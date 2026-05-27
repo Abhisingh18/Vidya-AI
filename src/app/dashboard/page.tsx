@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   Play, BookOpen, Globe, Flame, Sparkles, ArrowRight, Clock,
   Calculator, Atom, FlaskConical, Leaf, Zap, Monitor, Landmark,
-  Loader2, Target, TrendingUp, Lightbulb, Trophy, Calendar,
+  Loader2, Target, TrendingUp, Lightbulb, Trophy,
 } from 'lucide-react';
 
 interface VideoSummary {

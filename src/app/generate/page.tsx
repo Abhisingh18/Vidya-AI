@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
-  Brain, Code, Film, Mic, GitMerge, CheckCircle, Loader2,
+  Brain, Film, Mic, GitMerge, CheckCircle, Loader2,
   Download, ClipboardCopy, RefreshCw, Sparkles, Clock, Triangle,
   ChevronDown, Copy, Check, AlertCircle, Wand2, Languages,
   GraduationCap, ArrowRight, Mic2,

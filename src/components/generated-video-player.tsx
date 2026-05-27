@@ -233,7 +233,7 @@ export default function GeneratedVideoPlayer({ topic, script, language, scene, o
       if (e.target instanceof HTMLElement && ['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
       if (e.code === 'Space') {
         e.preventDefault();
-        playing ? stopAll() : play();
+        if (playing) stopAll(); else play();
       } else if (e.code === 'ArrowLeft') {
         e.preventDefault();
         skipBy(-10);

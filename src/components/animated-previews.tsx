@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Play, Pause, Volume2 } from 'lucide-react';
+import { Play, Volume2 } from 'lucide-react';
 
 /* ─────────────────────────────────────────────────────────────────────
    Four self-contained looping SVG animations. On hover, each card plays

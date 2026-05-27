@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Sparkles, PenLine, Wand2, Film, Volume2, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, PenLine, Wand2, Film, Volume2, CheckCircle2 } from 'lucide-react';
 import AnimatedPreviews from '@/components/animated-previews';
 
 const PLACEHOLDERS = [
