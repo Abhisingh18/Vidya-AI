@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+// Always hit the DB at request time. Without this Next.js statically
+// pre-renders the response at build, freezing whatever was in the DB
+// at that moment (often an empty array).
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface SceneStep {
   at: number;
   type: string;
