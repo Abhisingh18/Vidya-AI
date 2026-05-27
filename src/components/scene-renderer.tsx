@@ -267,7 +267,37 @@ export default function SceneRenderer({ scene, currentTime }: { scene: Scene | n
   const active = segments.find(s => currentTime >= s.from && currentTime < s.to) ?? segments[segments.length - 1];
 
   // Only render steps whose 'at' time has come
-  const visibleSteps = active.steps.filter(s => currentTime >= s.at);
+  const elapsed = active.steps.filter(s => currentTime >= s.at);
+
+  // Auto-hide overlapping text. When two text-style steps share roughly the same
+  // screen position, the more recent one replaces the older — otherwise long
+  // segments stack labels on top of labels.
+  const TEXT_TYPES = new Set(['title', 'subtitle', 'text', 'equation']);
+  const TITLE_Y = 28;     // hardcoded in case 'title' below
+  const SUBTITLE_Y = 50;  // hardcoded in case 'subtitle' below
+  const posKey = (s: SceneStep): string | null => {
+    if (!TEXT_TYPES.has(s.type)) return null;
+    const x = s.type === 'title' || s.type === 'subtitle' ? 160 : (s.x ?? 160);
+    const y = s.type === 'title' ? TITLE_Y
+      : s.type === 'subtitle' ? SUBTITLE_Y
+      : (s.y ?? 100);
+    // 18-pixel vertical buckets ≈ one text row at md size
+    return `${Math.round(x / 60)}:${Math.round(y / 18)}`;
+  };
+
+  const latestByPos = new Map<string, number>();
+  for (const s of elapsed) {
+    const k = posKey(s);
+    if (k === null) continue;
+    const prev = latestByPos.get(k);
+    if (prev === undefined || s.at > prev) latestByPos.set(k, s.at);
+  }
+
+  const visibleSteps = elapsed.filter(s => {
+    const k = posKey(s);
+    if (k === null) return true; // non-text steps always visible
+    return latestByPos.get(k) === s.at;
+  });
 
   return (
     <svg viewBox="0 0 320 200" className="w-full h-full" preserveAspectRatio="xMidYMid meet">

@@ -24,8 +24,31 @@ function c(color?: string) {
  * Static (non-animated) preview of a scene. Renders every visual step at once,
  * fully drawn — ideal for library cards & social-share thumbnails.
  */
-export default function SceneThumbnail({ steps }: { steps: SceneStep[] }) {
-  if (!steps || steps.length === 0) return null;
+export default function SceneThumbnail({ steps: rawSteps }: { steps: SceneStep[] }) {
+  if (!rawSteps || rawSteps.length === 0) return null;
+
+  // De-overlap text by position bucket — only the latest text wins each slot.
+  const TEXT_TYPES = new Set(['title', 'subtitle', 'text', 'equation']);
+  const posKey = (s: SceneStep): string | null => {
+    if (!TEXT_TYPES.has(s.type)) return null;
+    const x = s.type === 'title' || s.type === 'subtitle' ? 160 : (s.x ?? 160);
+    const y = s.type === 'title' ? 28
+      : s.type === 'subtitle' ? 50
+      : (s.y ?? 100);
+    return `${Math.round(x / 60)}:${Math.round(y / 18)}`;
+  };
+  const latestAt = new Map<string, number>();
+  for (const s of rawSteps) {
+    const k = posKey(s);
+    if (k === null) continue;
+    const prev = latestAt.get(k);
+    if (prev === undefined || s.at > prev) latestAt.set(k, s.at);
+  }
+  const steps = rawSteps.filter(s => {
+    const k = posKey(s);
+    if (k === null) return true;
+    return latestAt.get(k) === s.at;
+  });
 
   return (
     <svg viewBox="0 0 320 200" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
