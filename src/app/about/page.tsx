@@ -2,380 +2,200 @@
 
 import { useEffect, useRef, useState, ReactNode } from 'react';
 import Link from 'next/link';
-import {
-  Globe,
-  Users,
-  Zap,
-  Brain,
-  PlayCircle,
-  Mic,
-  GitMerge,
-  ArrowDown,
-  ExternalLink,
-} from 'lucide-react';
+import { Globe, Users, Zap, Heart, Sparkles, ArrowRight, Target, Code2 } from 'lucide-react';
 
-/* ------------------------------------------------------------------ */
-/*  Scroll-reveal wrapper                                              */
-/* ------------------------------------------------------------------ */
-function Reveal({
-  children,
-  className = '',
-  delay = 0,
-}: {
-  children: ReactNode;
-  className?: string;
-  delay?: number;
-}) {
+function Reveal({ children, className = '', delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
-
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.unobserve(el);
-        }
-      },
-      { threshold: 0.15 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
+    const el = ref.current; if (!el) return;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.unobserve(el); } }, { threshold: 0.15 });
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
-
   return (
-    <div
-      ref={ref}
-      className={className}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(32px)',
-        transition: `opacity 0.7s cubic-bezier(.22,1,.36,1) ${delay}ms, transform 0.7s cubic-bezier(.22,1,.36,1) ${delay}ms`,
-      }}
-    >
+    <div ref={ref} className={className} style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(28px)', transition: `opacity .7s cubic-bezier(.22,1,.36,1) ${delay}ms, transform .7s cubic-bezier(.22,1,.36,1) ${delay}ms` }}>
       {children}
     </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  About Page                                                         */
-/* ------------------------------------------------------------------ */
 export default function AboutPage() {
   return (
     <main className="min-h-screen bg-off-white dark:bg-dark-bg overflow-hidden">
-      {/* ===== HERO ===== */}
-      <section className="pt-28 pb-16 bg-gradient-hero dark:bg-gradient-hero-dark rangoli-bg relative">
-        {/* decorative blobs */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-saffron/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-10 right-10 w-72 h-72 bg-indigo-brand/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="container-main relative z-10">
+      {/* Hero */}
+      <section className="pt-28 pb-20 relative">
+        <div className="pointer-events-none absolute top-20 -left-20 w-96 h-96 bg-saffron/10 rounded-full blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 -right-20 w-96 h-96 bg-indigo-brand/10 rounded-full blur-3xl" />
+
+        <div className="container-main relative z-10 max-w-3xl mx-auto text-center">
           <Reveal>
-            <h1 className="text-4xl lg:text-5xl font-heading font-bold text-center text-navy dark:text-dark-text leading-tight">
-              Bodhan AI ke sapne ko aage le jaana
-            </h1>
-          </Reveal>
-
-          <Reveal delay={150}>
-            <p className="text-lg text-muted text-center max-w-3xl mx-auto mt-4 leading-relaxed">
-              VidyaAI — IIT Madras ki Bodhan AI aur AI4Bharat ke open-source
-              mission se inspired ek platform
-            </p>
-          </Reveal>
-
-          {/* ===== MISSION CARDS ===== */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
-            {/* Card 1 */}
-            <Reveal delay={0}>
-              <div className="card text-center">
-                <div className="w-16 h-16 mx-auto rounded-full bg-saffron/10 flex items-center justify-center mb-4">
-                  <Globe className="w-8 h-8 text-saffron" />
-                </div>
-                <h3 className="text-card-title font-heading text-navy dark:text-dark-text mb-2">
-                  Har Bhasha
-                </h3>
-                <p className="text-body text-muted leading-relaxed">
-                  22 Indian languages mein quality education — AI4Bharat IndicF5
-                  ki near-human voices ke saath
-                </p>
-              </div>
-            </Reveal>
-
-            {/* Card 2 */}
-            <Reveal delay={120}>
-              <div className="card text-center">
-                <div className="w-16 h-16 mx-auto rounded-full bg-indigo-brand/10 flex items-center justify-center mb-4">
-                  <Users className="w-8 h-8 text-indigo-brand" />
-                </div>
-                <h3 className="text-card-title font-heading text-navy dark:text-dark-text mb-2">
-                  Har Student
-                </h3>
-                <p className="text-body text-muted leading-relaxed">
-                  Class 6 se college tak — koi bhi topic, koi bhi subject,
-                  bilkul free
-                </p>
-              </div>
-            </Reveal>
-
-            {/* Card 3 */}
-            <Reveal delay={240}>
-              <div className="card text-center">
-                <div className="w-16 h-16 mx-auto rounded-full bg-teal/10 flex items-center justify-center mb-4">
-                  <Zap className="w-8 h-8 text-teal" />
-                </div>
-                <h3 className="text-card-title font-heading text-navy dark:text-dark-text mb-2">
-                  Har Topic
-                </h3>
-                <p className="text-body text-muted leading-relaxed">
-                  Math, Science, History, Computer Science — AI animated
-                  explanation sabke liye
-                </p>
-              </div>
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== TECH STACK ===== */}
-      <section className="container-main mt-20">
-        <Reveal>
-          <h2 className="section-heading text-center">
-            Kaise bana hai VidyaAI?
-          </h2>
-        </Reveal>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-          {/* Tech Card 1 — Claude */}
-          <Reveal delay={0}>
-            <div className="card flex gap-5 items-start h-full">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-saffron/10 flex items-center justify-center">
-                <Brain className="w-6 h-6 text-saffron" />
-              </div>
-              <div className="min-w-0">
-                <h3 className="text-card-title font-heading text-navy dark:text-dark-text">
-                  Claude API (Anthropic)
-                </h3>
-                <p className="text-small text-saffron font-medium mt-0.5">
-                  Script + Manim Code Generation
-                </p>
-                <p className="text-body text-muted mt-2 leading-relaxed">
-                  Claude AI topic ko samjhta hai, teacher jaisi explanation
-                  script likhta hai, aur Manim animation code generate karta hai
-                </p>
-                <a
-                  href="https://anthropic.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-small text-saffron font-medium mt-3 hover:underline transition-colors"
-                >
-                  anthropic.com
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              </div>
-            </div>
-          </Reveal>
-
-          {/* Tech Card 2 — Manim */}
-          <Reveal delay={120}>
-            <div className="card flex gap-5 items-start h-full">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-indigo-brand/10 flex items-center justify-center">
-                <PlayCircle className="w-6 h-6 text-indigo-brand" />
-              </div>
-              <div className="min-w-0">
-                <h3 className="text-card-title font-heading text-navy dark:text-dark-text">
-                  Manim Community Edition
-                </h3>
-                <p className="text-small text-indigo-brand font-medium mt-0.5">
-                  Mathematical Animations
-                </p>
-                <p className="text-body text-muted mt-2 leading-relaxed">
-                  3Blue1Brown channel wala engine — equations, shapes, graphs
-                  sab smoothly animate karta hai
-                </p>
-                <a
-                  href="https://www.manim.community"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-small text-indigo-brand font-medium mt-3 hover:underline transition-colors"
-                >
-                  manim.community
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              </div>
-            </div>
-          </Reveal>
-
-          {/* Tech Card 3 — IndicF5 */}
-          <Reveal delay={240}>
-            <div className="card flex gap-5 items-start h-full">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-teal/10 flex items-center justify-center">
-                <Mic className="w-6 h-6 text-teal" />
-              </div>
-              <div className="min-w-0">
-                <h3 className="text-card-title font-heading text-navy dark:text-dark-text">
-                  AI4Bharat IndicF5
-                </h3>
-                <p className="text-small text-teal font-medium mt-0.5">
-                  Indian Language Voice Synthesis
-                </p>
-                <p className="text-body text-muted mt-2 leading-relaxed">
-                  IIT Madras ke AI4Bharat team ka near-human TTS model — 11
-                  Indian languages, 1417 hours of training data
-                </p>
-                <div className="flex items-center gap-3 mt-3 flex-wrap">
-                  <a
-                    href="https://ai4bharat.iitm.ac.in"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-small text-teal font-medium hover:underline transition-colors"
-                  >
-                    ai4bharat.iitm.ac.in
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                  <span className="pill-indigo">IIT Madras Research</span>
-                </div>
-              </div>
-            </div>
-          </Reveal>
-
-          {/* Tech Card 4 — FFmpeg */}
-          <Reveal delay={360}>
-            <div className="card flex gap-5 items-start h-full">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-gray-100 dark:bg-dark-border/50 flex items-center justify-center">
-                <GitMerge className="w-6 h-6 text-muted" />
-              </div>
-              <div className="min-w-0">
-                <h3 className="text-card-title font-heading text-navy dark:text-dark-text">
-                  FFmpeg
-                </h3>
-                <p className="text-small text-muted font-medium mt-0.5">
-                  Audio-Video Synchronization
-                </p>
-                <p className="text-body text-muted mt-2 leading-relaxed">
-                  Animation video aur IndicF5 voice ko perfectly sync karke
-                  final MP4 video banata hai
-                </p>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ===== CONNECTION DIAGRAM ===== */}
-      <section className="container-main mt-20 py-16">
-        <Reveal>
-          <h2 className="section-heading text-center mb-12">
-            VidyaAI ka Journey
-          </h2>
-        </Reveal>
-
-        <div className="flex flex-col items-center gap-0">
-          {/* Box 1 — Bodhan AI */}
-          <Reveal delay={0}>
-            <div className="px-8 py-4 rounded-2xl border text-center bg-saffron/10 text-saffron border-saffron/30 w-full max-w-sm">
-              <p className="font-heading font-semibold text-lg">
-                Bodhan AI (IIT Madras)
-              </p>
-              <p className="text-small mt-1 opacity-80">
-                🏫 Education AI mission
-              </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-saffron/10 border border-saffron/20 text-saffron text-sm font-medium mb-8">
+              <Heart className="w-4 h-4" />
+              About VidyaAI
             </div>
           </Reveal>
 
           <Reveal delay={100}>
-            <ArrowDown className="w-6 h-6 text-muted my-3" />
+            <h1 className="text-5xl lg:text-6xl font-heading font-bold text-navy dark:text-dark-text leading-[1.1] tracking-tight">
+              Education,<br />
+              <span className="text-saffron">unbounded by language</span>
+            </h1>
           </Reveal>
 
-          {/* Box 2 — AI4Bharat */}
           <Reveal delay={200}>
-            <div className="px-8 py-4 rounded-2xl border text-center bg-indigo-brand/10 text-indigo-brand border-indigo-brand/30 w-full max-w-sm">
-              <p className="font-heading font-semibold text-lg">
-                AI4Bharat (IIT Madras)
-              </p>
-              <p className="text-small mt-1 opacity-80">
-                🌐 Open source Indian language models
-              </p>
-            </div>
+            <p className="text-lg text-muted max-w-2xl mx-auto mt-8 leading-relaxed">
+              VidyaAI is on a mission to bring world-class animated education to every Indian student — in the language they think in.
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* The Story */}
+      <section className="py-20">
+        <div className="container-main max-w-3xl">
+          <Reveal>
+            <p className="text-saffron text-sm font-semibold uppercase tracking-widest mb-3">Our story</p>
+            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-navy dark:text-dark-text mb-8">Why we built VidyaAI</h2>
           </Reveal>
 
-          <Reveal delay={300}>
-            <ArrowDown className="w-6 h-6 text-muted my-3" />
-          </Reveal>
+          <div className="space-y-6 text-lg text-muted leading-relaxed">
+            <Reveal delay={100}>
+              <p>
+                India has 260 million students and 22 official languages — but the best educational videos on the internet are almost entirely in English.
+                That gap costs millions of kids the chance to truly understand what they&apos;re learning.
+              </p>
+            </Reveal>
+            <Reveal delay={200}>
+              <p>
+                We built VidyaAI because a student in a small town in Bihar should have access to the same quality of explanation as one in a metro city —
+                and they should hear it in <span className="text-navy dark:text-dark-text font-medium">their</span> language, not someone else&apos;s.
+              </p>
+            </Reveal>
+            <Reveal delay={300}>
+              <p>
+                Our platform turns any topic into a beautifully animated, personalised teacher video in under a minute. No subscriptions. No paywalls.
+                Just learning, in your own tongue.
+              </p>
+            </Reveal>
+          </div>
+        </div>
+      </section>
 
-          {/* Box 3 — IndicF5 */}
-          <Reveal delay={400}>
-            <div className="px-8 py-4 rounded-2xl border text-center bg-teal/10 text-teal border-teal/30 w-full max-w-sm">
-              <p className="font-heading font-semibold text-lg">
-                IndicF5 TTS Model
-              </p>
-              <p className="text-small mt-1 opacity-80">
-                🎙️ Hindi/Indian voice
-              </p>
-            </div>
-          </Reveal>
+      {/* Values */}
+      <section className="py-20 bg-white dark:bg-dark-surface/30 border-y border-card-border dark:border-dark-border">
+        <div className="container-main">
+          <div className="text-center mb-16 max-w-2xl mx-auto">
+            <Reveal>
+              <p className="text-indigo-brand text-sm font-semibold uppercase tracking-widest mb-3">What we stand for</p>
+              <h2 className="text-3xl lg:text-4xl font-heading font-bold text-navy dark:text-dark-text">Our values</h2>
+            </Reveal>
+          </div>
 
-          <Reveal delay={500}>
-            <ArrowDown className="w-6 h-6 text-muted my-3" />
-          </Reveal>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {[
+              { icon: Globe, title: 'Language First', desc: 'Every student deserves to learn in the language they understand best. No exceptions.' },
+              { icon: Target, title: 'Quality Without Compromise', desc: 'Professional animation, accurate explanations, native-sounding narration — the same standard for every learner.' },
+              { icon: Users, title: 'Free for Students', desc: 'Education is a right. Core video generation will remain free for every student, always.' },
+            ].map((v, i) => {
+              const Icon = v.icon;
+              return (
+                <Reveal key={i} delay={i * 120}>
+                  <div className="card h-full text-center">
+                    <div className="w-14 h-14 mx-auto rounded-2xl bg-saffron/10 flex items-center justify-center mb-5">
+                      <Icon className="w-6 h-6 text-saffron" />
+                    </div>
+                    <h3 className="text-xl font-heading font-semibold text-navy dark:text-dark-text mb-3">{v.title}</h3>
+                    <p className="text-sm text-muted leading-relaxed">{v.desc}</p>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
-          {/* Box 4 — VidyaAI */}
-          <Reveal delay={600}>
-            <div className="px-8 py-4 rounded-2xl border border-transparent text-center bg-gradient-saffron text-white w-full max-w-sm shadow-saffron">
-              <p className="font-heading font-semibold text-lg">
-                VidyaAI Platform
-              </p>
-              <p className="text-small mt-1 opacity-90">
-                🎓 Students tak animated education
-              </p>
+      {/* What we do */}
+      <section className="py-20">
+        <div className="container-main">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
+            <Reveal>
+              <p className="text-teal text-sm font-semibold uppercase tracking-widest mb-3">What we do</p>
+              <h2 className="text-3xl lg:text-4xl font-heading font-bold text-navy dark:text-dark-text mb-6 leading-tight">
+                A teacher for every topic, in every language
+              </h2>
+              <div className="space-y-4 text-muted leading-relaxed">
+                <p>
+                  VidyaAI takes any topic a student types — from the Pythagoras Theorem to photosynthesis — and produces a complete animated explanation video.
+                </p>
+                <p>
+                  The script is tailored to the student&apos;s grade level. The animation is cinema-quality. The narration is in one of 22 Indian languages, sounding as natural as a real teacher.
+                </p>
+                <p className="text-navy dark:text-dark-text font-medium">
+                  All of it generated on demand. In under a minute. For free.
+                </p>
+              </div>
+            </Reveal>
+
+            <Reveal delay={200}>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { icon: Zap, label: '< 60 sec', sub: 'to generate' },
+                  { icon: Globe, label: '22', sub: 'languages' },
+                  { icon: Sparkles, label: '10k+', sub: 'topics' },
+                  { icon: Code2, label: 'Open', sub: 'source' },
+                ].map((s, i) => {
+                  const Icon = s.icon;
+                  return (
+                    <div key={i} className="card text-center group hover:-translate-y-1 transition-transform">
+                      <Icon className="w-6 h-6 text-saffron mx-auto mb-3 group-hover:scale-110 transition-transform" />
+                      <p className="text-2xl font-bold font-heading text-navy dark:text-dark-text">{s.label}</p>
+                      <p className="text-xs text-muted mt-1">{s.sub}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Acknowledgement */}
+      <section className="py-20">
+        <div className="container-main max-w-4xl">
+          <Reveal>
+            <div className="bg-gradient-mission dark:bg-gradient-mission-dark py-12 px-8 lg:px-12 rounded-3xl relative overflow-hidden">
+              <div className="absolute -top-20 -right-20 w-60 h-60 bg-saffron/5 rounded-full blur-2xl pointer-events-none" />
+              <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-indigo-brand/5 rounded-full blur-2xl pointer-events-none" />
+              <div className="relative z-10 text-center">
+                <Heart className="w-8 h-8 text-saffron mx-auto mb-5" />
+                <p className="text-lg lg:text-xl font-heading text-navy dark:text-dark-text leading-relaxed">
+                  VidyaAI is built with love by a small team that believes every Indian student deserves the best teacher in the world — speaking the language they grew up with.
+                </p>
+                <p className="text-sm text-muted mt-5">Made in India, for Bharat 🇮🇳</p>
+              </div>
             </div>
           </Reveal>
         </div>
       </section>
 
-      {/* ===== ACKNOWLEDGEMENT ===== */}
-      <section className="container-main mt-20">
-        <Reveal>
-          <div className="bg-gradient-mission dark:bg-gradient-mission-dark py-16 px-6 md:px-12 rounded-3xl relative overflow-hidden">
-            {/* subtle decorative circles */}
-            <div className="absolute -top-20 -right-20 w-60 h-60 bg-saffron/5 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-indigo-brand/5 rounded-full blur-2xl pointer-events-none" />
-
-            <div className="relative z-10">
-              <p className="text-xl lg:text-2xl font-heading text-center leading-relaxed text-navy dark:text-dark-text">
-                VidyaAI un researchers ke kaam ke upar khada hai jinhoone India
-                ke liye AI banaya —
-              </p>
-
-              <div className="text-lg text-muted text-center mt-6 space-y-1 leading-relaxed">
-                <p>Prof. Mitesh M. Khapra aur AI4Bharat team,</p>
-                <p>Bodhan AI Foundation at IIT Madras,</p>
-                <p>3Blue1Brown ke Grant Sanderson (Manim ke creator),</p>
-                <p>Aur poori open-source community.</p>
-              </div>
+      {/* CTA */}
+      <section className="py-20 text-center">
+        <div className="container-main max-w-2xl mx-auto space-y-6">
+          <Reveal>
+            <h2 className="text-3xl lg:text-4xl font-heading font-bold text-navy dark:text-dark-text">Want to be a part of this?</h2>
+          </Reveal>
+          <Reveal delay={100}>
+            <p className="text-muted">Get in touch — we&apos;d love to hear from students, teachers, and supporters.</p>
+          </Reveal>
+          <Reveal delay={200}>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+              <Link href="/contact" className="btn-saffron text-base px-8 py-4">Get in Touch <ArrowRight className="w-5 h-5" /></Link>
+              <Link href="/vision" className="btn-outline text-base px-8 py-4">Our Vision</Link>
             </div>
-          </div>
-        </Reveal>
-      </section>
-
-      {/* ===== CTA ===== */}
-      <section className="container-main mt-16 mb-16 text-center">
-        <Reveal>
-          <h2 className="text-3xl font-heading font-bold text-navy dark:text-dark-text">
-            Ready ho? Pehli video banao!
-          </h2>
-        </Reveal>
-
-        <Reveal delay={150}>
-          <Link
-            href="/generate"
-            className="btn-saffron text-lg px-8 py-4 mt-8 inline-flex shadow-saffron"
-          >
-            ⚡ Generate Karo →
-          </Link>
-        </Reveal>
+          </Reveal>
+        </div>
       </section>
     </main>
   );

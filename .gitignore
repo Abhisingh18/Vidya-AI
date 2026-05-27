@@ -28,6 +28,12 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# local sqlite database (regenerate via `prisma migrate dev` + `node scripts/seed-videos.mjs`)
+prisma/dev.db
+prisma/dev.db-journal
+*.sqlite
+*.sqlite-journal
+
 # vercel
 .vercel
 

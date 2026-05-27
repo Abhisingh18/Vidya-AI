@@ -77,6 +77,8 @@ const config: Config = {
       animation: {
         "float": "float 6s ease-in-out infinite",
         "float-delayed": "float 6s ease-in-out 2s infinite",
+        "pulse-slow": "pulseSoft 8s ease-in-out infinite",
+        "pulse-slower": "pulseSoft 12s ease-in-out 2s infinite",
         "shimmer": "shimmer 2s linear infinite",
         "marquee": "marquee 30s linear infinite",
         "marquee-reverse": "marquee-reverse 30s linear infinite",
@@ -135,6 +137,10 @@ const config: Config = {
         bounceGentle: {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-8px)" },
+        },
+        pulseSoft: {
+          "0%, 100%": { opacity: "0.4", transform: "scale(1)" },
+          "50%": { opacity: "0.7", transform: "scale(1.05)" },
         },
       },
       backgroundImage: {

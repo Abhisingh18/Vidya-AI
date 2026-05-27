@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ── NextAuth core models ─────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ── User & profile ───────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+
+  // grade / language defaults — set in onboarding
+  preferredLanguage String?  @default("Hindi")
+  preferredGrade    String?  @default("9-10")
+
+  accounts   Account[]
+  sessions   Session[]
+  videos     Video[]
+  watches    Watch[]
+  downloads  Download[]
+  bookmarks  Bookmark[]
+  streak     Streak?
+}
+
+// ── Domain models ────────────────────────────────────────────────────
+
+model Video {
+  id         String   @id @default(cuid())
+  topic      String
+  language   String
+  grade      String
+  voiceType  String
+  videoStyle String
+  script     String   // JSON-stringified ScriptLine[]
+  manimCode  String
+  scene      String?  // JSON-stringified Scene (title, duration, steps)
+  duration   Int?     // seconds
+  subject    String?  // auto-inferred (Math/Physics/etc)
+  createdAt  DateTime @default(now())
+
+  userId  String
+  user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  watches    Watch[]
+  downloads  Download[]
+  bookmarks  Bookmark[]
+}
+
+model Watch {
+  id        String   @id @default(cuid())
+  userId    String
+  videoId   String
+  watchedAt DateTime @default(now())
+  duration  Int      @default(0)  // seconds watched
+  completed Boolean  @default(false)
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@index([userId, watchedAt])
+}
+
+model Download {
+  id           String   @id @default(cuid())
+  userId       String
+  videoId      String
+  downloadedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@index([userId, downloadedAt])
+}
+
+model Bookmark {
+  id         String   @id @default(cuid())
+  userId     String
+  videoId    String?
+  topic      String?  // bookmark by topic name even if no video exists yet
+  subject    String?
+  createdAt  DateTime @default(now())
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video Video? @relation(fields: [videoId], references: [id], onDelete: SetNull)
+}
+
+model Streak {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  current      Int      @default(0)
+  longest      Int      @default(0)
+  lastActiveAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
