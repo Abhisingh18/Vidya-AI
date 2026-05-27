@@ -3,6 +3,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, Play, Eye, Star, ArrowUpRight, ChevronDown, Triangle, Atom, FlaskConical, Leaf, Monitor, Landmark, BookOpen, Sparkles, Clock } from 'lucide-react';
+import SceneThumbnail from '@/components/scene-thumbnail';
+import type { SceneStep } from '@/components/scene-renderer';
 
 type Subject = 'All' | 'Mathematics' | 'Physics' | 'Chemistry' | 'Biology' | 'Computer Science' | 'History' | 'General';
 type Grade = 'All' | '6-8' | '9-10' | '11-12' | 'College';
@@ -18,6 +20,7 @@ interface ApiVideo {
   createdAt: string;
   author: string;
   views: number;
+  previewSteps?: SceneStep[];
 }
 
 const SUBJECT_ICON: Record<string, { icon: React.ElementType; gradient: string; pill: string; short: string }> = {
@@ -73,22 +76,29 @@ function VideoCard({ video, index }: { video: ApiVideo; index: number }) {
   // Deterministic pseudo-rating from id so cards don't flicker on re-render
   const ratingSeed = video.id.charCodeAt(0) + video.id.charCodeAt(video.id.length - 1);
   const rating = 4 + ((ratingSeed % 10) / 10);
+  const hasPreview = video.previewSteps && video.previewSteps.length > 0;
   return (
     <Link
       href={`/library/${video.id}`}
       className="group rounded-2xl border border-card-border dark:border-dark-border bg-white dark:bg-dark-surface overflow-hidden transition-all duration-300 ease-out hover:shadow-card-hover dark:hover:shadow-card-dark-hover hover:-translate-y-1"
       style={{ animationDelay: `${index * 60}ms` }}
     >
-      <div className={`relative h-40 bg-gradient-to-br ${config.gradient} overflow-hidden`}>
-        <IconComp className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 text-white opacity-[0.12]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(255,255,255,0.15),transparent_60%)]" />
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-          <div className="w-12 h-12 rounded-full bg-white/90 dark:bg-dark-surface/90 flex items-center justify-center shadow-lg transform scale-75 group-hover:scale-100 transition-transform duration-300">
-            <Play className="w-5 h-5 text-navy dark:text-dark-text fill-current ml-0.5" />
+      <div className="relative h-40 bg-navy overflow-hidden">
+        {hasPreview ? (
+          <SceneThumbnail steps={video.previewSteps!} />
+        ) : (
+          <div className={`absolute inset-0 bg-gradient-to-br ${config.gradient}`}>
+            <IconComp className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 text-white opacity-[0.12]" />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(255,255,255,0.08),transparent_60%)] pointer-events-none" />
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/30 backdrop-blur-[1px]">
+          <div className="w-12 h-12 rounded-full bg-white/95 flex items-center justify-center shadow-lg transform scale-75 group-hover:scale-100 transition-transform duration-300">
+            <Play className="w-5 h-5 text-navy fill-current ml-0.5" />
           </div>
         </div>
-        <div className="absolute top-3 left-3 bg-white/90 dark:bg-dark-surface/90 text-xs px-2.5 py-1 rounded-full font-medium text-navy dark:text-dark-text shadow-sm">{video.language}</div>
-        <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded-md font-mono flex items-center gap-1"><Clock className="w-3 h-3" />{formatDuration(video.duration)}</div>
+        <div className="absolute top-3 left-3 bg-white/95 text-xs px-2.5 py-1 rounded-full font-medium text-navy shadow-sm backdrop-blur-sm">{video.language}</div>
+        <div className="absolute bottom-3 right-3 bg-black/75 text-white text-xs px-2 py-1 rounded-md font-mono flex items-center gap-1 backdrop-blur-sm"><Clock className="w-3 h-3" />{formatDuration(video.duration)}</div>
       </div>
       <div className="p-4">
         <h3 className="font-semibold text-sm text-navy dark:text-dark-text line-clamp-2 leading-snug min-h-[2.5rem]">{video.topic}</h3>
