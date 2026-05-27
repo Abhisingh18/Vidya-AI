@@ -1,7 +1,7 @@
 # VidyaAI — Har topic, har bhasha, har student
 
 AI-powered animated educational video generation platform for Indian students. Type any topic and watch AI teach it with synchronized voice narration, visual scenes (geometry, equations, diagrams), and a downloadable Manim source — in 22 Indian languages.
-
+## Deployed link:  https://vidya-qscffi5sh-abhishek-singhs-projects-3b6a3ace.vercel.app/
 ## Features
 
 - **Generate animated videos on demand** — type any topic, pick grade + language, get a 4–5 minute lesson.
