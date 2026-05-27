@@ -50,6 +50,10 @@ scripts/
 
 ## Getting Started Locally
 
+You need a Postgres database — easiest is a free one from
+[Neon](https://neon.tech), [Supabase](https://supabase.com), or
+[Render](https://render.com).
+
 ```bash
 git clone https://github.com/Abhisingh18/Vidya-AI.git
 cd Vidya-AI
@@ -57,11 +61,11 @@ npm install
 
 # Set up env
 cp .env.example .env.local
-# Edit .env.local — add OPENROUTER_API_KEY (free at openrouter.ai/keys)
+# Edit .env.local — add DATABASE_URL + OPENROUTER_API_KEY
 
-# Initialize DB + seed
-npx prisma migrate dev
-node scripts/seed-videos.mjs
+# Push schema to DB + seed 40 lessons
+npx prisma db push
+npm run seed
 
 npm run dev
 ```
@@ -83,26 +87,69 @@ See [`.env.example`](.env.example). Required:
 
 ## Deployment
 
-### Frontend → Vercel
+This is a Next.js monolith — **frontend + backend deploy together on Vercel**.
+There is no separate backend folder, because every `src/app/api/*/route.ts` runs
+as a serverless function on the same Vercel deployment.
 
-1. Import this repo in the Vercel dashboard.
-2. Add the env vars above in **Project Settings → Environment Variables**.
-3. Build command: `npm run build`, Output: `.next` (Next.js auto-detected).
-4. Set `NEXTAUTH_URL` to the Vercel-assigned URL.
+You only need two services:
 
-### Database → Render (or any Postgres host)
+| Service     | Purpose                                                  |
+| ----------- | -------------------------------------------------------- |
+| **Vercel**  | Hosts the app (UI + API routes)                          |
+| **Render**  | Hosts the Postgres database (free tier is enough)        |
 
-The default `prisma/schema.prisma` uses SQLite. For Render:
+### Step 1 — Create Postgres on Render
 
-1. Create a Postgres instance in Render → copy the connection string.
-2. Change `provider = "postgresql"` in `prisma/schema.prisma`.
-3. Set `DATABASE_URL` env var in Vercel to the Render Postgres URL.
-4. Run `npx prisma migrate deploy` against the new DB.
-5. Re-run `node scripts/seed-videos.mjs` to populate the library.
+1. Sign in to <https://render.com> → **New +** → **PostgreSQL**.
+2. Pick the free plan, choose a region close to Vercel’s (e.g. Oregon / Frankfurt).
+3. After creation, copy the **External Database URL** — looks like
+   `postgresql://user:pass@host.oregon-postgres.render.com/dbname`.
 
-### Backend API routes
+### Step 2 — Deploy on Vercel
 
-All `/api/*` routes ship with the Next.js app and run as serverless functions on Vercel — no separate backend deployment needed. If you want a dedicated Node service on Render, the API code in `src/app/api/` can be lifted into a standalone Express server using Prisma directly.
+1. Sign in to <https://vercel.com> → **Add New → Project** → import the
+   `Abhisingh18/Vidya-AI` repo.
+2. In **Environment Variables**, add:
+
+   | Key                   | Value                                           |
+   | --------------------- | ----------------------------------------------- |
+   | `DATABASE_URL`        | The Render Postgres URL from Step 1             |
+   | `NEXTAUTH_URL`        | `https://<your-vercel-project>.vercel.app`      |
+   | `NEXTAUTH_SECRET`     | Run `openssl rand -base64 32` to generate one   |
+   | `OPENROUTER_API_KEY`  | Your key from <https://openrouter.ai/keys>      |
+   | `GOOGLE_CLIENT_ID`    | (Optional — for Google login)                   |
+   | `GOOGLE_CLIENT_SECRET`| (Optional — for Google login)                   |
+
+3. Click **Deploy**. The build runs `prisma generate && prisma db push && next build`,
+   which automatically creates the Postgres tables on first deploy.
+
+### Step 3 — Seed the 40-video library
+
+Once Vercel says “Ready”, populate the library by running the seed script against
+your production DB from your local machine:
+
+```bash
+# In your local shell, point DATABASE_URL to the Render URL temporarily:
+DATABASE_URL="postgresql://..." npm run seed
+```
+
+That’s it — visit your Vercel URL’s `/library` and you’ll see all 40 lessons.
+
+### Re-deploys
+
+Every `git push` to `main` triggers a Vercel rebuild. The `prisma db push`
+step inside `build` reconciles your Postgres schema with any new fields you’ve
+added to `prisma/schema.prisma`. If a schema change would drop data, the build
+will fail safely — add `--accept-data-loss` to the build script only when you
+intend that.
+
+### Why not a separate `backend/` folder?
+
+In a traditional split-stack app you’d have `frontend/` (React on Vercel) and
+`backend/` (Express on Render). With Next.js App Router the API routes live
+inside the same project and ship to the same serverless deployment. You only
+need a separate backend service if you need long-running processes, WebSocket
+servers, or background workers — none of which this app uses.
 
 ## Seeding the Library
 
@@ -117,13 +164,13 @@ Add more entries to the `VIDEOS` array, then re-run `node scripts/seed-videos.mj
 
 ## Scripts
 
-| Command                          | What it does                          |
-| -------------------------------- | ------------------------------------- |
-| `npm run dev`                    | Local dev server on :3000             |
-| `npm run build`                  | Production build                      |
-| `npm run start`                  | Run production build                  |
-| `npx prisma studio`              | Browse the local DB in a GUI          |
-| `node scripts/seed-videos.mjs`   | Seed the 40 pre-built lessons         |
+| Command                | What it does                                                |
+| ---------------------- | ----------------------------------------------------------- |
+| `npm run dev`          | Local dev server on :3000                                   |
+| `npm run build`        | Prisma generate + db push + Next build (Vercel runs this)   |
+| `npm run start`        | Run production build                                        |
+| `npm run seed`         | Seed the 40 pre-built lessons                               |
+| `npx prisma studio`    | Browse the DB in a GUI                                      |
 
 ## License
 

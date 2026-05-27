@@ -52,11 +52,20 @@ function build(video) {
 }
 
 async function main() {
-  // Pick the first existing guest user as the author for these seeded videos.
-  const user = await prisma.user.findFirst({ orderBy: { createdAt: 'asc' } });
+  // Use a dedicated VidyaAI system user as the author for seeded library videos.
+  // Created on first run; reused on every subsequent run so seeding is idempotent.
+  const SYSTEM_EMAIL = 'library@vidyaai.system';
+  let user = await prisma.user.findUnique({ where: { email: SYSTEM_EMAIL } });
   if (!user) {
-    console.error('No user found in DB. Login at least once first.');
-    process.exit(1);
+    user = await prisma.user.create({
+      data: {
+        email: SYSTEM_EMAIL,
+        name: 'VidyaAI Library',
+        preferredLanguage: 'English',
+        preferredGrade: '9-10',
+      },
+    });
+    console.log(`Created system user: ${user.id}`);
   }
   console.log(`Seeding videos as user: ${user.name} (${user.id})`);
 
