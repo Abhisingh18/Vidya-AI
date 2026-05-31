@@ -92,5 +92,7 @@ async function main() {
 }
 
 main()
-  .catch(e => { console.error(e); process.exit(1); })
+  // Never fail the production build because of seeding — log and continue.
+  // (Shorts work without a DB; the library simply starts empty if this skips.)
+  .catch(e => { console.error('[seed] skipped due to error:', e?.message ?? e); })
   .finally(() => prisma.$disconnect());
