@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, Play, Eye, Star, ArrowUpRight, ChevronDown, Triangle, Atom, FlaskConical, Leaf, Monitor, Landmark, BookOpen, Sparkles, Clock } from 'lucide-react';
+import { Search, Play, Eye, Star, ArrowUpRight, ChevronDown, Triangle, Atom, FlaskConical, Leaf, Monitor, Landmark, BookOpen, Sparkles, Clock, Check } from 'lucide-react';
 import SceneThumbnail from '@/components/scene-thumbnail';
 import type { SceneStep } from '@/components/scene-renderer';
 
@@ -70,7 +70,7 @@ function Chip({ label, active, onClick }: { label: string; active: boolean; onCl
   );
 }
 
-function VideoCard({ video, index }: { video: ApiVideo; index: number }) {
+function VideoCard({ video, index, watched }: { video: ApiVideo; index: number; watched?: boolean }) {
   const config = getSubjectConfig(video.subject);
   const IconComp = config.icon;
   // Deterministic pseudo-rating from id so cards don't flicker on re-render
@@ -98,6 +98,11 @@ function VideoCard({ video, index }: { video: ApiVideo; index: number }) {
           </div>
         </div>
         <div className="absolute top-3 left-3 bg-white/95 text-xs px-2.5 py-1 rounded-full font-medium text-navy shadow-sm backdrop-blur-sm">{video.language}</div>
+        {watched && (
+          <div className="absolute top-3 right-3 bg-teal text-white text-[10px] px-2 py-1 rounded-full font-semibold flex items-center gap-1 shadow-sm">
+            <Check className="w-3 h-3" /> Watched
+          </div>
+        )}
         <div className="absolute bottom-3 right-3 bg-black/75 text-white text-xs px-2 py-1 rounded-md font-mono flex items-center gap-1 backdrop-blur-sm"><Clock className="w-3 h-3" />{formatDuration(video.duration)}</div>
       </div>
       <div className="p-4">
@@ -152,6 +157,7 @@ export default function LibraryPage() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>('All');
   const [sort, setSort] = useState<SortOption>('Latest');
   const [sortOpen, setSortOpen] = useState(false);
+  const [watched, setWatched] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -167,6 +173,16 @@ export default function LibraryPage() {
         if (!cancelled) setLoading(false);
       }
     })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Load the user's watch progress (empty if not logged in).
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/progress')
+      .then(r => r.json())
+      .then(d => { if (!cancelled) setWatched(new Set(Array.isArray(d.watched) ? d.watched : [])); })
+      .catch(() => {});
     return () => { cancelled = true; };
   }, []);
 
@@ -218,6 +234,19 @@ export default function LibraryPage() {
             <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-teal inline-block" />{uniqueSubjects} subjects</span>
           </p>
         </header>
+
+        {/* Progress bar — shows the logged-in user's completion across the library */}
+        {watched.size > 0 && totalVideos > 0 && (
+          <div className="mt-5 p-4 rounded-2xl bg-white dark:bg-dark-surface border border-card-border dark:border-dark-border animate-fade-in">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-navy dark:text-dark-text">Your progress</span>
+              <span className="text-sm text-muted"><span className="font-semibold text-saffron">{watched.size}</span> / {totalVideos} watched</span>
+            </div>
+            <div className="h-2.5 rounded-full bg-gray-100 dark:bg-dark-border overflow-hidden">
+              <div className="h-full bg-gradient-saffron rounded-full transition-all duration-700" style={{ width: `${Math.min(100, (watched.size / totalVideos) * 100)}%` }} />
+            </div>
+          </div>
+        )}
 
         {/* Filter bar */}
         <div className="sticky top-16 z-30 mt-6 animate-fade-in" style={{ animationDelay: '100ms' }}>
@@ -273,7 +302,7 @@ export default function LibraryPage() {
           {loading ? (
             Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
           ) : filteredVideos.length > 0 ? (
-            filteredVideos.map((video, i) => <VideoCard key={video.id} video={video} index={i} />)
+            filteredVideos.map((video, i) => <VideoCard key={video.id} video={video} index={i} watched={watched.has(video.id)} />)
           ) : (
             <EmptyState />
           )}

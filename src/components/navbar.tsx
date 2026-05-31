@@ -11,6 +11,7 @@ import { Menu, X, Sun, Moon, Flame, ArrowRight, LogOut, ChevronDown } from 'luci
 // Shown to visitors (marketing pages)
 const publicLinks = [
   { name: 'Home',       href: '/' },
+  { name: 'Shorts',     href: '/shorts' },
   { name: 'Vision',     href: '/vision' },
   { name: 'About',      href: '/about' },
   { name: 'Contact',    href: '/contact' },
@@ -20,7 +21,10 @@ const publicLinks = [
 const privateLinks = [
   { name: 'Dashboard',  href: '/dashboard' },
   { name: 'Generate',   href: '/generate' },
+  { name: 'Shorts',     href: '/shorts' },
   { name: 'Library',    href: '/library' },
+  { name: 'Saved',      href: '/bookmarks' },
+  { name: 'Playlists',  href: '/playlists' },
 ];
 
 export default function Navbar() {
@@ -35,6 +39,9 @@ export default function Navbar() {
   // Logged-in students see the app navigation; visitors see the marketing pages.
   const navLinks = isLoggedIn ? privateLinks : publicLinks;
 
+  // The Shorts feed is a full-screen immersive experience — hide the global chrome.
+  const immersive = pathname?.startsWith('/shorts');
+
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
@@ -48,6 +55,10 @@ export default function Navbar() {
     if (userMenuOpen) document.addEventListener('click', close);
     return () => document.removeEventListener('click', close);
   }, [userMenuOpen]);
+
+  // The Shorts feed is full-screen immersive — render no global navbar.
+  // (Placed after all hooks to satisfy the Rules of Hooks.)
+  if (immersive) return null;
 
   return (
     <>

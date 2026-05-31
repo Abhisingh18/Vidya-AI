@@ -1,9 +1,14 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Flame, ExternalLink, Mail, Heart } from 'lucide-react';
 
 export default function Footer() {
+  const pathname = usePathname();
+  // Hidden on the immersive Shorts feed.
+  if (pathname?.startsWith('/shorts')) return null;
+
   return (
     <footer className="bg-navy dark:bg-dark-bg border-t border-dark-border">
       <div className="container-main py-12 lg:py-16">

@@ -6,6 +6,7 @@ import AuthSessionProvider from '@/components/session-provider';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 import CursorEffect from '@/components/cursor-effect';
+import ServiceWorkerRegister from '@/components/sw-register';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -83,6 +84,7 @@ export default function RootLayout({
               Skip to content
             </a>
             <CursorEffect />
+            <ServiceWorkerRegister />
             <Navbar />
             <main id="main-content" className="min-h-screen">
               {children}

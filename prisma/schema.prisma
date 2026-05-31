@@ -64,6 +64,9 @@ model User {
   watches    Watch[]
   downloads  Download[]
   bookmarks  Bookmark[]
+  ratings    Rating[]
+  comments   Comment[]
+  playlists  Playlist[]
   streak     Streak?
 }
 
@@ -86,9 +89,12 @@ model Video {
   userId  String
   user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  watches    Watch[]
-  downloads  Download[]
-  bookmarks  Bookmark[]
+  watches        Watch[]
+  downloads      Download[]
+  bookmarks      Bookmark[]
+  ratings        Rating[]
+  comments       Comment[]
+  playlistItems  PlaylistItem[]
 }
 
 model Watch {
@@ -137,4 +143,59 @@ model Streak {
   lastActiveAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ── Engagement models ────────────────────────────────────────────────
+
+model Rating {
+  id        String   @id @default(cuid())
+  userId    String
+  videoId   String
+  value     Int      // 1–5 stars
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, videoId])  // one rating per user per video
+  @@index([videoId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  userId    String
+  videoId   String
+  text      String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@index([videoId, createdAt])
+}
+
+model Playlist {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  emoji     String?  @default("📚")
+  createdAt DateTime @default(now())
+
+  user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items PlaylistItem[]
+
+  @@index([userId])
+}
+
+model PlaylistItem {
+  id         String   @id @default(cuid())
+  playlistId String
+  videoId    String
+  order      Int      @default(0)
+  addedAt    DateTime @default(now())
+
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  video    Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, videoId])
 }
