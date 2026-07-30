@@ -6,7 +6,7 @@ AI-powered animated educational video generation platform for Indian students. T
 - **Generate animated videos on demand** — type any topic, pick grade + language, get a 4–5 minute lesson.
 - **Multilingual TTS narration** — Hindi, English, Tamil, Telugu, Marathi, Bengali, Kannada, Malayalam, Gujarati, Punjabi (plus 12 more).
 - **Live scene renderer** — SVG-based animations rendered in real time alongside the voice track. No video files to download.
-- **Community library** — public gallery of 40+ pre-built lessons covering Math, Physics, Chemistry, Biology, CS, History — including 3Blue1Brown-style deep-learning topics (Neural Nets, Backpropagation, Fourier Transform, Eigenvalues, Transformers).
+- **Community library** — public gallery of 40+ pre-built lessons covering Math, Physics, Chemistry, Biology, CS, History — including 3Blue1Brown-style deep-learning topics (Neural Nets, Backpropagation, Fourier Transform, Eigenvalue, Transformers).
 - **Manim export** — every generated lesson includes a Python Manim source so power users can render locally.
 - **Auth + streaks + watch history** — NextAuth (Google + guest), Prisma, daily learning streaks.
 - **Dark mode + custom cursor** — saffron-themed UI with animated cursor trail.
