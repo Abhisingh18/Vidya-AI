@@ -40,13 +40,21 @@ export const authOptions: AuthOptions = {
         const email = (credentials?.email ?? '').trim().toLowerCase()
           || `${name.toLowerCase().replace(/[^a-z0-9]+/g, '.')}@guest.vidyaai`;
 
-        const user = await prisma.user.upsert({
-          where: { email },
-          update: { name },
-          create: { name, email },
-        });
+        // NextAuth forwards a thrown error's message to the client verbatim, so a
+        // raw Prisma error would leak the DB host. Log it here (Vercel logs) and
+        // hand the client a stable code the login page can explain.
+        try {
+          const user = await prisma.user.upsert({
+            where: { email },
+            update: { name },
+            create: { name, email },
+          });
 
-        return { id: user.id, name: user.name ?? name, email: user.email ?? email };
+          return { id: user.id, name: user.name ?? name, email: user.email ?? email };
+        } catch (err) {
+          console.error('[auth] guest sign-in failed — database error:', err);
+          throw new Error('DatabaseError');
+        }
       },
     }),
   ],

@@ -6,6 +6,12 @@ import { signIn, useSession, getProviders } from 'next-auth/react';
 import Link from 'next/link';
 import { Flame, ArrowRight, UserPlus, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 
+// Error codes returned by the guest provider's authorize() (see src/lib/auth.ts)
+const GUEST_ERRORS: Record<string, string> = {
+  DatabaseError: "Our servers can't reach the database right now. Please try again in a few minutes.",
+  CredentialsSignin: 'Please enter your name to continue.',
+};
+
 function LoginInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -33,15 +39,21 @@ function LoginInner() {
     if (!name.trim()) return;
     setLoading(true);
     setError(null);
-    const res = await signIn('guest', {
-      name: name.trim(),
-      email: email.trim(),
-      redirect: false,
-      callbackUrl,
-    });
-    setLoading(false);
-    if (res?.error) setError('Sign-in failed. Please try again.');
-    else if (res?.ok) router.replace(callbackUrl);
+    try {
+      const res = await signIn('guest', {
+        name: name.trim(),
+        email: email.trim(),
+        redirect: false,
+        callbackUrl,
+      });
+      if (res?.error) setError(GUEST_ERRORS[res.error] ?? 'Sign-in failed. Please try again.');
+      else if (res?.ok) router.replace(callbackUrl);
+    } catch {
+      // signIn rejects when the auth endpoint is unreachable or returns non-JSON
+      setError('Could not reach the server. Check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
