@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Plus_Jakarta_Sans, Inter, Noto_Sans_Devanagari, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import AuthSessionProvider from '@/components/session-provider';
@@ -7,34 +6,6 @@ import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 import CursorEffect from '@/components/cursor-effect';
 import ServiceWorkerRegister from '@/components/sw-register';
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  variable: '--font-heading',
-  display: 'swap',
-  weight: ['400', '500', '600', '700'],
-});
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-body',
-  display: 'swap',
-  weight: ['400', '500', '600'],
-});
-
-const notoSansDevanagari = Noto_Sans_Devanagari({
-  subsets: ['devanagari'],
-  variable: '--font-hindi',
-  display: 'swap',
-  weight: ['400', '500', '600', '700'],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-  display: 'swap',
-  weight: ['400', '500'],
-});
 
 export const metadata: Metadata = {
   title: 'VidyaAI — Har topic, har bhasha, har student',
@@ -65,11 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${plusJakartaSans.variable} ${inter.variable} ${notoSansDevanagari.variable} ${jetbrainsMono.variable}`}
-    >
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#FF6B2C" />
         <link rel="icon" href="/favicon.ico" />
