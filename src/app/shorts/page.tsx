@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ChevronUp, ChevronDown, Loader2, X, Check, ArrowLeft, Film } from 'lucide-react';
-import ReelPlayer from '@/components/shorts/reel-player';
-import type { Short } from '@/lib/shorts';
+import ReelPlayer, { unlockReelAudio } from '@/components/shorts/reel-player';
+import type { Reel } from '@/lib/reels';
 import { LANGUAGES } from '@/lib/languages';
 
+const LANG_KEY = 'vidya-reels-language';
+
 export default function ShortsPage() {
-  const [shorts, setShorts] = useState<Short[]>([]);
+  const [shorts, setShorts] = useState<Reel[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeIdx, setActiveIdx] = useState(0);
   const [muted, setMuted] = useState(false);
@@ -17,13 +19,45 @@ export default function ShortsPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // Rounded display font for the reels (Latin + Devanagari); system fonts until it loads.
+  useEffect(() => {
+    if (document.getElementById('reel-font')) return;
+    const link = document.createElement('link');
+    link.id = 'reel-font';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap';
+    document.head.appendChild(link);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(LANG_KEY);
+      if (saved && LANGUAGES.some(l => l.name === saved)) setLanguage(saved);
+    } catch { /* private mode */ }
+  }, []);
+
   useEffect(() => {
     fetch('/api/shorts')
       .then(r => r.json())
-      .then(d => setShorts(Array.isArray(d.shorts) ? d.shorts : []))
+      .then(d => {
+        const list: Reel[] = Array.isArray(d.shorts) ? d.shorts : [];
+        // /shorts?reel=<id> opens that reel first (shared links)
+        const want = new URLSearchParams(window.location.search).get('reel');
+        const at = want ? list.findIndex(r => r.id === want) : -1;
+        setShorts(at > 0 ? [list[at], ...list.slice(0, at), ...list.slice(at + 1)] : list);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  // Start at the first reel (the browser may snap to another one while the feed lays out).
+  useEffect(() => {
+    if (!shorts.length) return;
+    const el = containerRef.current;
+    el?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    const id = requestAnimationFrame(() => el?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior }));
+    return () => cancelAnimationFrame(id);
+  }, [shorts]);
 
   useEffect(() => {
     if (!containerRef.current || shorts.length === 0) return;
@@ -45,6 +79,11 @@ export default function ShortsPage() {
   const scrollTo = (i: number) => {
     const clamped = Math.max(0, Math.min(shorts.length - 1, i));
     slideRefs.current[clamped]?.scrollIntoView({ behavior: 'smooth' });
+  };
+  const chooseLanguage = (name: string) => {
+    setLanguage(name);
+    setLangOpen(false);
+    try { localStorage.setItem(LANG_KEY, name); } catch { /* private mode */ }
   };
 
   if (loading) {
@@ -74,12 +113,14 @@ export default function ShortsPage() {
           >
             <div className="relative w-full max-w-[430px] h-full max-h-[880px] sm:h-[calc(100dvh-2.5rem)]">
               <ReelPlayer
-                short={short}
+                reel={short}
                 active={i === activeIdx}
+                near={Math.abs(i - activeIdx) === 1}
                 muted={muted}
                 language={language}
                 onToggleMute={() => setMuted(m => !m)}
                 onOpenLanguages={() => setLangOpen(true)}
+                onEnded={() => scrollTo(i + 1 < shorts.length ? i + 1 : 0)}
               />
             </div>
           </div>
@@ -100,10 +141,10 @@ export default function ShortsPage() {
 
       {/* Desktop nav arrows */}
       <div className="hidden sm:flex flex-col gap-3 absolute right-6 top-1/2 -translate-y-1/2 z-40">
-        <button onClick={() => scrollTo(activeIdx - 1)} disabled={activeIdx === 0} className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur flex items-center justify-center text-white disabled:opacity-25 transition-all" aria-label="Previous">
+        <button onClick={() => { unlockReelAudio(); scrollTo(activeIdx - 1); }} disabled={activeIdx === 0} className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur flex items-center justify-center text-white disabled:opacity-25 transition-all" aria-label="Previous">
           <ChevronUp className="w-5 h-5" />
         </button>
-        <button onClick={() => scrollTo(activeIdx + 1)} disabled={activeIdx === shorts.length - 1} className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur flex items-center justify-center text-white disabled:opacity-25 transition-all" aria-label="Next">
+        <button onClick={() => { unlockReelAudio(); scrollTo(activeIdx + 1); }} disabled={activeIdx === shorts.length - 1} className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur flex items-center justify-center text-white disabled:opacity-25 transition-all" aria-label="Next">
           <ChevronDown className="w-5 h-5" />
         </button>
       </div>
@@ -117,12 +158,12 @@ export default function ShortsPage() {
               <h3 className="text-lg font-heading font-bold text-white">Choose language</h3>
               <button onClick={() => setLangOpen(false)} className="text-white/60 hover:text-white"><X className="w-5 h-5" /></button>
             </div>
-            <p className="text-white/50 text-xs mb-4">The AI teacher will explain in your language 🌐</p>
+            <p className="text-white/50 text-xs mb-4">English and Hindi are ready to play; other languages are translated in a few seconds 🌐</p>
             <div className="grid grid-cols-2 gap-2">
               {LANGUAGES.map(l => (
                 <button
                   key={l.name}
-                  onClick={() => { setLanguage(l.name); setLangOpen(false); }}
+                  onClick={() => chooseLanguage(l.name)}
                   className={`flex items-center justify-between gap-2 px-4 py-3 rounded-xl border text-left transition-all ${
                     language === l.name
                       ? 'border-saffron bg-saffron/15 text-white'

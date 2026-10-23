@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { MODELS, NO_REASONING } from '@/lib/llm';
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const MODELS = [
-  'openai/gpt-oss-20b:free',
-  'google/gemma-4-31b-it:free',
-  'openai/gpt-oss-120b:free',
-];
 
-interface BeatText { say: string; sub?: string }
+interface SceneText { headline: string; say: string }
 
-function extractJson(raw: string): { hook?: string; beats?: BeatText[] } | null {
+function extractJson(raw: string): { title?: string; scenes?: Partial<SceneText>[] } | null {
   let s = raw.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
   s = s.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
   const start = s.indexOf('{');
@@ -35,7 +31,8 @@ async function callModel(model: string, prompt: string) {
           { role: 'user', content: prompt },
         ],
         temperature: 0.3,
-        max_tokens: 1500,
+        max_tokens: 3500,
+        reasoning: NO_REASONING,
       }),
     });
     if (!res.ok) return null;
@@ -46,43 +43,47 @@ async function callModel(model: string, prompt: string) {
   }
 }
 
-// Translate a reel's spoken lines + hook into a target Indian language.
+// Translate a reel's title, headlines and spoken lines (written in English) into an Indian language.
 export async function POST(req: NextRequest) {
-  const { language, hook, beats } = await req.json();
-  if (!language || !Array.isArray(beats)) {
-    return NextResponse.json({ error: 'language and beats required' }, { status: 400 });
+  const body = await req.json().catch(() => ({}));
+  const language = typeof body.language === 'string' ? body.language.trim().slice(0, 30) : '';
+  const title = typeof body.title === 'string' ? body.title.slice(0, 200) : '';
+  const scenes: SceneText[] = (Array.isArray(body.scenes) ? body.scenes : []).slice(0, 12).map((x: Partial<SceneText>) => ({
+    headline: String(x?.headline ?? '').slice(0, 200), say: String(x?.say ?? '').slice(0, 500),
+  }));
+  if (!language || !scenes.length) {
+    return NextResponse.json({ error: 'language and scenes required' }, { status: 400 });
   }
 
-  const items = beats.map((b: BeatText, i: number) => ({ i, say: b.say, sub: b.sub ?? '' }));
-
   const prompt = `Translate this short educational reel into ${language} for a school student.
-Keep it natural, simple and friendly — the way a good teacher speaks. Use the ${language} script.
-Keep any equations, numbers, symbols and emojis exactly as they are.
-Do NOT translate proper scientific terms that are normally kept in English (translate them only if a common ${language} word exists).
+Keep it natural, simple and friendly — the way a good teacher speaks in an Indian classroom. Use the ${language} script.
+"say" is read aloud by a text-to-speech voice: plain words, numbers written as words where natural, no emoji or symbols.
+"headline" is short on-screen text: keep it short, keep any emoji, numbers, formulas and symbols (a², CO₂, →, =) exactly, and keep the *asterisks* around the translated version of the starred word.
+Keep scientific terms that Indian ${language}-medium textbooks keep in English.
 
-HOOK: ${hook}
+TITLE: ${title}
 
-LINES (JSON): ${JSON.stringify(items)}
+SCENES (JSON): ${JSON.stringify(scenes.map((sc, i) => ({ i, ...sc })))}
 
 Return ONLY this JSON shape:
-{"hook":"<translated hook>","beats":[{"say":"<translated say>","sub":"<translated sub or empty>"}, ...]}
-The beats array must have exactly ${items.length} items in the same order.`;
+{"title":"<translated title>","scenes":[{"headline":"...","say":"..."}, ...]}
+The scenes array must have exactly ${scenes.length} items in the same order.`;
 
   if (OPENROUTER_API_KEY) {
     for (const model of MODELS) {
       const out = await callModel(model, prompt);
-      if (out && Array.isArray(out.beats) && out.beats.length === items.length) {
+      if (out && Array.isArray(out.scenes) && out.scenes.length === scenes.length) {
         return NextResponse.json({
-          hook: out.hook ?? hook,
-          beats: out.beats.map((b, idx) => ({
-            say: String(b.say ?? items[idx].say),
-            sub: b.sub ? String(b.sub) : undefined,
+          title: String(out.title || title),
+          scenes: out.scenes.map((sc, i) => ({
+            headline: String(sc?.headline || scenes[i].headline),
+            say: String(sc?.say || scenes[i].say),
           })),
         });
       }
     }
   }
 
-  // Fallback — return original text untouched so playback still works.
-  return NextResponse.json({ hook, beats: items.map(it => ({ say: it.say, sub: it.sub || undefined })), fallback: true });
+  // No translation available: the player keeps the English text.
+  return NextResponse.json({ title, scenes, fallback: true });
 }

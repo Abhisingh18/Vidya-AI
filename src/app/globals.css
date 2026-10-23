@@ -219,36 +219,150 @@
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* ── AI Teacher Avatar + reel polish ──────────────────────── */
-@keyframes avatarBob   { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-@keyframes avatarBlink { 0%,92%,100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
-@keyframes avatarTalk  { 0%,100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }
-@keyframes haloPulse   { 0%,100% { opacity: 0.35; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.08); } }
-@keyframes waveBar     { 0%,100% { height: 20%; } 50% { height: 100%; } }
-@keyframes reelCardIn  { from { opacity: 0; transform: translateY(20px) scale(0.94); } to { opacity: 1; transform: translateY(0) scale(1); } }
+/* ── Reels (components/shorts) ──────────────────────────────── */
+@keyframes reelKbIn   { from { transform: scale(1.04); } to { transform: scale(1.2); } }
+@keyframes reelKbUp   { from { transform: scale(1.18) translateY(5%); } to { transform: scale(1.18) translateY(-5%); } }
+@keyframes reelKbSoft { from { transform: scale(0.96); } to { transform: scale(1.04); } }
+@keyframes reelFloatY { 0%,100% { translate: 0 0; } 50% { translate: 0 -1.4%; } }
+@keyframes reelInZoom { from { opacity: 0; transform: scale(1.14); } to { opacity: 1; transform: scale(1); } }
+@keyframes reelInUp   { from { opacity: 0; transform: translateY(9%); } to { opacity: 1; transform: translateY(0); } }
+@keyframes reelInLeft { from { opacity: 0; transform: translateX(12%); } to { opacity: 1; transform: translateX(0); } }
+@keyframes reelOut    { from { opacity: 1; } to { opacity: 0; transform: scale(0.95); } }
+@keyframes reelWord   { 0% { opacity: 0; transform: translateY(45%) scale(0.75); filter: blur(5px); } 60% { opacity: 1; transform: translateY(-6%) scale(1.05); filter: blur(0); } 100% { opacity: 1; transform: none; } }
+@keyframes reelStat   { 0% { opacity: 0; transform: scale(0.35); } 60% { opacity: 1; transform: scale(1.12); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes reelPopIn  { 0% { opacity: 0; transform: scale(0.3); } 70% { opacity: 1; transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes reelGrowIn { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+@keyframes reelDrawIn { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+@keyframes reelWind   { to { stroke-dashoffset: -76; } }
+@keyframes reelFlash  { 0%,100% { opacity: 0; } 8%,26% { opacity: 1; } 17% { opacity: 0.25; } }
+@keyframes reelGrid   { to { background-position: 44px 44px; } }
 
-.avatar-bob   { animation: avatarBob 3.5s ease-in-out infinite; }
-.avatar-blink { transform-origin: center; animation: avatarBlink 5s ease-in-out infinite; }
-.avatar-talk  { transform-origin: center top; animation: avatarTalk 0.22s ease-in-out infinite; }
-.avatar-halo  { animation: haloPulse 2.4s ease-in-out infinite; }
-.reel-card-in { animation: reelCardIn 0.5s cubic-bezier(0.22,1,0.36,1); }
+.reel-kb-in   { animation: reelKbIn var(--reel-kb, 9s) ease-out both; }
+.reel-kb-up   { animation: reelKbUp var(--reel-kb, 9s) ease-in-out both; }
+.reel-kb-soft { animation: reelKbSoft var(--reel-kb, 9s) ease-out both; }
+.reel-float   { animation: reelFloatY 5s ease-in-out infinite; }
+.reel-in-zoom { animation: reelInZoom 0.75s cubic-bezier(0.22,1,0.36,1) both; }
+.reel-in-up   { animation: reelInUp 0.7s cubic-bezier(0.22,1,0.36,1) both; }
+.reel-in-left { animation: reelInLeft 0.7s cubic-bezier(0.22,1,0.36,1) both; }
+.reel-out     { animation: reelOut 0.6s ease both; z-index: 0; }
+.reel-word    { animation: reelWord 0.6s cubic-bezier(0.22,1,0.36,1) both; }
+.reel-stat    { animation: reelStat 0.75s cubic-bezier(0.22,1,0.36,1) 0.45s both; }
+.reel-pop-in  { transform-box: fill-box; transform-origin: center; animation: reelPopIn 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+.reel-grow-in { animation: reelGrowIn 0.65s cubic-bezier(0.22,1,0.36,1) both; }
+.reel-draw-in { stroke-dasharray: 100; animation: reelDrawIn 0.9s ease both; }
+.reel-wind    { animation: reelWind 1.2s linear infinite; }
+.reel-flash   { animation: reelFlash 1.8s ease-in-out infinite; }
+.reel-grid    { background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); background-size: 44px 44px; animation: reelGrid 6s linear infinite; }
 
-/* ── Reel scene animations ────────────────────────────────── */
-@keyframes reelDraw   { from { stroke-dashoffset: 500; } to { stroke-dashoffset: 0; } }
-@keyframes reelFloat  { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
-@keyframes reelGrow   { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-@keyframes reelPulse  { 0% { transform: scale(0.7); opacity: 0.7; } 100% { transform: scale(1.7); opacity: 0; } }
-@keyframes reelWave   { from { transform: translateX(0); } to { transform: translateX(-150px); } }
-@keyframes reelPop    { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.12); } 100% { transform: scale(1); opacity: 1; } }
-@keyframes reelSpin   { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes reelBlink2 { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+@media (prefers-reduced-motion: reduce) {
+  .reel-kb-in, .reel-kb-up, .reel-kb-soft, .reel-float, .reel-wind, .reel-flash, .reel-grid { animation: none; }
+  .reel-word, .reel-stat, .reel-in-zoom, .reel-in-up, .reel-in-left { animation-duration: 0.01ms; }
+}
 
-.reel-draw   { stroke-dasharray: 500; animation: reelDraw 1.1s ease forwards; }
-.reel-float  { animation: reelFloat 3.2s ease-in-out infinite; }
-.reel-grow   { transform-box: fill-box; transform-origin: bottom; animation: reelGrow 0.7s cubic-bezier(.22,1,.36,1) forwards; }
-.reel-pulsering { transform-box: fill-box; transform-origin: center; animation: reelPulse 2.4s ease-out infinite; }
-.reel-wavemove  { animation: reelWave 2.2s linear infinite; }
-.reel-pop    { transform-box: fill-box; transform-origin: center; animation: reelPop 0.5s cubic-bezier(.22,1,.36,1) forwards; }
-.reel-spin   { transform-box: fill-box; transform-origin: center; animation: reelSpin 7s linear infinite; }
-.reel-spin-fast { transform-box: fill-box; transform-origin: center; animation: reelSpin 3.5s linear infinite; }
-.reel-blink2 { animation: reelBlink2 1.2s ease-in-out infinite; }
+/* With the signed-in sidebar there's no top bar on desktop, so trim the
+   pt-24 offset app pages reserve for it. */
+@media (min-width: 1024px) {
+  .with-sidebar .container-main.pt-24 {
+    padding-top: 2.5rem;
+  }
+}
+
+/* ── Slide view: present-mode reveals (slide-view.tsx / slide-diagram.tsx) ── */
+@keyframes vs-pop {
+  0%   { opacity: 0; transform: translateY(1.4cqw) scale(0.9); }
+  60%  { opacity: 1; transform: translateY(-0.2cqw) scale(1.03); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes vs-zoom      { 0% { opacity: 0; transform: scale(0); } 70% { opacity: 1; transform: scale(1.25); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes vs-draw      { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes vs-wipe-r    { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes vs-wipe-l    { from { clip-path: inset(0 0 0 100%); } to { clip-path: inset(0 0 0 0); } }
+@keyframes vs-wipe-d    { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes vs-kenburns  { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.09) translate(-1.5%, -1%); } }
+@keyframes vs-float     { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-0.9cqw) rotate(-4deg); } }
+@keyframes vs-slide-in  { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: none; } }
+
+.vs-pop      { animation: vs-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.vs-zoom     { transform-box: fill-box; transform-origin: center; animation: vs-zoom 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.vs-draw     { stroke-dasharray: 1; animation: vs-draw 0.6s ease-out both; }
+.vs-wipe-r   { animation: vs-wipe-r 0.45s ease-out both; }
+.vs-wipe-l   { animation: vs-wipe-l 0.45s ease-out both; }
+.vs-wipe-d   { animation: vs-wipe-d 0.45s ease-out both; }
+.vs-kenburns { transform-origin: center; animation: vs-kenburns 16s ease-in-out infinite alternate; }
+.vs-float    { display: inline-block; animation: vs-float 4.5s ease-in-out infinite; }
+.vs-slide-in { animation: vs-slide-in 0.35s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .vs-pop, .vs-zoom, .vs-draw, .vs-wipe-r, .vs-wipe-l, .vs-wipe-d,
+  .vs-kenburns, .vs-float, .vs-slide-in { animation: none !important; }
+}
+
+/* ── Explainer player (explainer-player.tsx) ── */
+/* Scene transitions: two layers; --xp-dir is 1 forward, -1 backward. */
+@keyframes xp-swipe-in  { from { transform: translate3d(calc(var(--xp-dir, 1) * 112%), 0, 0) scale(0.93); } to { transform: none; } }
+@keyframes xp-swipe-out { from { transform: none; } to { transform: translate3d(calc(var(--xp-dir, 1) * -112%), 0, 0) scale(0.93); opacity: 0.6; } }
+@keyframes xp-zoom-in   { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: none; } }
+@keyframes xp-zoom-out  { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(1.14); } }
+@keyframes xp-fade-in   { from { opacity: 0; } to { opacity: 1; } }
+@keyframes xp-fade-out  { from { opacity: 1; } to { opacity: 0; } }
+@keyframes xp-rise-in   { from { opacity: 0; transform: translate3d(0, 16%, 0) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes xp-rise-out  { from { opacity: 1; transform: none; } to { opacity: 0; transform: translate3d(0, -6%, 0) scale(0.96); } }
+
+.xp-swipe-in   { animation: xp-swipe-in 0.76s cubic-bezier(0.65, 0, 0.35, 1) both; will-change: transform; }
+.xp-swipe-out  { animation: xp-swipe-out 0.76s cubic-bezier(0.65, 0, 0.35, 1) both; will-change: transform, opacity; }
+.xp-zoom-in    { animation: xp-zoom-in 0.72s cubic-bezier(0.22, 1, 0.36, 1) both; will-change: transform, opacity; }
+.xp-zoom-out   { animation: xp-zoom-out 0.72s cubic-bezier(0.4, 0, 0.6, 1) both; will-change: transform, opacity; }
+.xp-fade-in    { animation: xp-fade-in 0.62s ease-out both; will-change: opacity; }
+.xp-fade-out   { animation: xp-fade-out 0.62s ease-in both; will-change: opacity; }
+.xp-rise-in    { animation: xp-rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; will-change: transform, opacity; }
+.xp-rise-out   { animation: xp-rise-out 0.7s cubic-bezier(0.4, 0, 0.6, 1) both; will-change: transform, opacity; }
+
+/* Backdrop: slow drifting gradient blobs + a little parallax per scene. */
+@keyframes xp-blob-0 { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(14%, 10%, 0) scale(1.18); } }
+@keyframes xp-blob-1 { from { transform: translate3d(0, 0, 0) scale(1.1); } to { transform: translate3d(-16%, -12%, 0) scale(0.92); } }
+@keyframes xp-blob-2 { from { transform: translate3d(0, 0, 0) scale(0.95); } to { transform: translate3d(18%, -16%, 0) scale(1.15); } }
+.xp-blob     { position: absolute; border-radius: 9999px; will-change: transform; }
+.xp-blob-0   { animation: xp-blob-0 19s ease-in-out infinite alternate; }
+.xp-blob-1   { animation: xp-blob-1 23s ease-in-out infinite alternate; }
+.xp-blob-2   { animation: xp-blob-2 27s ease-in-out infinite alternate; }
+.xp-parallax { transition: transform 1.4s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* Title card, intro, end screen */
+@keyframes xp-rise     { from { opacity: 0; transform: translate3d(0, 0.9rem, 0); } to { opacity: 1; transform: none; } }
+@keyframes xp-intro    { from { opacity: 0; transform: translate3d(0, 5%, 0) scale(0.9); } }
+@keyframes xp-title-out { to { opacity: 0; transform: scale(1.05); } }
+@keyframes xp-ring     { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.75); opacity: 0; } }
+@keyframes xp-float    { 0%, 100% { transform: rotate(var(--xp-tilt, 0deg)) translate3d(0, 0, 0); } 50% { transform: rotate(var(--xp-tilt, 0deg)) translate3d(0, -4%, 0); } }
+@keyframes xp-card-in  { from { opacity: 0; transform: rotate(var(--xp-tilt, 0deg)) translate3d(0, 12%, 0) scale(0.92); } }
+@keyframes xp-flash    { 0% { opacity: 0.95; transform: scale(0.7); } 100% { opacity: 0; transform: scale(1.4); } }
+@keyframes xp-pop-in   { from { opacity: 0; transform: translate3d(0, 0.4rem, 0) scale(0.94); } }
+@keyframes xp-end-in   { from { opacity: 0; } to { opacity: 1; } }
+@keyframes xp-cue      { from { opacity: 0; transform: translate3d(0, 0.35em, 0); } to { opacity: 1; transform: none; } }
+
+.xp-stagger > *    { animation: xp-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.xp-stagger > :nth-child(2) { animation-delay: 0.08s; }
+.xp-stagger > :nth-child(3) { animation-delay: 0.16s; }
+.xp-stagger > :nth-child(4) { animation-delay: 0.26s; }
+.xp-intro     { animation: xp-intro 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.xp-title-out { animation: xp-title-out 0.45s ease-in both; }
+.xp-ring      { animation: xp-ring 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+.xp-float-0, .xp-float-1 { transform: rotate(var(--xp-tilt, 0deg)); animation: xp-card-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both, xp-float 7s ease-in-out 0.9s infinite; }
+.xp-float-1   { animation-delay: 0.12s, 1.4s; }
+.xp-flash     { animation: xp-flash 0.55s ease-out both; }
+.xp-pop-in    { animation: xp-pop-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.xp-end-in    { animation: xp-end-in 0.5s ease-out both; }
+.xp-recap-item { animation: xp-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Captions: karaoke-style word highlight */
+.xp-cue       { animation: xp-cue 0.22s ease-out both; }
+.xp-cue-box   { animation: xp-pop-in 0.26s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.xp-word      { border-radius: 0.3em; padding: 0 0.06em; margin: 0 -0.06em; -webkit-box-decoration-break: clone; box-decoration-break: clone;
+                transition: color 0.15s ease, background-color 0.15s ease, opacity 0.2s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-swipe-in, .xp-zoom-in, .xp-rise-in { animation-name: xp-fade-in !important; }
+  .xp-swipe-out, .xp-zoom-out, .xp-rise-out { animation-name: xp-fade-out !important; }
+  .xp-blob, .xp-ring, .xp-float-0, .xp-float-1, .xp-stagger > *, .xp-intro, .xp-title-out,
+  .xp-flash, .xp-pop-in, .xp-cue, .xp-cue-box, .xp-recap-item { animation: none !important; }
+  .xp-parallax { transition: none; }
+}
