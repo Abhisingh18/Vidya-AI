@@ -5,13 +5,15 @@
 // is on screen.
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Check, Mic } from 'lucide-react';
+import { Check, FileText, ListChecks, Mic, Presentation } from 'lucide-react';
 import { REELS } from '@/lib/reels';
 import { MotionStage } from '@/components/motion/motion-stage';
 import { slidePalette } from '@/components/teacher/slide-diagram';
 import type { SceneMotion } from '@/lib/motion';
 
-export type FeatureDemoId = 'video' | 'reels' | 'doubt' | 'flashcards' | 'notes' | 'mock' | 'planner' | 'xp';
+export type FeatureDemoId =
+  | 'video' | 'reels' | 'doubt' | 'flashcards' | 'notes' | 'mock' | 'planner' | 'xp'
+  | 'slides' | 'quiz' | 'lesson' | 'exam' | 'classroom' | 'toolkit' | 'upload';
 
 /** Step counter 0…n-1 that advances every `ms` while `on`. */
 function useStep(n: number, ms: number, on: boolean) {
@@ -240,9 +242,170 @@ function XpDemo({ on }: { on: boolean }) {
   );
 }
 
+// ── teacher demos ───────────────────────────────────────────────────
+
+const SLIDE_IMG = REELS.find(r => r.id === 'heart')!.scenes[0].image!.src;
+
+function SlidesDemo({ on }: { on: boolean }) {
+  const step = useStep(6, 1000, on);
+  return (
+    <div className="relative mx-auto flex h-full w-full max-w-[17rem] gap-2 rounded-lg bg-white p-2.5 shadow-sm ring-1 ring-card-border dark:bg-dark-bg dark:ring-dark-border">
+      <div className="flex-1 space-y-1">
+        <p className="font-heading text-[11px] font-bold text-navy dark:text-dark-text">❤️ The Human Heart</p>
+        <div className="h-0.5 w-8 rounded-full bg-saffron" />
+        {['4 chambers', 'Pumps blood', 'Beats 1 lakh times/day'].map((t, i) => (
+          <p key={t} className={`text-[9px] text-navy dark:text-dark-text ${shown(step > i)}`}><span className="text-saffron">●</span> {t}</p>
+        ))}
+      </div>
+      <div className={`relative w-[42%] overflow-hidden rounded-md ${shown(step > 0)}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {on && <img src={SLIDE_IMG} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" draggable={false} />}
+        <span className="absolute bottom-1 left-1 rounded bg-black/55 px-1 text-[7px] text-white">📷 picked by vision AI</span>
+      </div>
+      <span className={`absolute -bottom-0.5 right-2 inline-flex items-center gap-1 rounded-full bg-saffron px-2 py-0.5 text-[9px] font-bold text-white shadow ${shown(step >= 4)}`}>
+        <Presentation className="h-3 w-3" /> Export PPTX
+      </span>
+    </div>
+  );
+}
+
+function QuizDemo({ on }: { on: boolean }) {
+  const step = useStep(6, 950, on);
+  const qs = [['MCQ', 'Which organ pumps blood?', 'Heart'], ['T/F', 'Arteries carry blood to the heart.', 'False'], ['Short', 'Name the heart’s four chambers.', '2 atria, 2 ventricles']];
+  return (
+    <div className="flex h-full flex-col gap-1 text-[9px]">
+      {qs.map(([type, q, a], i) => (
+        <div key={q} className={`rounded-md bg-white px-2 py-1 shadow-sm dark:bg-dark-bg ${shown(step > i)}`}>
+          <p className="text-navy dark:text-dark-text"><span className="mr-1 rounded bg-indigo-brand/10 px-1 font-bold text-indigo-brand">{type}</span>{q}</p>
+          <p className={`mt-0.5 font-semibold text-success ${shown(step > i + 2)}`}>✓ {a}</p>
+        </div>
+      ))}
+      <span className={`mt-auto ml-auto inline-flex items-center gap-1 rounded-full bg-navy px-2 py-0.5 text-[9px] font-bold text-white dark:bg-saffron ${shown(step >= 5)}`}>
+        <ListChecks className="h-3 w-3" /> Assigned to Class 9-B
+      </span>
+    </div>
+  );
+}
+
+function LessonDemo({ on }: { on: boolean }) {
+  const step = useStep(5, 1100, on);
+  const parts = [['0–5', 'Warm-up: why does a heart beat?', '🙋'], ['5–20', 'Explain with the diagram', '🧑‍🏫'], ['20–35', 'Activity: feel your pulse', '🫀'], ['35–40', 'Exit ticket: 3 quick questions', '✍️']];
+  return (
+    <div className="flex h-full flex-col justify-center gap-1 text-[9px]">
+      <p className="mb-0.5 font-heading text-[10px] font-bold text-navy dark:text-dark-text">Class 7 · Circulation · 40 min</p>
+      {parts.map(([t, label, e], i) => {
+        const active = step === i, done = step > i;
+        return (
+          <div key={t} className={`flex items-center gap-1.5 rounded-md px-1.5 py-0.5 transition-all ${active ? 'bg-saffron text-white shadow' : done ? 'bg-white text-muted dark:bg-dark-bg' : 'bg-white text-navy dark:bg-dark-bg dark:text-dark-text'}`}>
+            <span className="w-9 shrink-0 font-mono font-bold">{t}′</span><span>{e}</span><span className="truncate">{label}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ExamDemo({ on }: { on: boolean }) {
+  const step = useStep(6, 950, on);
+  const sections = [['A', '10 MCQs', 10], ['B', '6 short answers', 18], ['C', '4 long answers', 32], ['D', '2 case studies', 20]] as const;
+  const total = sections.slice(0, Math.min(step, 4)).reduce((t, s) => t + s[2], 0);
+  return (
+    <div className="mx-auto flex h-full w-full max-w-[15rem] flex-col rounded-md bg-white px-3 py-2 text-[9px] text-navy shadow-md dark:bg-dark-bg dark:text-dark-text">
+      <p className="text-center font-heading text-[10px] font-bold">Half-Yearly Examination</p>
+      <p className="mb-1 text-center text-[8px] text-muted">Class 10 · Science · 3 hours</p>
+      {sections.map(([s, label, marks], i) => (
+        <div key={s} className={`flex justify-between border-b border-dashed border-card-border py-0.5 dark:border-dark-border ${shown(step > i)}`}>
+          <span><b>Section {s}</b> · {label}</span><span className="font-semibold">{marks} marks</span>
+        </div>
+      ))}
+      <div className="mt-auto flex items-center justify-between pt-1">
+        <span className={`inline-flex items-center gap-1 font-semibold text-success ${shown(step >= 5)}`}><FileText className="h-3 w-3" /> Answer key ready</span>
+        <span className="font-black text-saffron">{total} / 80</span>
+      </div>
+    </div>
+  );
+}
+
+function ClassroomDemo({ on }: { on: boolean }) {
+  const step = useStep(6, 900, on);
+  const kids = ['🧒', '👧', '👦', '🧒🏽', '👧🏾'];
+  return (
+    <div className="flex h-full flex-col gap-1.5 text-[9px]">
+      <div className="flex items-center justify-between rounded-md bg-white px-2 py-1 shadow-sm dark:bg-dark-bg">
+        <span className="font-heading text-[10px] font-bold text-navy dark:text-dark-text">Class 9-B Science</span>
+        <span className="rounded bg-indigo-brand/10 px-1.5 py-0.5 font-mono font-bold text-indigo-brand">VX7-42K</span>
+      </div>
+      <div className="flex items-center gap-0.5">
+        {kids.map((k, i) => (
+          <span key={i} className={`flex h-6 w-6 items-center justify-center rounded-full bg-white text-[12px] shadow-sm transition-all duration-500 dark:bg-dark-bg ${step > i ? 'scale-100 opacity-100' : 'scale-50 opacity-0'}`}>{k}</span>
+        ))}
+        <span className="ml-1 text-muted">{Math.min(step, kids.length) + 27} joined</span>
+      </div>
+      {[['🎬 Video: The Human Heart', 82], ['📝 Quiz: Circulation', 64]].map(([t, pct]) => (
+        <div key={t} className="rounded-md bg-white px-2 py-1 shadow-sm dark:bg-dark-bg">
+          <div className="flex justify-between text-navy dark:text-dark-text"><span>{t}</span><span className="font-semibold">{step >= 3 ? pct : Number(pct) - 30}%</span></div>
+          <div className="mt-0.5 h-1 overflow-hidden rounded-full bg-card-border dark:bg-dark-border">
+            <div className="h-full rounded-full bg-teal transition-all duration-700" style={{ width: `${step >= 3 ? pct : Number(pct) - 30}%` }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ToolkitDemo({ on }: { on: boolean }) {
+  const step = useStep(9, 900, on);
+  const tool = Math.floor(step / 3), k = step % 3;
+  const tabs = ['📋 Rubric', '✅ NCERT check', '🌐 Translate'];
+  return (
+    <div className="flex h-full flex-col gap-1.5 text-[9px]">
+      <div className="flex gap-1">
+        {tabs.map((t, i) => <span key={t} className={`rounded-full px-2 py-0.5 font-semibold transition-colors ${i === tool ? 'bg-navy text-white dark:bg-saffron' : 'bg-white text-muted dark:bg-dark-bg'}`}>{t}</span>)}
+      </div>
+      <div className="flex-1 rounded-md bg-white p-2 text-navy shadow-sm dark:bg-dark-bg dark:text-dark-text">
+        {tool === 0 && [['Understanding', '4 / 4'], ['Diagram', '3 / 4'], ['Presentation', '4 / 4']].map(([c, m], i) => (
+          <div key={c} className={`flex justify-between border-b border-dashed border-card-border py-0.5 dark:border-dark-border ${shown(k >= i)}`}><span>{c}</span><b>{m}</b></div>
+        ))}
+        {tool === 1 && ['Class 10 · Science · Ch 6 “Life Processes”', '✓ Covers 6.4 Transportation', '✓ Matches NCERT learning outcomes'].map((t, i) => (
+          <p key={t} className={`${i ? 'font-semibold text-success' : 'text-muted'} ${shown(k >= i)}`}>{t}</p>
+        ))}
+        {tool === 2 && (
+          <>
+            <p className="text-muted">The heart pumps blood to every part of the body.</p>
+            <p className={`mt-1 font-semibold text-saffron ${shown(k >= 1)}`}>दिल ख़ून को शरीर के हर हिस्से तक पंप करता है।</p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function UploadDemo({ on }: { on: boolean }) {
+  const step = useStep(5, 1000, on);
+  const outs = [[Presentation, 'Slides'], [ListChecks, 'Quiz'], [FileText, 'Exam']] as const;
+  return (
+    <div className="flex h-full items-center justify-between gap-2 text-[9px]">
+      <div className="flex h-full w-[42%] flex-col items-center justify-center rounded-lg border-2 border-dashed border-saffron/50 bg-white/60 dark:bg-dark-bg/60">
+        <span className={`rounded-md bg-red-500 px-2 py-1.5 text-[9px] font-bold text-white shadow transition-all duration-700 ${step >= 1 ? 'translate-y-0 opacity-100' : '-translate-y-6 opacity-0'}`}>📄 Chapter-6.pdf</span>
+        <span className="mt-1.5 text-muted">{step >= 2 ? 'Read 12 pages ✓' : 'Drop your notes'}</span>
+      </div>
+      <span className={`text-lg text-saffron transition-opacity ${step >= 2 ? 'opacity-100' : 'opacity-20'}`}>→</span>
+      <div className="flex flex-1 flex-col gap-1">
+        {outs.map(([Icon, label], i) => (
+          <div key={label} className={`flex items-center gap-1.5 rounded-md bg-white px-2 py-1 font-semibold text-navy shadow-sm dark:bg-dark-bg dark:text-dark-text ${shown(step > i + 1)}`}>
+            <Icon className="h-3 w-3 text-saffron" /> {label} <span className="ml-auto text-success">✓</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const DEMOS: Record<FeatureDemoId, (p: { on: boolean }) => ReactNode> = {
   video: VideoDemo, reels: ReelsDemo, doubt: DoubtDemo, flashcards: FlashcardDemo,
   notes: NotesDemo, mock: MockDemo, planner: PlannerDemo, xp: XpDemo,
+  slides: SlidesDemo, quiz: QuizDemo, lesson: LessonDemo, exam: ExamDemo,
+  classroom: ClassroomDemo, toolkit: ToolkitDemo, upload: UploadDemo,
 };
 
 /** A feature card's demo panel; plays while on screen. */

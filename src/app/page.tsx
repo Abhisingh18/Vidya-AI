@@ -45,19 +45,19 @@ const STUDENT_FEATURES: Feature[] = [
 ];
 
 const TEACHER_FEATURES: Feature[] = [
-  { icon: Presentation, title: 'AI slide decks', href: '/teacher/slides', tags: ['Real images', 'Diagrams', 'PPTX export'],
+  { icon: Presentation, title: 'AI slide decks', demo: 'slides', href: '/teacher/slides', tags: ['Real images', 'Diagrams', 'PPTX export'],
     desc: 'Visual decks with photos picked by a vision model, labelled diagrams and a present mode that reveals ideas step by step.' },
-  { icon: ListChecks, title: 'Quiz builder', href: '/teacher/quizzes', tags: ['MCQ', 'True/false', 'Short answer'],
+  { icon: ListChecks, title: 'Quiz builder', demo: 'quiz', href: '/teacher/quizzes', tags: ['MCQ', 'True/false', 'Short answer'],
     desc: 'Ready-to-use quizzes for any chapter, with answer keys — edit, assign and track scores.' },
-  { icon: BookOpen, title: 'Lesson plans', href: '/teacher/lesson-plans', tags: ['Objectives', 'Activities'],
+  { icon: BookOpen, title: 'Lesson plans', demo: 'lesson', href: '/teacher/lesson-plans', tags: ['Objectives', 'Activities'],
     desc: 'Period-by-period lesson plans with objectives, activities, homework and assessment.' },
-  { icon: FileText, title: 'Exam paper generator', href: '/teacher/exams', tags: ['Unit test → Annual', 'Answer key'],
+  { icon: FileText, title: 'Exam paper generator', demo: 'exam', href: '/teacher/exams', tags: ['Unit test → Annual', 'Answer key'],
     desc: 'Mid-sem, half-yearly or annual papers with marks-wise sections, from topics or your syllabus PDF.' },
-  { icon: Users, title: 'Classrooms', href: '/teacher/classes', tags: ['Class code', 'Assignments'],
+  { icon: Users, title: 'Classrooms', demo: 'classroom', href: '/teacher/classes', tags: ['Class code', 'Assignments'],
     desc: 'Create a class, share a code, assign quizzes and videos, and see how every student is doing.' },
-  { icon: Wrench, title: 'Teacher toolkit', href: '/teacher/toolkit', tags: ['Rubrics', 'NCERT alignment', 'Translate'],
+  { icon: Wrench, title: 'Teacher toolkit', demo: 'toolkit', href: '/teacher/toolkit', tags: ['Rubrics', 'NCERT alignment', 'Translate'],
     desc: 'Rubric generator, NCERT/CBSE alignment check, material translation and parent messages in seconds.' },
-  { icon: Upload, title: 'Your material, your way', href: '/teacher/slides', tags: ['PDF', 'PPT', 'Notes'],
+  { icon: Upload, title: 'Your material, your way', demo: 'upload', href: '/teacher/slides', tags: ['PDF', 'PPT', 'Notes'],
     desc: 'Upload your chapter, notes or syllabus — slides, quizzes, exams and videos follow exactly what you teach.' },
 ];
 
