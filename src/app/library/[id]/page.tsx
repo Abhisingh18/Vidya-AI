@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { ArrowLeft, Eye, Calendar, User, BookOpen, Languages, GraduationCap, Bookmark, Download, Check, FileText } from 'lucide-react';
+import { ArrowLeft, Eye, Calendar, User, BookOpen, Languages, GraduationCap, Bookmark, Download, Check, FileText, Clapperboard } from 'lucide-react';
 import GeneratedVideoPlayer from '@/components/generated-video-player';
+import ExplainerPlayer from '@/components/explainer-player';
+import { isExplainer, type ExplainerContent } from '@/lib/explainer';
 import type { Scene } from '@/components/scene-renderer';
 import QuizPanel from '@/components/watch/quiz-panel';
 import DoubtChat from '@/components/watch/doubt-chat';
@@ -30,7 +32,8 @@ interface VideoDetail {
   author: string;
   views: number;
   script: ScriptLine[];
-  scene: Scene | null;
+  /** Classic animation scene, or a visual explainer (format 'explainer-v1'). */
+  scene: Scene | ExplainerContent | null;
   manimCode: string;
 }
 
@@ -101,16 +104,18 @@ export default function WatchPage() {
     // Record the download server-side (counts toward streak + stats).
     fetch(`/api/videos/${id}/download`, { method: 'POST' }).catch(() => {});
 
-    // Build a self-contained text file: script + Manim source.
+    // Build a self-contained text file: script (+ Manim source for classic animations).
     const lines = [
       `VidyaAI — ${video.topic}`,
       `Language: ${video.language}  |  Grade: ${video.grade}  |  Subject: ${video.subject}`,
       '',
       '═══════════════ SCRIPT ═══════════════',
       ...video.script.map(l => `[${l.time}] ${l.text}`),
-      '',
-      '═══════════════ MANIM SOURCE ═══════════════',
-      video.manimCode || '(none)',
+      ...(isExplainer(video.scene) ? [] : [
+        '',
+        '═══════════════ MANIM SOURCE ═══════════════',
+        video.manimCode || '(none)',
+      ]),
     ];
     const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -180,6 +185,16 @@ export default function WatchPage() {
     );
   }
 
+  const explainer = isExplainer(video.scene) ? video.scene : null;
+  const trackWatch = () => {
+    // Record a watch the first time playback starts (fire-and-forget).
+    fetch(`/api/videos/${video.id}/watch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ duration: 0, completed: false }),
+    }).catch(() => {});
+  };
+
   return (
     <main className="min-h-screen bg-off-white dark:bg-dark-bg">
       <div className="container-main pt-24 pb-16">
@@ -195,26 +210,28 @@ export default function WatchPage() {
 
           {/* Player + title column */}
           <div>
-            <GeneratedVideoPlayer
-              topic={video.topic}
-              script={video.script}
-              language={video.language}
-              scene={video.scene}
-              onWatchTracked={() => {
-                // Record a watch the first time playback starts (fire-and-forget).
-                fetch(`/api/videos/${video.id}/watch`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ duration: 0, completed: false }),
-                }).catch(() => {});
-              }}
-            />
+            {explainer ? (
+              <ExplainerPlayer content={explainer} onWatchTracked={trackWatch} />
+            ) : (
+              <GeneratedVideoPlayer
+                topic={video.topic}
+                script={video.script}
+                language={video.language}
+                scene={video.scene as Scene | null}
+                onWatchTracked={trackWatch}
+              />
+            )}
 
             <div className="mt-6">
               <h1 className="text-3xl font-heading font-bold text-navy dark:text-dark-text leading-tight">
                 {video.topic}
               </h1>
               <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-muted">
+                {explainer && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-saffron/10 text-saffron dark:bg-saffron/20 text-xs font-semibold">
+                    <Clapperboard className="w-3.5 h-3.5" /> Visual explainer · {explainer.scenes.length} scenes
+                  </span>
+                )}
                 <span className="inline-flex items-center gap-1.5">
                   <User className="w-4 h-4" /> {video.author}
                 </span>

@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircleQuestion, Send, Loader2 } from 'lucide-react';
+import { MessageCircleQuestion, Send, Loader2, Square, Volume2 } from 'lucide-react';
+import VoiceInput from '@/components/student/voice-input';
+import { getTtsStatus, speak, speechCode, stopSpeaking, useSpeakingId } from '@/lib/speak';
 
 interface ScriptLine { time: string; text: string }
 interface Msg { role: 'user' | 'bot'; text: string }
@@ -22,9 +24,26 @@ export default function DoubtChat({ topic, language, script }: Props) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [noVoice, setNoVoice] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const speakingId = useSpeakingId();
+  const lang = speechCode(language);
 
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, loading]);
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [messages, loading]);
+
+  // Warm up the narration check; stop reading aloud when leaving the page.
+  useEffect(() => {
+    getTtsStatus();
+    return () => stopSpeaking();
+  }, []);
+
+  const readAloud = async (i: number, text: string) => {
+    const id = `video-doubt-${i}`;
+    if (speakingId === id) { stopSpeaking(); return; }
+    setNoVoice(false);
+    if ((await speak(text, lang, { id })) === 'no-voice') setNoVoice(true);
+  };
 
   const ask = async (question: string) => {
     const q = question.trim();
@@ -64,6 +83,14 @@ export default function DoubtChat({ topic, language, script }: Props) {
                   : 'bg-gray-100 dark:bg-dark-border text-navy dark:text-dark-text rounded-bl-md'
               }`}>
                 {m.text}
+                {m.role === 'bot' && (
+                  <button type="button" onClick={() => readAloud(i, m.text)}
+                    className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold text-indigo-brand dark:text-indigo-brand-200 hover:underline">
+                    {speakingId === `video-doubt-${i}`
+                      ? <><Square className="w-3 h-3 fill-current" /> Stop</>
+                      : <><Volume2 className="w-3.5 h-3.5" /> Read answer aloud</>}
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -92,14 +119,25 @@ export default function DoubtChat({ topic, language, script }: Props) {
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && ask(input)}
-          placeholder="Type your question…"
-          className="flex-1 h-11 px-4 rounded-xl border-2 border-card-border dark:border-dark-border bg-off-white dark:bg-dark-bg text-navy dark:text-dark-text focus:border-indigo-brand outline-none text-sm"
+          onKeyDown={e => e.key === 'Enter' && !listening && ask(input)}
+          placeholder={listening ? 'Listening…' : 'Type or speak your question…'}
+          aria-label="Your question"
+          className="flex-1 min-w-0 h-11 px-4 rounded-xl border-2 border-card-border dark:border-dark-border bg-off-white dark:bg-dark-bg text-navy dark:text-dark-text focus:border-indigo-brand outline-none text-sm"
         />
-        <button onClick={() => ask(input)} disabled={loading || !input.trim()} className="w-11 h-11 rounded-xl bg-indigo-brand text-white flex items-center justify-center disabled:opacity-50 hover:bg-indigo-brand/90 transition-all shrink-0">
+        <VoiceInput
+          lang={lang}
+          onText={t => setInput(v => (v.trim() ? `${v.trim()} ${t}` : t))}
+          onListeningChange={setListening}
+          disabled={loading}
+          title={`Speak your question in ${language}`}
+        />
+        <button onClick={() => ask(input)} disabled={loading || listening || !input.trim()} aria-label="Send" className="w-11 h-11 rounded-xl bg-indigo-brand text-white flex items-center justify-center disabled:opacity-50 hover:bg-indigo-brand/90 transition-all shrink-0">
           <Send className="w-4 h-4" />
         </button>
       </div>
+      {noVoice && (
+        <p className="mt-2 text-xs text-muted">This device has no voice for {language}. Try Chrome on Android, or install a {language} voice in your text-to-speech settings.</p>
+      )}
     </section>
   );
 }

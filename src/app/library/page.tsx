@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, Play, Eye, Star, ArrowUpRight, ChevronDown, Triangle, Atom, FlaskConical, Leaf, Monitor, Landmark, BookOpen, Sparkles, Clock, Check } from 'lucide-react';
+import { Search, Play, Eye, Star, ArrowUpRight, ChevronDown, Triangle, Atom, FlaskConical, Leaf, Monitor, Landmark, BookOpen, Sparkles, Clock, Check, Clapperboard } from 'lucide-react';
 import SceneThumbnail from '@/components/scene-thumbnail';
 import type { SceneStep } from '@/components/scene-renderer';
 
@@ -21,7 +21,11 @@ interface ApiVideo {
   author: string;
   views: number;
   previewSteps?: SceneStep[];
+  /** Present for visual explainers: first scene's picture, else its emoji. */
+  explainer?: ExplainerPreview | null;
 }
+
+interface ExplainerPreview { image: string | null; emoji: string; scenes: number }
 
 const SUBJECT_ICON: Record<string, { icon: React.ElementType; gradient: string; pill: string; short: string }> = {
   Mathematics:        { icon: Triangle,    gradient: 'from-indigo-brand-400 to-indigo-brand-700', pill: 'bg-indigo-brand/10 text-indigo-brand dark:bg-indigo-brand/20', short: 'Math' },
@@ -70,6 +74,38 @@ function Chip({ label, active, onClick }: { label: string; active: boolean; onCl
   );
 }
 
+/** Commons serves fixed thumbnail steps; 500px is plenty for a card and much lighter than the slide-size image. */
+const cardThumb = (url: string) => url.replace(/\/thumb\/(.+)\/\d+px-([^/?]+)(\?.*)?$/, '/thumb/$1/500px-$2');
+
+function ExplainerThumbnail({ preview }: { preview: ExplainerPreview }) {
+  const [failed, setFailed] = useState(false);
+  const full = preview.image;
+  return (
+    <div className="absolute inset-0 bg-gradient-to-br from-saffron-100 via-orange-50 to-indigo-brand-100 dark:from-saffron-900/70 dark:via-dark-surface dark:to-indigo-brand-900/70">
+      {full && !failed ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={cardThumb(full)}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+          // A tiny original has no 500px thumb: fall back to the full image, then to the emoji.
+          onError={e => { if (e.currentTarget.src !== full) e.currentTarget.src = full; else setFailed(true); }}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="w-20 h-20 rounded-full bg-white/85 dark:bg-white/10 shadow-lg flex items-center justify-center text-[2.6rem] leading-none select-none">
+            {preview.emoji}
+          </span>
+        </div>
+      )}
+      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/45 to-transparent pointer-events-none" />
+    </div>
+  );
+}
+
 function VideoCard({ video, index, watched }: { video: ApiVideo; index: number; watched?: boolean }) {
   const config = getSubjectConfig(video.subject);
   const IconComp = config.icon;
@@ -84,7 +120,9 @@ function VideoCard({ video, index, watched }: { video: ApiVideo; index: number; 
       style={{ animationDelay: `${index * 60}ms` }}
     >
       <div className="relative h-40 bg-navy overflow-hidden">
-        {hasPreview ? (
+        {video.explainer ? (
+          <ExplainerThumbnail preview={video.explainer} />
+        ) : hasPreview ? (
           <SceneThumbnail steps={video.previewSteps!} />
         ) : (
           <div className={`absolute inset-0 bg-gradient-to-br ${config.gradient}`}>
@@ -101,6 +139,11 @@ function VideoCard({ video, index, watched }: { video: ApiVideo; index: number; 
         {watched && (
           <div className="absolute top-3 right-3 bg-teal text-white text-[10px] px-2 py-1 rounded-full font-semibold flex items-center gap-1 shadow-sm">
             <Check className="w-3 h-3" /> Watched
+          </div>
+        )}
+        {video.explainer && (
+          <div className="absolute bottom-3 left-3 bg-saffron text-white text-[10px] px-2 py-1 rounded-full font-semibold flex items-center gap-1 shadow-sm">
+            <Clapperboard className="w-3 h-3" /> Visual explainer
           </div>
         )}
         <div className="absolute bottom-3 right-3 bg-black/75 text-white text-xs px-2 py-1 rounded-md font-mono flex items-center gap-1 backdrop-blur-sm"><Clock className="w-3 h-3" />{formatDuration(video.duration)}</div>

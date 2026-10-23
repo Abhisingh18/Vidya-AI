@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { bumpStreak } from '@/lib/streak';
+import { awardXp } from '@/lib/xp';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -17,6 +18,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   if (!video) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
   await prisma.watch.create({ data: { userId, videoId: params.id, duration, completed } });
-  await bumpStreak(userId);
-  return NextResponse.json({ ok: true });
+  // XP once per video; awardXp bumps the streak when it awards, and a re-watch
+  // (no XP) still counts as today's activity.
+  const xp = await awardXp(userId, 'video_watched', params.id);
+  if (!xp) await bumpStreak(userId);
+  return NextResponse.json({ ok: true, xp });
 }

@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { MODELS, NO_REASONING } from '@/lib/llm';
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const MODELS = [
-  'openai/gpt-oss-20b:free',
-  'google/gemma-4-31b-it:free',
-  'openai/gpt-oss-120b:free',
-];
 
 interface QuizQuestion {
   question: string;
@@ -55,6 +51,7 @@ async function callModel(model: string, prompt: string) {
         ],
         temperature: 0.5,
         max_tokens: 2000,
+        reasoning: NO_REASONING,
       }),
     });
     if (!res.ok) return null;

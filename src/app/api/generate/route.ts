@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { MODELS, NO_REASONING } from '@/lib/llm';
+
+export const maxDuration = 300;
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
-const MODELS = [
-  'openai/gpt-oss-20b:free',
-  'google/gemma-4-31b-it:free',
-  'openai/gpt-oss-120b:free',
-];
 
 interface ScriptLine { time: string; text: string }
 
@@ -194,6 +192,7 @@ async function callModel(model: string, prompt: string) {
         ],
         temperature: 0.6,
         max_tokens: 8000,
+        reasoning: NO_REASONING,
       }),
     });
 

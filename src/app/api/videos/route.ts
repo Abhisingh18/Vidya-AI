@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { bumpStreak } from '@/lib/streak';
+import { awardXp } from '@/lib/xp';
+import { explainerDuration, isExplainer, parseExplainer } from '@/lib/explainer';
 
 function inferSubject(topic: string): string {
   const t = topic.toLowerCase();
@@ -21,32 +23,41 @@ export async function POST(req: NextRequest) {
   const userId = (session?.user as { id?: string } | undefined)?.id;
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const body = await req.json();
-  const { topic, language, grade, voiceType, videoStyle, script, manimCode, scene, duration } = body;
+  const body = await req.json().catch(() => ({}));
+  const { topic, language, grade, voiceType, videoStyle, script, manimCode = '', duration } = body;
 
-  if (!topic || !script || !manimCode) {
+  if (!topic || !script) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
+
+  // Visual explainers are re-validated so only well-formed scenes are stored.
+  const explainer = isExplainer(body.scene) ? parseExplainer(body.scene) : null;
+  if (isExplainer(body.scene) && !explainer) {
+    return NextResponse.json({ error: 'Invalid explainer scenes' }, { status: 400 });
+  }
+  const scene = explainer ?? body.scene;
 
   const video = await prisma.video.create({
     data: {
       topic,
-      language,
-      grade,
-      voiceType,
-      videoStyle,
+      language: language ?? explainer?.language ?? 'English',
+      grade: grade ?? explainer?.grade ?? '',
+      voiceType: voiceType ?? '',
+      videoStyle: videoStyle ?? (explainer ? 'explainer' : ''),
       script: JSON.stringify(script),
-      manimCode,
+      manimCode: String(manimCode),
       scene: scene ? JSON.stringify(scene) : null,
-      duration: duration ?? null,
+      duration: duration ?? (explainer ? explainerDuration(explainer) : null),
       subject: inferSubject(topic),
       userId,
     },
   });
 
-  await bumpStreak(userId);
+  // awardXp also bumps the streak; if awarding failed, still count the activity.
+  const xp = await awardXp(userId, 'video_generated', video.id);
+  if (!xp) await bumpStreak(userId);
 
-  return NextResponse.json({ id: video.id });
+  return NextResponse.json({ id: video.id, xp });
 }
 
 // GET: list user's generated videos

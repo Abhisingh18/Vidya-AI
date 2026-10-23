@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { MODELS, NO_REASONING } from '@/lib/llm';
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const MODELS = [
-  'openai/gpt-oss-20b:free',
-  'google/gemma-4-31b-it:free',
-  'openai/gpt-oss-120b:free',
-];
 
 async function callModel(model: string, messages: { role: string; content: string }[]) {
   try {
@@ -17,7 +13,7 @@ async function callModel(model: string, messages: { role: string; content: strin
         'HTTP-Referer': 'https://vidyaai.app',
         'X-Title': 'VidyaAI',
       },
-      body: JSON.stringify({ model, messages, temperature: 0.6, max_tokens: 700 }),
+      body: JSON.stringify({ model, messages, temperature: 0.6, max_tokens: 700, reasoning: NO_REASONING }),
     });
     if (!res.ok) return null;
     const data = await res.json();
