@@ -12,10 +12,16 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
+    "@breezystack/lamejs": "1.2.7",
+    "@diffusionstudio/piper-wasm": "1.0.0",
     "@prisma/client": "^6.19.3",
+    "jszip": "^3.10.2",
     "lucide-react": "^1.16.0",
     "next": "14.2.35",
     "next-auth": "^4.24.14",
+    "onnxruntime-node": "1.21.0",
+    "pdfjs-dist": "4.10.38",
+    "pptxgenjs": "^3.12.0",
     "prisma": "^6.19.3",
     "react": "^18",
     "react-dom": "^18"
