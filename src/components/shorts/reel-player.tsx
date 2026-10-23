@@ -67,7 +67,7 @@ export function unlockReelAudio() {
 type Tier = 'audio' | 'speech' | 'timer';
 
 /** Plays one scene's line: server audio → browser voice → timer, reporting progress (0–1). */
-class SceneVoice {
+export class SceneVoice {
   private gen = 0;
   private ticker = 0;
   private timers: number[] = [];

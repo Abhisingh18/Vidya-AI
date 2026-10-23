@@ -2,14 +2,17 @@
 
 // Landing-page sample of an explainer video: real motion scenes (the same
 // templates generated videos use) stepping through their animation with the
-// narration line under each step. Animates only while on screen.
+// narration line under each step — spoken aloud once sound is turned on, each
+// step then lasting as long as its line. Animates only while on screen.
 
 import { useEffect, useRef, useState } from 'react';
 import { emptySlide, type SlideTheme } from '@/lib/teacher-docs';
 import { motionSteps, type SceneMotion } from '@/lib/motion';
 import MotionSlide from '@/components/motion/motion-stage';
+import { Volume2, VolumeX } from 'lucide-react';
+import { usePreviewVoice } from './preview-voice';
 
-interface Demo { title: string; emoji: string; language: string; theme: SlideTheme; motion: SceneMotion; lines: string[] }
+interface Demo { title: string; emoji: string; language: 'English' | 'Hindi'; theme: SlideTheme; motion: SceneMotion; lines: string[] }
 
 const DEMOS: Demo[] = [
   {
@@ -26,7 +29,7 @@ const DEMOS: Demo[] = [
     ],
   },
   {
-    title: 'जल चक्र', emoji: '🌧️', language: 'हिंदी', theme: 'indigo',
+    title: 'जल चक्र', emoji: '🌧️', language: 'Hindi', theme: 'indigo',
     motion: { kind: 'cycle', items: [
       { emoji: '☀️', label: 'वाष्पीकरण' }, { emoji: '☁️', label: 'संघनन' }, { emoji: '🌧️', label: 'वर्षा' }, { emoji: '🌊', label: 'संग्रहण' },
     ] },
@@ -51,7 +54,7 @@ const DEMOS: Demo[] = [
     ],
   },
   {
-    title: 'विद्युत परिपथ', emoji: '💡', language: 'हिंदी', theme: 'saffron',
+    title: 'विद्युत परिपथ', emoji: '💡', language: 'Hindi', theme: 'saffron',
     motion: { kind: 'flow', items: [
       { emoji: '🔋', label: 'बैटरी' }, { emoji: '🔌', label: 'तार' }, { emoji: '💡', label: 'बल्ब' }, { emoji: '🎚️', label: 'स्विच' },
     ] },
@@ -77,12 +80,14 @@ const DEMOS: Demo[] = [
 
 const STEP_MS = 2300;
 const END_HOLD_MS = 2600;
+const SPOKEN_GAP_MS = 350;
 
 export default function VideoPreview() {
   const root = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [demo, setDemo] = useState(0);
   const [beat, setBeat] = useState(0);
+  const { soundOn, toggle, setSound, speak, stop } = usePreviewVoice('video-preview');
 
   useEffect(() => {
     const el = root.current;
@@ -91,20 +96,29 @@ export default function VideoPreview() {
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
+  useEffect(() => { if (!visible) setSound(false); }, [visible, setSound]);
 
   const d = DEMOS[demo];
   const steps = motionSteps(d.motion);
+  const line = d.lines[Math.min(beat, d.lines.length - 1)];
   useEffect(() => {
     if (!visible) return;
-    const id = window.setTimeout(() => {
-      if (beat < steps) setBeat(b => b + 1);
-      else { setBeat(0); setDemo(x => (x + 1) % DEMOS.length); }
-    }, beat < steps ? STEP_MS : END_HOLD_MS);
+    let id = 0;
+    const advance = (ms: number) => {
+      id = window.setTimeout(() => {
+        if (beat < steps) setBeat(b => b + 1);
+        else { setBeat(0); setDemo(x => (x + 1) % DEMOS.length); }
+      }, ms);
+    };
+    if (soundOn) {
+      speak(line, d.language, () => {}, () => advance(beat < steps ? SPOKEN_GAP_MS : SPOKEN_GAP_MS * 3));
+      return () => { stop(); window.clearTimeout(id); };
+    }
+    advance(beat < steps ? STEP_MS : END_HOLD_MS);
     return () => window.clearTimeout(id);
-  }, [visible, beat, steps]);
+  }, [visible, beat, steps, soundOn, line, d.language, speak, stop]);
 
   const slide = { ...emptySlide('image'), title: d.title, emoji: d.emoji, bullets: [] };
-  const line = d.lines[Math.min(beat, d.lines.length - 1)];
 
   return (
     <div ref={root} className="rounded-2xl border border-card-border bg-white shadow-[0_30px_80px_-30px_rgba(26,26,46,0.45)] dark:border-dark-border dark:bg-dark-surface">
@@ -112,12 +126,17 @@ export default function VideoPreview() {
       <div className="flex items-center gap-2 border-b border-card-border px-4 py-2.5 dark:border-dark-border">
         <span className="h-2.5 w-2.5 rounded-full bg-[#FF5F57]" /><span className="h-2.5 w-2.5 rounded-full bg-[#FEBC2E]" /><span className="h-2.5 w-2.5 rounded-full bg-[#28C840]" />
         <span className="ml-3 truncate rounded-md bg-off-white px-3 py-0.5 text-[11px] text-muted dark:bg-dark-bg">vidya.ai/library · Visual explainer</span>
-        <span className="ml-auto rounded-full bg-saffron/10 px-2 py-0.5 text-[10px] font-semibold text-saffron">🔊 {d.language}</span>
+        <span className="ml-auto rounded-full bg-saffron/10 px-2 py-0.5 text-[10px] font-semibold text-saffron">{d.language === 'Hindi' ? 'हिंदी' : 'English'}</span>
       </div>
       <div className="relative p-3 sm:p-4">
         <div key={demo} className="overflow-hidden rounded-xl animate-fade-in">
           <MotionSlide slide={slide} motion={d.motion} theme={d.theme} beat={beat} />
         </div>
+        <button type="button" onClick={toggle} aria-pressed={soundOn}
+          className={`absolute right-6 top-6 z-10 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold shadow-lg transition-all sm:right-7 sm:top-7 ${
+            soundOn ? 'bg-navy text-white dark:bg-white dark:text-navy' : 'animate-pulse bg-saffron text-white hover:scale-105'}`}>
+          {soundOn ? <><Volume2 className="h-4 w-4" /> Sound on</> : <><VolumeX className="h-4 w-4" /> Listen</>}
+        </button>
         <p key={`${demo}-${beat}`} className="mx-auto mt-3 min-h-[2.75rem] max-w-2xl rounded-xl bg-navy px-4 py-2.5 text-center text-sm font-medium text-white animate-fade-in dark:bg-black/60">
           {line}
         </p>
