@@ -130,7 +130,7 @@ export default function AboutPage() {
                   VidyaAI takes any topic a student types — from the Pythagoras Theorem to photosynthesis — and produces a complete animated explanation video.
                 </p>
                 <p>
-                  The script is tailored to the student&apos;s grade level. The animation is cinema-quality. The narration is in one of 22 Indian languages, sounding as natural as a real teacher.
+                  The script is tailored to the student&apos;s grade level. The animation is cinema-quality. The narration is in one of 23 Indian languages, sounding as natural as a real teacher.
                 </p>
                 <p className="text-navy dark:text-dark-text font-medium">
                   All of it generated on demand. In under a minute. For free.

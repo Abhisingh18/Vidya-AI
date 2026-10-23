@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Flame, ExternalLink, Mail, Heart } from 'lucide-react';
+import Logo from '@/components/brand/logo';
+import { ExternalLink, Mail, Heart } from 'lucide-react';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -16,16 +17,11 @@ export default function Footer() {
 
           {/* Brand */}
           <div>
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 rounded-xl bg-gradient-saffron flex items-center justify-center">
-                <Flame className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-heading font-bold text-saffron">
-                Vidya<span className="text-white">AI</span>
-              </span>
+            <Link href="/" className="group mb-4 flex items-center gap-2">
+              <Logo size={36} onDark />
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
-              Professional animated teacher videos in 22 Indian languages — built for every student in Bharat.
+              Animated lessons, reels and teaching tools in 23 Indian languages — built for every student and teacher in Bharat.
             </p>
             <div className="flex gap-3 mt-5">
               {[

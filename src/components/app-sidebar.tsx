@@ -7,10 +7,11 @@ import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import {
   LayoutDashboard, Sparkles, Library, Clapperboard, Bookmark, ListVideo,
-  LogOut, Sun, Moon, Menu, X, Flame, Presentation, ClipboardList, NotebookPen,
+  LogOut, Sun, Moon, Menu, X, Presentation, ClipboardList, NotebookPen,
   Wrench, Users, ScrollText, Camera, Layers, FileText, ClipboardCheck, CalendarDays, Trophy,
 } from 'lucide-react';
 import { useTheme } from './theme-provider';
+import Logo from '@/components/brand/logo';
 import { homeForRole, parseRole } from '@/lib/roles';
 import type { ProgressSummary } from '@/lib/badges';
 import { useXpSummary, XpPill } from './student/xp-pill';
@@ -90,13 +91,8 @@ function SidebarContent({ onNavigate, xp }: { onNavigate?: () => void; xp?: Prog
 
   return (
     <div className="flex h-full flex-col">
-      <Link href={homeForRole(role)} onClick={onNavigate} className="flex items-center gap-2 px-5 h-16 shrink-0">
-        <div className="w-9 h-9 rounded-xl bg-gradient-saffron flex items-center justify-center shadow-saffron/30">
-          <Flame className="w-5 h-5 text-white" />
-        </div>
-        <span className="text-xl font-heading font-bold text-saffron">
-          Vidya<span className="text-navy dark:text-dark-text">AI</span>
-        </span>
+      <Link href={homeForRole(role)} onClick={onNavigate} className="group flex items-center gap-2 px-5 h-16 shrink-0">
+        <Logo size={36} />
       </Link>
 
       <nav aria-label="App navigation" className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
@@ -194,13 +190,8 @@ export default function AppSidebar() {
       </aside>
 
       <header className="lg:hidden print:hidden fixed top-0 inset-x-0 z-40 h-16 glass shadow-nav dark:shadow-nav-dark flex items-center justify-between px-4">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-saffron flex items-center justify-center">
-            <Flame className="w-4 h-4 text-white" />
-          </div>
-          <span className="text-lg font-heading font-bold text-saffron">
-            Vidya<span className="text-navy dark:text-dark-text">AI</span>
-          </span>
+        <Link href="/dashboard" className="group flex items-center gap-2">
+          <Logo size={32} />
         </Link>
         <button
           onClick={() => setDrawerOpen(true)}

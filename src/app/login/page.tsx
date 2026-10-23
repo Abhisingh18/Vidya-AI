@@ -4,7 +4,8 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { Flame, ArrowRight, Loader2, AlertCircle, GraduationCap, Presentation, Eye, EyeOff, LogOut } from 'lucide-react';
+import Logo from '@/components/brand/logo';
+import { ArrowRight, Loader2, AlertCircle, GraduationCap, Presentation, Eye, EyeOff, LogOut } from 'lucide-react';
 import { homeForRole, type Role } from '@/lib/roles';
 
 const ROLES: { id: Role; label: string; hint: string; icon: typeof GraduationCap }[] = [
@@ -94,12 +95,7 @@ function LoginInner() {
 
       <div className="relative w-full max-w-md">
         <Link href="/" className="flex items-center justify-center gap-2 mb-8 group">
-          <div className="w-11 h-11 rounded-xl bg-gradient-saffron flex items-center justify-center shadow-saffron/40">
-            <Flame className="w-6 h-6 text-white" />
-          </div>
-          <span className="text-2xl font-heading font-bold text-saffron">
-            Vidya<span className="text-navy dark:text-dark-text">AI</span>
-          </span>
+          <Logo size={44} />
         </Link>
 
         <div className="bg-white dark:bg-dark-surface rounded-3xl shadow-card-hover border border-card-border dark:border-dark-border p-8">

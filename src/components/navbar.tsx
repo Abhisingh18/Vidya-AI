@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from './theme-provider';
 import { useSession } from 'next-auth/react';
-import { Menu, X, Sun, Moon, Flame, ArrowRight } from 'lucide-react';
+import Logo from '@/components/brand/logo';
+import { Menu, X, Sun, Moon, ArrowRight } from 'lucide-react';
 import AppSidebar from './app-sidebar';
 import { usesAppSidebar } from './app-shell';
 import { homeForRole, parseRole } from '@/lib/roles';
@@ -63,12 +64,7 @@ export default function Navbar() {
 
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-saffron flex items-center justify-center shadow-saffron/30 group-hover:shadow-saffron transition-shadow duration-300">
-                <Flame className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-heading font-bold text-saffron">
-                Vidya<span className="text-navy dark:text-dark-text">AI</span>
-              </span>
+              <Logo size={36} />
             </Link>
 
             {/* Desktop Nav */}

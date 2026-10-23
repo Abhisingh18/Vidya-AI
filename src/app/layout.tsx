@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   authors: [{ name: 'VidyaAI Team' }],
   openGraph: {
     title: 'VidyaAI — Every topic, every language, every student',
-    description: 'AI-powered animated educational videos in 22 Indian languages.',
+    description: 'Animated lessons with a real voice, visual reels and a teacher toolkit — in 23 Indian languages.',
     type: 'website',
     locale: 'en_IN',
   },
@@ -40,7 +40,13 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#FF6B2C" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.ico" sizes="48x48" />
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+        {/* Brand fonts (tailwind font-heading / font-body); loaded at runtime so the build never fetches them */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font -- root layout: applies to every page */}
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" />
       </head>
       <body className="font-body antialiased">
         <AuthSessionProvider>

@@ -149,7 +149,7 @@ export default function ShortsPage() {
         </button>
       </div>
 
-      {/* Language sheet — 22 Indian languages */}
+      {/* Language sheet — every supported Indian language */}
       {langOpen && (
         <div className="absolute inset-0 z-50 flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setLangOpen(false)} />
