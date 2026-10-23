@@ -8,14 +8,14 @@ AI-powered animated educational video generation platform for Indian students. T
 - **Live scene renderer** — SVG-based animations rendered in real time alongside the voice track. No video files to download.
 - **Community library** — public gallery of 40+ pre-built lessons covering Math, Physics, Chemistry, Biology, CS, History — including 3Blue1Brown-style deep-learning topics (Neural Nets, Backpropagation, Fourier Transform, Eigenvalue, Transformers).
 - **Manim export** — every generated lesson includes a Python Manim source so power users can render locally.
-- **Auth + streaks + watch history** — NextAuth (Google + guest), Prisma, daily learning streaks.
+- **Auth + streaks + watch history** — NextAuth (email + password, student/teacher roles), Prisma, daily learning streaks.
 - **Dark mode + custom cursor** — saffron-themed UI with animated cursor trail.
 
 ## Tech Stack
 
 - **Framework**: Next.js 14 (App Router) + React 18 + TypeScript
 - **Styling**: Tailwind CSS
-- **Auth**: NextAuth.js (Google OAuth + guest sessions)
+- **Auth**: NextAuth.js (email + password, student / teacher roles)
 - **Database**: Prisma ORM — SQLite locally, swap to Postgres for production
 - **LLM**: OpenRouter (free models — `gpt-oss-20b:free`, `gemma-4-31b-it:free`, `gpt-oss-120b:free`)
 - **TTS**: Web Speech API (no external TTS service needed)
@@ -80,8 +80,6 @@ See [`.env.example`](.env.example). Required:
 | `NEXTAUTH_URL`          | Public URL of the app                           |
 | `NEXTAUTH_SECRET`       | Random secret for JWT signing                   |
 | `OPENROUTER_API_KEY`    | Free LLM access for `/api/generate`             |
-| `GOOGLE_CLIENT_ID`      | Optional — Google OAuth                         |
-| `GOOGLE_CLIENT_SECRET`  | Optional — Google OAuth                         |
 | `DATABASE_URL`          | Optional override (defaults to local SQLite)    |
 
 ## Deployment
@@ -116,8 +114,6 @@ You only need two services:
    | `NEXTAUTH_URL`        | `https://<your-vercel-project>.vercel.app`      |
    | `NEXTAUTH_SECRET`     | Run `openssl rand -base64 32` to generate one   |
    | `OPENROUTER_API_KEY`  | Your key from <https://openrouter.ai/keys>      |
-   | `GOOGLE_CLIENT_ID`    | (Optional — for Google login)                   |
-   | `GOOGLE_CLIENT_SECRET`| (Optional — for Google login)                   |
 
 3. Click **Deploy**. The build runs `prisma generate && prisma db push && next build`,
    which automatically creates the Postgres tables on first deploy.
