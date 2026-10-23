@@ -58,6 +58,12 @@ model User {
   preferredLanguage String?  @default("Hindi")
   preferredGrade    String?  @default("9-10")
 
+  // "STUDENT" | "TEACHER" — picked on the login screen
+  role String @default("STUDENT")
+
+  // scrypt hash (see src/lib/password.ts); null for accounts created before passwords
+  passwordHash String?
+
   accounts   Account[]
   sessions   Session[]
   videos     Video[]
@@ -68,6 +74,14 @@ model User {
   comments   Comment[]
   playlists  Playlist[]
   streak     Streak?
+
+  teacherDocs    TeacherDoc[]
+  classesTaught  Classroom[]
+  classMembers   ClassMember[]
+  quizAttempts   QuizAttempt[]
+
+  studentDocs StudentDoc[]
+  xpEvents    XpEvent[]
 }
 
 // ── Domain models ────────────────────────────────────────────────────
@@ -198,4 +212,119 @@ model PlaylistItem {
   video    Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
 
   @@unique([playlistId, videoId])
+}
+
+// ── Teacher workspace ────────────────────────────────────────────────
+
+// AI-generated, teacher-editable material: slide decks, quizzes, lesson plans
+// and toolkit outputs. `content` is JSON whose shape depends on `type`.
+model TeacherDoc {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "slides" | "quiz" | "lesson" | "toolkit"
+  title     String
+  topic     String
+  grade     String
+  language  String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignments Assignment[]
+
+  @@index([userId, type])
+}
+
+model Classroom {
+  id        String   @id @default(cuid())
+  teacherId String
+  name      String
+  subject   String?
+  grade     String?
+  joinCode  String   @unique
+  createdAt DateTime @default(now())
+
+  teacher     User          @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  members     ClassMember[]
+  assignments Assignment[]
+}
+
+model ClassMember {
+  id          String   @id @default(cuid())
+  classroomId String
+  userId      String
+  joinedAt    DateTime @default(now())
+
+  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([classroomId, userId])
+}
+
+// Something a teacher shares with a class: a quiz/slides/lesson doc or a library video.
+model Assignment {
+  id          String    @id @default(cuid())
+  classroomId String
+  kind        String    // "quiz" | "slides" | "lesson" | "video"
+  title       String
+  docId       String?
+  videoId     String?
+  dueAt       DateTime?
+  createdAt   DateTime  @default(now())
+
+  classroom Classroom     @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  doc       TeacherDoc?   @relation(fields: [docId], references: [id], onDelete: Cascade)
+  attempts  QuizAttempt[]
+}
+
+model QuizAttempt {
+  id           String   @id @default(cuid())
+  assignmentId String
+  userId       String
+  answers      String   // JSON array of chosen option indexes
+  score        Int
+  total        Int
+  createdAt    DateTime @default(now())
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, userId])
+}
+
+// ── Student study tools ──────────────────────────────────────────────
+
+// A student's own study material: flashcard decks, revision notes, mock tests,
+// study plans and solved doubts. `content` is JSON whose shape depends on `type`.
+model StudentDoc {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "flashcards" | "notes" | "mock" | "plan" | "doubt"
+  title     String
+  topic     String
+  grade     String
+  language  String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+}
+
+// One XP award (see src/lib/xp.ts). `refId` makes repeatable actions idempotent.
+model XpEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  kind      String
+  points    Int
+  refId     String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, kind, refId])
 }
