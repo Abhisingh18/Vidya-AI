@@ -5,22 +5,25 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
   Brain, Film, Mic, GitMerge, CheckCircle, Loader2,
-  Download, ClipboardCopy, RefreshCw, Sparkles, Clock, Triangle,
-  ChevronDown, Copy, Check, AlertCircle, Wand2, Languages,
-  GraduationCap, ArrowRight, Mic2, PenLine, ScanEye, Save,
-  RotateCcw, SkipForward, ExternalLink, Timer,
+  Download, ClipboardCopy, RefreshCw, Sparkles, Clock,
+  Copy, Check, AlertCircle, Wand2, Languages,
+  GraduationCap, Mic2, PenLine, ScanEye, Save,
+  RotateCcw, SkipForward, ExternalLink, Timer, ArrowUp, Paperclip, X, FileText,
 } from 'lucide-react';
 import GeneratedVideoPlayer from '@/components/generated-video-player';
 import ExplainerPlayer from '@/components/explainer-player';
 import SlideView from '@/components/teacher/slide-view';
 import SourceUpload from '@/components/teacher/source-upload';
+import Pill from '@/components/generate/pill';
+import GenerateBackdrop from '@/components/generate/backdrop';
+import { LogoMark } from '@/components/brand/logo';
+import { LANGUAGES as ALL_LANGUAGES } from '@/lib/languages';
 import { deriveTopic, type SourceFile } from '@/lib/source';
 import {
   EXPLAINER_FORMAT, TARGET_MINUTES, explainerDuration, explainerToScript,
   type ExplainerContent, type ExplainerOutline, type ExplainerScene,
 } from '@/lib/explainer';
 
-interface Language { name: string; flag: string; }
 interface ScriptLine { time: string; text: string; }
 interface SceneStep {
   at: number; type: string; text?: string;
@@ -32,23 +35,21 @@ interface SceneStep {
 interface SceneData { title: string; subtitle?: string; duration: number; steps: SceneStep[] }
 interface GenerationResult { script: ScriptLine[]; manim_code: string; scene?: SceneData | null; videoId?: string; fallback?: boolean }
 
-const LANGUAGES: Language[] = [
-  { name: 'Hindi',     flag: '🇮🇳' }, { name: 'English',   flag: '🇬🇧' },
-  { name: 'Tamil',     flag: '🇮🇳' }, { name: 'Telugu',    flag: '🇮🇳' },
-  { name: 'Marathi',   flag: '🇮🇳' }, { name: 'Bengali',   flag: '🇮🇳' },
-  { name: 'Kannada',   flag: '🇮🇳' }, { name: 'Malayalam', flag: '🇮🇳' },
-  { name: 'Gujarati',  flag: '🇮🇳' }, { name: 'Punjabi',   flag: '🇮🇳' },
-];
 
 const GRADE_LEVELS = ['6-8', '9-10', '11-12', 'College', 'Competitive Exam'];
 
-const POPULAR_TOPICS = [
-  { name: 'Pythagoras Theorem', emoji: '📐' },
-  { name: 'Integration',        emoji: '∫' },
-  { name: "Newton's Laws",      emoji: '🍎' },
-  { name: 'DNA Structure',      emoji: '🧬' },
-  { name: 'Photosynthesis',     emoji: '🌱' },
-  { name: 'Quadratic Equations',emoji: '𝑥²' },
+const gradeLabel = (g: string) => (/^\d/.test(g) ? `Class ${g}` : g);
+
+/** What the student asked for (the chat bubble above the answer). */
+interface Asked { topic: string; mode: 'explainer' | 'classic'; language: string; grade: string; voiceType: 'male' | 'female'; notes: number }
+
+const SUGGESTIONS = [
+  { emoji: '📐', title: 'Pythagoras theorem', hint: 'with a visual proof', topic: 'Pythagoras theorem with a visual proof' },
+  { emoji: '🍎', title: "Newton's laws of motion", hint: 'with everyday examples', topic: "Newton's three laws of motion with everyday examples" },
+  { emoji: '🌱', title: 'Photosynthesis', hint: 'how plants make food', topic: 'Photosynthesis — how plants make their food' },
+  { emoji: '🧬', title: 'DNA structure', hint: 'the double helix', topic: 'Structure of DNA — the double helix' },
+  { emoji: '∫', title: 'Integration basics', hint: 'area under a curve', topic: 'Integration basics — area under a curve' },
+  { emoji: '🌍', title: 'Layers of the Earth', hint: 'from crust to core', topic: 'Layers of the Earth — from crust to core' },
 ];
 
 /* Fake timeline for the classic (single-request) generator. */
@@ -61,11 +62,6 @@ const STEPS = [
   { icon: CheckCircle, text: 'Your video is ready!',              sub: '🎉 Watch now'                  },
 ];
 
-const SAMPLE_VIDEOS = [
-  { topic: 'Pythagoras Theorem',     lang: 'Hindi',    duration: '3:42', color: 'bg-gradient-saffron' },
-  { topic: "Newton's Laws of Motion", lang: 'English', duration: '4:15', color: 'bg-gradient-teal' },
-  { topic: 'Integration Basics',      lang: 'Tamil',   duration: '5:01', color: 'bg-gradient-indigo' },
-];
 
 type Mode = 'explainer' | 'classic';
 
@@ -472,7 +468,9 @@ function GeneratePageInner() {
   const [videoStyle, setVideoStyle] = useState<'math' | 'concept'>('math');
   const [mode, setMode]             = useState<Mode>('explainer');
   const [sources, setSources]       = useState<SourceFile[]>([]);
-  const [langOpen, setLangOpen]     = useState(false);
+  const [notesOpen, setNotesOpen]   = useState(false);
+  const [asked, setAsked]           = useState<Asked | null>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Classic generator
   const [isGenerating, setIsGenerating] = useState(false);
@@ -515,6 +513,12 @@ function GeneratePageInner() {
 
   // On small screens the result sits below the form — bring the player into view once it's ready.
   const resultRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(220, el.scrollHeight)}px`;
+  }, [topic]);
   const hasContent = !!job?.content;
   useEffect(() => {
     if (hasContent && window.innerWidth < 1024) resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -771,240 +775,143 @@ function GeneratePageInner() {
     URL.revokeObjectURL(url);
   };
 
-  const generateButton = (
-    <div className="space-y-3">
-      {mode === 'classic' && genError && (
-        <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 text-sm">
-          <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-          <div>
-            <p className="font-semibold">Generation failed</p>
-            <p className="text-xs opacity-80 mt-0.5">{genError}</p>
-          </div>
+  const submit = () => {
+    if (!canGenerate || busy) return;
+    setNotesOpen(false);
+    setAsked({ topic: topic.trim() || deriveTopic(sources), mode, language, grade, voiceType, notes: mode === 'explainer' ? sources.length : 0 });
+    if (mode === 'explainer') startExplainer(); else handleGenerate();
+  };
+  // Nothing asked yet (or the last request was in the other mode): show the start screen.
+  const idle = mode === 'explainer' ? !job : !isGenerating && !generationDone;
+
+  const composer = (docked: boolean) => (
+    <div className={`relative rounded-[28px] border border-card-border bg-white/95 p-2.5 text-left shadow-[0_24px_60px_-24px_rgba(26,26,46,0.35)] backdrop-blur-xl transition-colors focus-within:border-saffron/60 dark:border-dark-border dark:bg-dark-surface/95 ${docked ? '' : 'sm:p-3'}`}>
+      {notesOpen && mode === 'explainer' && (
+        <div className="mb-2 rounded-2xl border border-card-border bg-off-white p-3 dark:border-dark-border dark:bg-dark-bg">
+          <SourceUpload files={sources} onChange={setSources} topic={topic} disabled={busy} label="Your notes"
+            hint="Upload your class notes, a textbook chapter or your teacher's PPT — the video will follow it." />
         </div>
       )}
-      <button type="button" onClick={mode === 'explainer' ? startExplainer : handleGenerate} disabled={!canGenerate}
-        className="group relative w-full h-14 btn-saffron disabled:opacity-50 disabled:cursor-not-allowed text-base overflow-hidden">
-        <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-        {mode === 'explainer' && phase === 'done' ? 'Generate another video' : 'Generate Video'}
-        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-      </button>
-      <p className="text-xs text-muted text-center flex items-center justify-center gap-1.5">
-        <Clock className="w-3 h-3" /> {mode === 'explainer' ? 'Usually 2–4 minutes' : 'Usually 30–60 seconds'} · Free
-      </p>
+      {!notesOpen && mode === 'explainer' && sources.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 px-1.5 pt-1">
+          {sources.map((f, i) => (
+            <span key={`${f.name}-${i}`} className="inline-flex max-w-[15rem] items-center gap-1.5 rounded-full bg-saffron/10 px-2.5 py-1 text-[11px] font-medium text-saffron">
+              <FileText className="h-3 w-3 shrink-0" /><span className="truncate">{f.name}</span>
+              <button type="button" onClick={() => setSources(sources.filter((_, j) => j !== i))} disabled={busy} aria-label={`Remove ${f.name}`} className="hover:text-navy dark:hover:text-white"><X className="h-3 w-3" /></button>
+            </span>
+          ))}
+        </div>
+      )}
+      <textarea ref={inputRef} rows={1} value={topic} onChange={e => setTopic(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit(); } }}
+        placeholder={mode === 'explainer' && sources.length
+          ? 'Optional with your notes — e.g. just the part about Newton’s second law…'
+          : 'Ask for any lesson — e.g. Explain Newton’s third law with rockets…'}
+        aria-label="What do you want to learn?"
+        className="block max-h-[220px] min-h-[52px] w-full resize-none bg-transparent px-3 py-3 text-base text-navy outline-none placeholder:text-muted/60 dark:text-dark-text" />
+      <div className="flex flex-wrap items-center gap-1.5 px-1">
+        {mode === 'explainer' && (
+          <button type="button" onClick={() => setNotesOpen(o => !o)} disabled={busy} title="Attach your notes, chapter or PPT" aria-pressed={notesOpen}
+            className={`relative flex h-9 w-9 items-center justify-center rounded-full border transition-all disabled:opacity-50 ${notesOpen ? 'border-saffron bg-saffron/10 text-saffron' : 'border-card-border text-muted hover:border-saffron/50 hover:text-saffron dark:border-dark-border'}`}>
+            <Paperclip className="h-4 w-4" />
+            {sources.length > 0 && <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-saffron px-1 text-[9px] font-bold text-white">{sources.length}</span>}
+          </button>
+        )}
+        <Pill icon={<Film className="h-3.5 w-3.5" />} title="Video type" up={docked} disabled={busy}
+          label={MODES.find(m => m.key === mode)?.label ?? ''} value={mode} onChange={setMode}
+          options={MODES.map(m => ({ value: m.key, label: m.label, hint: m.sub, icon: m.emoji }))} />
+        <Pill icon={<Languages className="h-3.5 w-3.5" />} title="Language" up={docked} wide
+          label={language} value={language} onChange={setLanguage}
+          options={ALL_LANGUAGES.map(l => ({ value: l.name, label: l.name, hint: l.native }))} />
+        <Pill icon={<GraduationCap className="h-3.5 w-3.5" />} title="Class" up={docked}
+          label={gradeLabel(grade)} value={grade} onChange={setGrade}
+          options={GRADE_LEVELS.map(g => ({ value: g, label: gradeLabel(g) }))} />
+        <Pill icon={<Mic2 className="h-3.5 w-3.5" />} title="Voice" up={docked}
+          label={voiceType === 'female' ? 'Female' : 'Male'} value={voiceType} onChange={setVoiceType}
+          options={[{ value: 'female', label: 'Female teacher', icon: '👩‍🏫' }, { value: 'male', label: 'Male teacher', icon: '👨‍🏫' }]} />
+        {mode === 'classic' && (
+          <Pill icon={<PenLine className="h-3.5 w-3.5" />} title="Style" up={docked}
+            label={videoStyle === 'math' ? 'Math' : 'Concept'} value={videoStyle} onChange={setVideoStyle}
+            options={[{ value: 'math', label: 'Math / diagrams', icon: '📐' }, { value: 'concept', label: 'Concept', icon: '📝' }]} />
+        )}
+        <button type="button" onClick={submit} disabled={!canGenerate || busy} aria-label="Generate video" title="Generate video (Enter)"
+          className="ml-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-saffron text-white shadow-saffron transition-all hover:scale-105 disabled:cursor-not-allowed disabled:bg-card-border disabled:text-muted disabled:shadow-none dark:disabled:bg-dark-border">
+          {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowUp className="h-5 w-5" />}
+        </button>
+      </div>
+    </div>
+  );
+
+  const timing = (
+    <p className="mt-2.5 text-center text-[11px] text-muted">
+      {mode === 'explainer' ? '🎬 5–6 min narrated video · ready in about 2–4 minutes' : '✏️ ~1 min animation · ready in under a minute'} · Free · Enter to send, Shift + Enter for a new line
+    </p>
+  );
+
+  const classicError = mode === 'classic' && genError && (
+    <div className="mb-3 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
+      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+      <div><p className="font-semibold">Generation failed</p><p className="mt-0.5 text-xs opacity-80">{genError}</p></div>
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-off-white dark:bg-dark-bg">
-      <div className="container-main pt-24 pb-16">
-
-        {/* Header */}
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-saffron/10 border border-saffron/20 text-saffron text-xs font-medium mb-3">
-              <Sparkles className="w-3 h-3" /> AI Video Generator
+    <main className="relative min-h-screen overflow-x-clip bg-off-white dark:bg-dark-bg">
+      <GenerateBackdrop quiet={!idle} />
+      <div className="relative mx-auto max-w-4xl px-4 pt-24 sm:px-6">
+        {idle ? (
+          <section className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center pb-16 text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-saffron/20 bg-white/80 px-3 py-1 text-xs font-medium text-saffron backdrop-blur dark:bg-dark-surface/80">
+              <Sparkles className="h-3 w-3" /> AI video generator
             </div>
-            <h1 className="text-3xl lg:text-4xl font-heading font-bold text-navy dark:text-dark-text leading-tight">
-              {mode === 'explainer' ? 'Generate your visual lesson' : 'Generate your animated lesson'}
+            <h1 className="mt-5 font-heading text-4xl font-extrabold tracking-tight text-navy sm:text-5xl dark:text-dark-text">
+              What should we <span className="text-gradient-saffron">learn</span> today?
             </h1>
-            <p className="text-muted mt-2 text-sm">
-              {mode === 'explainer'
-                ? 'Type any topic or upload your class notes, pick a language, and AI builds a narrated explainer with real pictures, diagrams and captions.'
-                : 'Type any topic, pick a language, and watch AI build your video.'}
+            <p className="mx-auto mt-3 max-w-xl text-muted">
+              Type any topic or attach your notes — VidyaAI makes a narrated video lesson with real pictures, animations and captions.
             </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-
-          {/* ════════════════ LEFT — 2/5 ════════════════ */}
-          <div className="lg:col-span-2 space-y-5">
-
-            {/* Topic card */}
-            <div className="card">
-              <label className="flex items-center gap-2 text-sm font-heading font-semibold text-navy dark:text-dark-text mb-3">
-                <span className="w-6 h-6 rounded-md bg-saffron/10 flex items-center justify-center text-saffron text-xs font-bold">1</span>
-                What do you want to learn?
-              </label>
-              <textarea
-                value={topic}
-                onChange={e => setTopic(e.target.value)}
-                placeholder={mode === 'explainer' && sources.length
-                  ? 'Optional with your notes — e.g. just the part about Newton’s second law…'
-                  : 'e.g. Explain the Pythagoras Theorem with a clear visual proof...'}
-                className="w-full h-28 rounded-xl border-2 border-card-border dark:border-dark-border bg-off-white dark:bg-dark-bg text-navy dark:text-dark-text focus:border-saffron focus:ring-2 focus:ring-saffron/15 resize-none p-4 text-sm font-body placeholder:text-muted/60 outline-none transition-all"
-              />
-              {/* Popular topic chips */}
-              <div className="mt-3 flex flex-wrap gap-2">
-                {POPULAR_TOPICS.map(t => (
-                  <button
-                    key={t.name}
-                    onClick={() => setTopic(t.name)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-card-border dark:border-dark-border bg-white dark:bg-dark-surface hover:border-saffron hover:bg-saffron/5 text-xs text-navy dark:text-dark-text transition-all"
-                  >
-                    <span className="text-sm">{t.emoji}</span>
-                    {t.name}
-                  </button>
-                ))}
-              </div>
-              {/* Own material: the explainer follows the student's notes / chapter / PPT */}
-              {mode === 'explainer' && (
-                <div className="mt-4 pt-4 border-t border-card-border dark:border-dark-border">
-                  <SourceUpload files={sources} onChange={setSources} topic={topic} disabled={busy} label="Your notes"
-                    hint="Upload your class notes, a textbook chapter or your teacher's PPT — the video will follow it." />
+            <div className="relative z-20 mt-8 w-full max-w-3xl">
+              {classicError}
+              {composer(false)}
+              {timing}
+            </div>
+            <div className="mt-6 grid w-full max-w-3xl grid-cols-2 gap-2.5 sm:grid-cols-3">
+              {SUGGESTIONS.map(x => (
+                <button key={x.title} type="button" onClick={() => { setTopic(x.topic); inputRef.current?.focus(); }}
+                  className="group flex items-start gap-2.5 rounded-2xl border border-card-border bg-white/80 p-3 text-left backdrop-blur transition-all hover:-translate-y-0.5 hover:border-saffron/40 hover:shadow-card dark:border-dark-border dark:bg-dark-surface/80">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-saffron/10 text-lg">{x.emoji}</span>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold leading-snug text-navy transition-colors group-hover:text-saffron dark:text-dark-text">{x.title}</span>
+                    <span className="block text-xs leading-snug text-muted">{x.hint}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        ) : (
+          <>
+            <div className="space-y-6 pb-6">
+              {asked && (
+                <div className="flex justify-end animate-fade-in">
+                  <div className="max-w-[85%] rounded-3xl rounded-br-md bg-navy px-5 py-3 text-white shadow-card dark:bg-dark-surface">
+                    <p className="text-sm font-medium" dir="auto">{asked.topic}</p>
+                    <p className="mt-1.5 text-[11px] text-white/70">
+                      {asked.mode === 'explainer' ? '🎬 Visual explainer' : '✏️ Classic animation'} · 🌐 {asked.language} · 🎓 {gradeLabel(asked.grade)} · {asked.voiceType === 'female' ? '👩‍🏫 Female' : '👨‍🏫 Male'}
+                      {asked.notes > 0 && ` · 📎 ${asked.notes} file${asked.notes > 1 ? 's' : ''}`}
+                    </p>
+                  </div>
                 </div>
               )}
-            </div>
-
-            {/* Settings card */}
-            <div className="card">
-              <label className="flex items-center gap-2 text-sm font-heading font-semibold text-navy dark:text-dark-text mb-4">
-                <span className="w-6 h-6 rounded-md bg-indigo-brand/10 flex items-center justify-center text-indigo-brand text-xs font-bold">2</span>
-                Personalise the lesson
-              </label>
-
-              <div className="space-y-5">
-                {/* Video type */}
-                <div>
-                  <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <Film className="w-3 h-3" /> Video type
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {MODES.map(m => (
-                      <button key={m.key} type="button" onClick={() => setMode(m.key)} disabled={busy} aria-pressed={mode === m.key}
-                        className={`relative flex items-start gap-2 rounded-xl border-2 p-2.5 text-left transition-all disabled:cursor-not-allowed ${mode === m.key ? 'border-saffron bg-saffron/5' : 'border-card-border dark:border-dark-border bg-off-white dark:bg-dark-bg hover:border-saffron/40 disabled:opacity-50'}`}>
-                        <span className="text-lg leading-none mt-0.5">{m.emoji}</span>
-                        <span className="min-w-0">
-                          <span className={`block text-xs font-semibold ${mode === m.key ? 'text-saffron' : 'text-navy dark:text-dark-text'}`}>{m.label}</span>
-                          <span className="block text-[10px] text-muted mt-0.5 leading-snug">{m.sub}</span>
-                        </span>
-                        {m.key === 'explainer' && (
-                          <span className="absolute -top-2 right-2 px-1.5 py-px rounded-full bg-saffron text-white text-[9px] font-bold uppercase tracking-wider">New</span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Language */}
-                <div>
-                  <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <Languages className="w-3 h-3" /> Language
-                  </p>
-                  <div className="relative">
-                    <button type="button" onClick={() => setLangOpen(!langOpen)}
-                      className="w-full flex items-center justify-between rounded-xl border-2 border-card-border dark:border-dark-border bg-off-white dark:bg-dark-bg px-4 py-2.5 text-sm text-navy dark:text-dark-text hover:border-saffron/50 transition-all">
-                      <span className="flex items-center gap-2">
-                        <span className="text-lg">{LANGUAGES.find(l => l.name === language)?.flag}</span>
-                        {language}
-                      </span>
-                      <ChevronDown className={`w-4 h-4 text-muted transition-transform ${langOpen ? 'rotate-180' : ''}`} />
-                    </button>
-                    {langOpen && (
-                      <div className="absolute z-30 mt-1 w-full rounded-xl border border-card-border dark:border-dark-border bg-white dark:bg-dark-surface shadow-card-hover max-h-60 overflow-y-auto animate-fade-in">
-                        {LANGUAGES.map(l => (
-                          <button key={l.name} type="button" onClick={() => { setLanguage(l.name); setLangOpen(false); }}
-                            className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 hover:bg-saffron/5 transition-colors ${language === l.name ? 'text-saffron font-semibold bg-saffron/5' : 'text-navy dark:text-dark-text'}`}>
-                            <span className="text-lg">{l.flag}</span>{l.name}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Grade */}
-                <div>
-                  <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <GraduationCap className="w-3 h-3" /> Grade level
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {GRADE_LEVELS.map(g => (
-                      <button key={g} type="button" onClick={() => setGrade(g)}
-                        className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${grade === g ? 'bg-saffron text-white shadow-saffron' : 'bg-off-white dark:bg-dark-bg border border-card-border dark:border-dark-border text-navy dark:text-dark-text hover:border-saffron/40'}`}>
-                        {g}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Voice (+ Style for classic) */}
-                <div className={mode === 'classic' ? 'grid grid-cols-2 gap-3' : ''}>
-                  <div>
-                    <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                      <Mic2 className="w-3 h-3" /> Voice
-                    </p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {([{ key: 'female', emoji: '👩‍🏫' }, { key: 'male', emoji: '👨‍🏫' }] as const).map(v => (
-                        <button key={v.key} type="button" onClick={() => setVoiceType(v.key)}
-                          className={`flex items-center justify-center gap-1.5 rounded-lg border-2 py-2 text-xs font-medium transition-all ${voiceType === v.key ? 'border-saffron bg-saffron/5 text-saffron' : 'border-card-border dark:border-dark-border bg-off-white dark:bg-dark-bg text-navy dark:text-dark-text'}`}>
-                          <span className="text-base">{v.emoji}</span>
-                          {v.key === 'female' ? 'Female' : 'Male'}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  {mode === 'classic' && (
-                    <div>
-                      <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                        <Film className="w-3 h-3" /> Style
-                      </p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {([{ key: 'math', emoji: '📐' }, { key: 'concept', emoji: '📝' }] as const).map(s => (
-                          <button key={s.key} type="button" onClick={() => setVideoStyle(s.key)}
-                            className={`flex items-center justify-center gap-1.5 rounded-lg border-2 py-2 text-xs font-medium transition-all ${videoStyle === s.key ? 'border-indigo-brand bg-indigo-brand/5 text-indigo-brand' : 'border-card-border dark:border-dark-border bg-off-white dark:bg-dark-bg text-navy dark:text-dark-text'}`}>
-                            <span className="text-base">{s.emoji}</span>
-                            {s.key === 'math' ? 'Math' : 'Concept'}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Generate button / progress */}
-            {mode === 'explainer' ? (
-              job && phase ? (
-                <>
-                  <ExplainerProgress job={job} phase={phase} error={jobError} elapsed={elapsed}
-                    onRetry={retryExplainer} onSkipPictures={skipPictures} onStartOver={startExplainer} />
-                  {phase === 'done' && generateButton}
-                </>
-              ) : generateButton
-            ) : !isGenerating ? generateButton : (
-              <div className="card bg-gradient-to-br from-saffron/5 to-indigo-brand/5 dark:from-saffron/10 dark:to-indigo-brand/10 border-saffron/20">
-                <div className="flex items-center gap-2 mb-4">
-                  <Loader2 className="w-4 h-4 text-saffron animate-spin" />
-                  <p className="text-xs font-semibold text-saffron uppercase tracking-wider">Generating</p>
-                </div>
-                <div className="space-y-2.5">
-                  {STEPS.map((step, idx) => {
-                    const StepIcon = step.icon;
-                    const isDone   = idx < currentStep;
-                    const isActive = idx === currentStep && currentStep < 6;
-                    return (
-                      <div key={idx} className="flex items-start gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-500 ${isDone ? 'bg-success text-white' : isActive ? 'bg-saffron text-white shadow-saffron/30 shadow-md' : 'bg-gray-100 dark:bg-dark-border text-muted'}`}>
-                          {isDone ? <Check className="w-3.5 h-3.5" /> : isActive ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <StepIcon className="w-3.5 h-3.5" />}
-                        </div>
-                        <div className="flex-1 pt-0.5">
-                          <p className={`text-sm font-medium transition-colors ${isDone ? 'text-success' : isActive ? 'text-navy dark:text-dark-text' : 'text-muted'}`}>{step.text}</p>
-                          {(isActive || isDone) && <p className="text-[11px] text-muted mt-0.5">{step.sub}</p>}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* ════════════════ RIGHT — 3/5 ════════════════ */}
-          <div className="lg:col-span-3">
-            {mode === 'explainer' && job && content ? (
-              /* ── EXPLAINER RESULT ── */
+              <div className="flex gap-3">
+                <LogoMark size={36} className="mt-1 hidden shrink-0 sm:block" />
+                <div className="min-w-0 flex-1 space-y-5">
+                  {mode === 'explainer' ? (
+                    <>
+                      {job && phase && (
+                        <ExplainerProgress job={job} phase={phase} error={jobError} elapsed={elapsed}
+                          onRetry={retryExplainer} onSkipPictures={skipPictures} onStartOver={startExplainer} />
+                      )}
+                      {job && content ? (
               <div ref={resultRef} className="space-y-5 animate-fade-in scroll-mt-20">
                 {!job.videoId && phase === 'error' && jobError?.stage === 'save' && (
                   <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-center gap-2 text-xs text-amber-700 dark:text-amber-400">
@@ -1123,66 +1030,37 @@ function GeneratePageInner() {
                   </button>
                 </div>
               </div>
-            ) : mode === 'explainer' && job && phase ? (
-              <ExplainerPreview job={job} phase={phase} />
-            ) : mode === 'explainer' || !generationDone ? (
-              <div className="card h-full min-h-[600px] flex flex-col items-center justify-center text-center p-10">
-
-                {/* Decorative geometric bg */}
-                <div className="relative w-full max-w-md mb-8">
-                  <div className="absolute inset-0 flex items-center justify-center opacity-10 dark:opacity-20">
-                    <svg className="w-full h-full max-h-64" viewBox="0 0 400 300" fill="none">
-                      <circle cx="200" cy="150" r="100" stroke="#3D3BDB" strokeWidth="1.5" strokeDasharray="8 4" className="animate-spin-slow" style={{ transformOrigin: '200px 150px' }}/>
-                      <polygon points="200,50 280,200 120,200" stroke="#FF6B2C" strokeWidth="1.5" fill="none" />
-                      <rect x="130" y="100" width="140" height="100" rx="4" stroke="#0F9E75" strokeWidth="1.5" strokeDasharray="6 3" fill="none" />
-                    </svg>
-                  </div>
-                  <div className="relative flex items-center justify-center">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-saffron to-indigo-brand p-[2px] shadow-2xl">
-                      <div className="w-full h-full rounded-full bg-white dark:bg-dark-surface flex items-center justify-center">
-                        {isGenerating && mode === 'classic'
-                          ? <Loader2 className="w-10 h-10 text-saffron animate-spin" />
-                          : <Film className="w-10 h-10 text-saffron" />
-                        }
-                      </div>
-                    </div>
-                  </div>
+                      ) : job && phase ? <ExplainerPreview job={job} phase={phase} /> : null}
+                    </>
+                  ) : (
+                    <>
+                      {isGenerating && !generationDone && (
+              <div className="card bg-gradient-to-br from-saffron/5 to-indigo-brand/5 dark:from-saffron/10 dark:to-indigo-brand/10 border-saffron/20">
+                <div className="flex items-center gap-2 mb-4">
+                  <Loader2 className="w-4 h-4 text-saffron animate-spin" />
+                  <p className="text-xs font-semibold text-saffron uppercase tracking-wider">Generating</p>
                 </div>
-
-                <h2 className="text-2xl font-heading font-bold text-navy dark:text-dark-text mb-2">
-                  {isGenerating && mode === 'classic' ? 'Building your video...' : 'Your video will appear here'}
-                </h2>
-                <p className="text-sm text-muted max-w-md mb-8">
-                  {isGenerating && mode === 'classic'
-                    ? 'AI is generating a beautiful animated explanation just for you. Hang tight!'
-                    : mode === 'explainer'
-                      ? 'Enter a topic or upload your notes on the left and click Generate. We\'ll build a narrated 5–6 minute lesson with real pictures, diagrams and captions — it takes about 2–4 minutes.'
-                      : 'Enter a topic on the left and click Generate. We\'ll build a complete animated lesson — usually in under a minute.'}
-                </p>
-
-                {!(isGenerating && mode === 'classic') && (
-                  <div className="w-full max-w-md">
-                    <p className="text-[10px] font-semibold text-muted uppercase tracking-widest mb-3">Quick start examples</p>
-                    <div className="space-y-2">
-                      {SAMPLE_VIDEOS.map((v, i) => (
-                        <button key={i} type="button" onClick={() => setTopic(v.topic)}
-                          className="group w-full flex items-center gap-3 p-3 rounded-xl bg-off-white dark:bg-dark-bg border border-card-border dark:border-dark-border hover:border-saffron/40 hover:shadow-card transition-all text-left">
-                          <div className={`w-12 h-9 rounded-lg ${v.color} flex items-center justify-center shrink-0`}>
-                            <Triangle className="w-3.5 h-3.5 text-white fill-white rotate-90" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-navy dark:text-dark-text truncate group-hover:text-saffron transition-colors">{v.topic}</p>
-                            <p className="text-[11px] text-muted">{v.lang} · {v.duration}</p>
-                          </div>
-                          <ArrowRight className="w-4 h-4 text-muted group-hover:text-saffron group-hover:translate-x-0.5 transition-all" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <div className="space-y-2.5">
+                  {STEPS.map((step, idx) => {
+                    const StepIcon = step.icon;
+                    const isDone   = idx < currentStep;
+                    const isActive = idx === currentStep && currentStep < 6;
+                    return (
+                      <div key={idx} className="flex items-start gap-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-500 ${isDone ? 'bg-success text-white' : isActive ? 'bg-saffron text-white shadow-saffron/30 shadow-md' : 'bg-gray-100 dark:bg-dark-border text-muted'}`}>
+                          {isDone ? <Check className="w-3.5 h-3.5" /> : isActive ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <StepIcon className="w-3.5 h-3.5" />}
+                        </div>
+                        <div className="flex-1 pt-0.5">
+                          <p className={`text-sm font-medium transition-colors ${isDone ? 'text-success' : isActive ? 'text-navy dark:text-dark-text' : 'text-muted'}`}>{step.text}</p>
+                          {(isActive || isDone) && <p className="text-[11px] text-muted mt-0.5">{step.sub}</p>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            ) : result && (
-              /* ── CLASSIC RESULT VIEW ── */
+                      )}
+                      {generationDone && result && (
               <div className="space-y-5 animate-fade-in">
                 {result.fallback && (
                   <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-start gap-2 text-xs text-amber-700 dark:text-amber-400">
@@ -1299,9 +1177,19 @@ function GeneratePageInner() {
                   </button>
                 </div>
               </div>
-            )}
-          </div>
-        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="sticky bottom-0 z-30 -mx-4 bg-gradient-to-t from-off-white via-off-white/95 to-transparent px-4 pb-4 pt-10 sm:-mx-6 sm:px-6 dark:from-dark-bg dark:via-dark-bg/95">
+              {classicError}
+              {composer(true)}
+              <p className="mt-2 text-center text-[11px] text-muted">VidyaAI can make mistakes — check important facts with your textbook.</p>
+            </div>
+          </>
+        )}
       </div>
     </main>
   );

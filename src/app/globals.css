@@ -254,6 +254,12 @@
 .reel-flash   { animation: reelFlash 1.8s ease-in-out infinite; }
 .reel-grid    { background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); background-size: 44px 44px; animation: reelGrid 6s linear infinite; }
 
+/* ── Generate page backdrop (components/generate/backdrop.tsx) ── */
+@keyframes genAurora { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(6%,-5%) scale(1.08); } 66% { transform: translate(-5%,4%) scale(0.95); } }
+@keyframes genFloat  { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-38px) rotate(4deg); } }
+.gen-aurora { animation: genAurora 18s ease-in-out infinite; }
+.gen-float  { animation: genFloat 18s ease-in-out infinite; }
+
 /* ── Landing hero video (components/landing/hero-video.tsx) ── */
 @keyframes heroZoomIn  { from { opacity: 0; transform: scale(1.22); filter: blur(10px); } to { opacity: 1; transform: scale(1); filter: blur(0); } }
 @keyframes heroSlideIn { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: translateX(0); } }
@@ -262,6 +268,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .hero-zoom-in, .hero-slide-in { animation-duration: 0.01ms; }
+  .gen-aurora, .gen-float { animation: none; }
   .reel-kb-in, .reel-kb-up, .reel-kb-soft, .reel-float, .reel-wind, .reel-flash, .reel-grid { animation: none; }
   .reel-word, .reel-stat, .reel-in-zoom, .reel-in-up, .reel-in-left { animation-duration: 0.01ms; }
 }
