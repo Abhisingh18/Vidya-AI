@@ -12,6 +12,7 @@ import { LANGUAGES } from '@/lib/languages';
 import { homeForRole, parseRole } from '@/lib/roles';
 import ReelPreview from '@/components/landing/reel-preview';
 import VideoPreview from '@/components/landing/video-preview';
+import FeatureDemo, { type FeatureDemoId } from '@/components/landing/feature-demos';
 
 const PLACEHOLDERS = [
   "Newton's third law of motion…",
@@ -22,24 +23,24 @@ const PLACEHOLDERS = [
 ];
 const POPULAR = ["Newton's laws", 'Photosynthesis', 'Human heart', 'Pythagoras', 'Water cycle'];
 
-interface Feature { icon: typeof Film; title: string; desc: string; tags: string[]; href: string }
+interface Feature { icon: typeof Film; title: string; desc: string; tags: string[]; href: string; demo?: FeatureDemoId }
 
 const STUDENT_FEATURES: Feature[] = [
-  { icon: Film, title: 'Visual explainer videos', href: '/generate', tags: ['5–6 min', 'Real voice', '23 languages'],
+  { icon: Film, title: 'Visual explainer videos', demo: 'video', href: '/generate', tags: ['5–6 min', 'Real voice', '23 languages'],
     desc: 'Type a topic and get a narrated lesson with real photos, diagrams and animations that move with the teacher’s voice.' },
-  { icon: Clapperboard, title: '60-second reels', href: '/shorts', tags: ['Swipe to learn', 'Hindi + English'],
+  { icon: Clapperboard, title: '60-second reels', demo: 'reels', href: '/shorts', tags: ['Swipe to learn', 'Hindi + English'],
     desc: 'Short visual reels on science, maths and geography — perfect for a quick revision on the bus.' },
-  { icon: Camera, title: 'Ask a doubt', href: '/doubts', tags: ['Photo', 'Voice', 'Step-by-step'],
+  { icon: Camera, title: 'Ask a doubt', demo: 'doubt', href: '/doubts', tags: ['Photo', 'Voice', 'Step-by-step'],
     desc: 'Snap a photo of a question or just ask by voice, and get a clear step-by-step explanation.' },
-  { icon: Layers, title: 'Flashcards', href: '/flashcards', tags: ['Spaced repetition'],
+  { icon: Layers, title: 'Flashcards', demo: 'flashcards', href: '/flashcards', tags: ['Spaced repetition'],
     desc: 'Smart flashcards from any topic or your own notes, shown again right before you would forget them.' },
-  { icon: NotebookPen, title: 'Revision notes', href: '/notes', tags: ['Mind map', 'Printable'],
+  { icon: NotebookPen, title: 'Revision notes', demo: 'notes', href: '/notes', tags: ['Mind map', 'Printable'],
     desc: 'One-page notes with key points, formulas and a mind map of the whole chapter.' },
-  { icon: Timer, title: 'Mock tests', href: '/practice', tags: ['Timed', 'AI-graded answers'],
+  { icon: Timer, title: 'Mock tests', demo: 'mock', href: '/practice', tags: ['Timed', 'AI-graded answers'],
     desc: 'Exam-style tests with MCQs and written answers graded by AI, plus a chapter-wise report.' },
-  { icon: CalendarDays, title: 'Study planner', href: '/planner', tags: ['Day-by-day', 'Auto re-plan'],
+  { icon: CalendarDays, title: 'Study planner', demo: 'planner', href: '/planner', tags: ['Day-by-day', 'Auto re-plan'],
     desc: 'A daily plan up to your exam date that re-plans itself when you fall behind.' },
-  { icon: Trophy, title: 'XP, streaks & badges', href: '/achievements', tags: ['Leaderboard'],
+  { icon: Trophy, title: 'XP, streaks & badges', demo: 'xp', href: '/achievements', tags: ['Leaderboard'],
     desc: 'Earn XP for every lesson, test and task, keep your streak alive and climb the class leaderboard.' },
 ];
 
@@ -323,10 +324,22 @@ export default function HomePage() {
                 <Link key={f.title} href={f.href}
                   className="group flex animate-fade-in-up flex-col rounded-2xl border border-card-border bg-white p-5 opacity-0 transition-all duration-300 hover:-translate-y-1 hover:border-saffron/40 hover:shadow-card-hover dark:border-dark-border dark:bg-dark-surface"
                   style={{ animationDelay: `${i * 60}ms` }}>
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-saffron/15 to-indigo-brand/15 text-saffron transition-transform group-hover:scale-110">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="font-heading font-semibold text-navy dark:text-dark-text">{f.title}</h3>
+                  {f.demo && <FeatureDemo id={f.demo} />}
+                  {f.demo ? (
+                    <h3 className="flex items-center gap-2 font-heading font-semibold text-navy dark:text-dark-text">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-saffron/15 to-indigo-brand/15 text-saffron">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      {f.title}
+                    </h3>
+                  ) : (
+                    <>
+                      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-saffron/15 to-indigo-brand/15 text-saffron transition-transform group-hover:scale-110">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <h3 className="font-heading font-semibold text-navy dark:text-dark-text">{f.title}</h3>
+                    </>
+                  )}
                   <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted">{f.desc}</p>
                   <div className="mt-4 flex flex-wrap gap-1.5">
                     {f.tags.map(t => <span key={t} className="rounded-full bg-off-white px-2 py-0.5 text-[11px] font-medium text-muted dark:bg-dark-bg">{t}</span>)}
