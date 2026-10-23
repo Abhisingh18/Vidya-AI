@@ -12,6 +12,7 @@ import { LANGUAGES } from '@/lib/languages';
 import { homeForRole, parseRole } from '@/lib/roles';
 import ReelPreview from '@/components/landing/reel-preview';
 import VideoPreview from '@/components/landing/video-preview';
+import HeroVideo from '@/components/landing/hero-video';
 import FeatureDemo, { type FeatureDemoId } from '@/components/landing/feature-demos';
 
 const PLACEHOLDERS = [
@@ -150,8 +151,8 @@ export default function HomePage() {
         <div className="pointer-events-none absolute -top-24 right-[-10%] h-[520px] w-[520px] rounded-full bg-saffron/15 blur-[130px]" />
         <div className="pointer-events-none absolute bottom-[-20%] left-[-10%] h-[480px] w-[480px] rounded-full bg-indigo-brand/12 blur-[130px]" />
 
-        <div className="container-main relative z-10 grid items-center gap-14 lg:grid-cols-[1.08fr_0.92fr]">
-          <div className="text-center lg:text-left">
+        <div className="container-main relative z-10">
+          <div className="mx-auto max-w-3xl text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-card-border bg-white px-4 py-1.5 text-xs font-medium shadow-sm dark:border-dark-border dark:bg-dark-surface">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-saffron opacity-60" />
@@ -160,17 +161,17 @@ export default function HomePage() {
               <span className="text-muted">Free for every student &amp; teacher · {LANGUAGES.length} Indian languages</span>
             </div>
 
-            <h1 className="mt-6 font-heading text-[2.6rem] font-extrabold leading-[1.05] tracking-tight text-navy sm:text-5xl lg:text-[64px] dark:text-dark-text">
-              Every lesson,<br className="hidden sm:block" /> explained like your{' '}
+            <h1 className="mt-6 font-heading text-[2.6rem] font-extrabold leading-[1.05] tracking-tight text-navy sm:text-5xl lg:text-[68px] dark:text-dark-text">
+              Every lesson, explained like your{' '}
               <span className="text-gradient-saffron">best teacher.</span>
             </h1>
 
-            <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-muted lg:mx-0">
+            <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-muted">
               Animated video lessons with a real voice, 60-second visual reels, instant doubt solving, mock tests —
               and a complete AI toolkit for teachers. In Hindi, Tamil, Bengali and {LANGUAGES.length - 3} more languages.
             </p>
 
-            <div className="relative mx-auto mt-8 max-w-xl lg:mx-0">
+            <div className="relative mx-auto mt-8 max-w-xl">
               <div className="relative flex h-14 items-center overflow-hidden rounded-2xl border-2 border-card-border bg-white px-2 shadow-card transition-all duration-300 focus-within:border-saffron focus-within:shadow-lg dark:border-dark-border dark:bg-dark-surface">
                 <Wand2 className="ml-2 h-5 w-5 shrink-0 text-saffron" />
                 <div className="relative flex h-full flex-1 items-center">
@@ -188,7 +189,7 @@ export default function HomePage() {
                   Make my video <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
-              <div className="mt-3 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                 <span className="text-xs text-muted">Try:</span>
                 {POPULAR.map(t => (
                   <button key={t} onClick={() => setTopic(t)}
@@ -199,7 +200,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               {isLoggedIn ? (
                 <Link href={home} className="btn-saffron px-6 py-3 text-base shadow-saffron">Go to dashboard <ArrowRight className="h-4 w-4" /></Link>
               ) : (
@@ -214,20 +215,19 @@ export default function HomePage() {
               )}
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs text-muted lg:justify-start">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs text-muted">
               <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Free, no credit card</span>
               <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Works on any phone</span>
               <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Real voice — no app needed</span>
             </div>
           </div>
 
-          {/* live reel */}
-          <div className="relative mx-auto w-[min(78vw,300px)]">
-            <div className="pointer-events-none absolute inset-[-12%] rounded-full bg-gradient-to-tr from-saffron/25 via-transparent to-indigo-brand/25 blur-3xl" />
-            <ReelPreview id="heart" lang="hi" className="relative" />
-            <FloatChip className="-left-28 top-[16%] animate-float"><Volume2 className="h-4 w-4 text-saffron" /> Teacher’s voice · हिंदी</FloatChip>
-            <FloatChip className="-right-24 top-[46%] animate-float [animation-delay:1.2s]"><Sparkles className="h-4 w-4 text-indigo-brand" /> Animates as it explains</FloatChip>
-            <FloatChip className="-left-20 bottom-[14%] animate-float [animation-delay:2.1s]"><Trophy className="h-4 w-4 text-amber-500" /> +20 XP earned</FloatChip>
+          {/* the hero video: six subjects, live animation */}
+          <div className="relative mx-auto mt-14 max-w-5xl">
+            <HeroVideo />
+            <p className="mt-4 text-center text-xs text-muted">
+              Every frame above is drawn live by VidyaAI — six subjects, seven seconds each. Tap <b>Listen</b> to hear the teacher.
+            </p>
           </div>
         </div>
       </section>
@@ -246,8 +246,38 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ═══════════════ PHONE REEL ═══════════════ */}
+      <section className="relative overflow-hidden py-20 lg:py-28">
+        <div className="pointer-events-none absolute right-[-10%] top-10 h-[420px] w-[420px] rounded-full bg-indigo-brand/10 blur-[120px]" />
+        <div className="container-main relative grid items-center gap-14 lg:grid-cols-2">
+          <Reveal className="relative mx-auto w-[min(78vw,300px)]">
+            <div className="pointer-events-none absolute inset-[-12%] rounded-full bg-gradient-to-tr from-saffron/25 via-transparent to-indigo-brand/25 blur-3xl" />
+            <ReelPreview id="heart" lang="hi" className="relative" />
+            <FloatChip className="-left-28 top-[16%] animate-float"><Volume2 className="h-4 w-4 text-saffron" /> Teacher’s voice · हिंदी</FloatChip>
+            <FloatChip className="-right-24 top-[46%] animate-float [animation-delay:1.2s]"><Sparkles className="h-4 w-4 text-indigo-brand" /> Animates as it explains</FloatChip>
+            <FloatChip className="-left-20 bottom-[14%] animate-float [animation-delay:2.1s]"><Trophy className="h-4 w-4 text-amber-500" /> +20 XP earned</FloatChip>
+          </Reveal>
+          <Reveal delay={120} className="text-center lg:text-left">
+            <Eyebrow>Learn on your phone</Eyebrow>
+            <h2 className="font-heading text-3xl font-bold leading-tight text-navy lg:text-[2.6rem] dark:text-dark-text">
+              A minute on the bus. <span className="text-gradient-saffron">A concept for life.</span>
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl leading-relaxed text-muted lg:mx-0">
+              Swipe through visual reels where a teacher’s voice explains every step — in Hindi, English or your own language.
+              Tap the phone to hear it.
+            </p>
+            <ul className="mx-auto mt-6 max-w-md space-y-3 text-left text-sm text-navy lg:mx-0 dark:text-dark-text">
+              {['Real photos, moving diagrams and kinetic captions', 'A natural teacher’s voice — no app or login needed', 'Every reel links to a full lesson, quiz and notes'].map(x => (
+                <li key={x} className="flex items-start gap-2.5"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />{x}</li>
+              ))}
+            </ul>
+            <Link href="/shorts" className="btn-saffron mt-8 px-6 py-3">Watch reels <ArrowRight className="h-4 w-4" /></Link>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ═══════════════ VIDEO SAMPLE ═══════════════ */}
-      <section className="py-20 lg:py-28">
+      <section className="border-t border-card-border py-20 lg:py-28 dark:border-dark-border">
         <div className="container-main grid items-center gap-12 lg:grid-cols-[1.25fr_0.75fr]">
           <Reveal><VideoPreview /></Reveal>
           <Reveal delay={120}>
