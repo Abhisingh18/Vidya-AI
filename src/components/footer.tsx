@@ -10,7 +10,7 @@ export default function Footer() {
   if (pathname?.startsWith('/shorts')) return null;
 
   return (
-    <footer className="bg-navy dark:bg-dark-bg border-t border-dark-border">
+    <footer className="print:hidden bg-navy dark:bg-dark-bg border-t border-dark-border">
       <div className="container-main py-12 lg:py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
 

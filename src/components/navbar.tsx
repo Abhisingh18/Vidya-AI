@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useTheme } from './theme-provider';
-import { useSession, signOut } from 'next-auth/react';
-import { Menu, X, Sun, Moon, Flame, ArrowRight, LogOut, ChevronDown } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { Menu, X, Sun, Moon, Flame, ArrowRight } from 'lucide-react';
+import AppSidebar from './app-sidebar';
+import { usesAppSidebar } from './app-shell';
+import { homeForRole, parseRole } from '@/lib/roles';
 
 // Shown to visitors (marketing pages)
 const publicLinks = [
@@ -17,27 +19,12 @@ const publicLinks = [
   { name: 'Contact',    href: '/contact' },
 ];
 
-// Shown to logged-in students (the app itself)
-const privateLinks = [
-  { name: 'Dashboard',  href: '/dashboard' },
-  { name: 'Generate',   href: '/generate' },
-  { name: 'Shorts',     href: '/shorts' },
-  { name: 'Library',    href: '/library' },
-  { name: 'Saved',      href: '/bookmarks' },
-  { name: 'Playlists',  href: '/playlists' },
-];
-
 export default function Navbar() {
   const [isScrolled, setIsScrolled]   = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const { data: session, status } = useSession();
-
-  const isLoggedIn = !!session;
-  // Logged-in students see the app navigation; visitors see the marketing pages.
-  const navLinks = isLoggedIn ? privateLinks : publicLinks;
 
   // The Shorts feed is a full-screen immersive experience — hide the global chrome.
   const immersive = pathname?.startsWith('/shorts');
@@ -50,15 +37,17 @@ export default function Navbar() {
 
   useEffect(() => { setIsMobileOpen(false); }, [pathname]);
 
-  useEffect(() => {
-    const close = () => setUserMenuOpen(false);
-    if (userMenuOpen) document.addEventListener('click', close);
-    return () => document.removeEventListener('click', close);
-  }, [userMenuOpen]);
-
   // The Shorts feed is full-screen immersive — render no global navbar.
   // (Placed after all hooks to satisfy the Rules of Hooks.)
   if (immersive) return null;
+
+  // Inside the app, signed-in users get the vertical sidebar instead of the top bar.
+  if (usesAppSidebar(pathname, !!session)) return <AppSidebar />;
+
+  // Signed-in users on marketing pages get a way back into the app instead of "Sign In".
+  const cta = session
+    ? { href: homeForRole(parseRole((session.user as { role?: string } | undefined)?.role)), label: 'Dashboard' }
+    : { href: '/login', label: 'Sign In' };
 
   return (
     <>
@@ -84,7 +73,7 @@ export default function Navbar() {
 
             {/* Desktop Nav */}
             <div className="hidden lg:flex items-center gap-1">
-              {navLinks.map(link => (
+              {publicLinks.map(link => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -111,62 +100,12 @@ export default function Navbar() {
 
               {status === 'loading' ? (
                 <div className="w-9 h-9 rounded-full bg-gray-100 dark:bg-dark-border animate-pulse" />
-              ) : isLoggedIn ? (
-                <>
-                  {/* Avatar with user name */}
-                  <div className="relative" onClick={e => e.stopPropagation()}>
-                    <button
-                      onClick={() => setUserMenuOpen(o => !o)}
-                      className="hidden sm:flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border border-card-border dark:border-dark-border hover:border-saffron transition-all duration-200"
-                    >
-                      {session?.user?.image ? (
-                        <Image src={session.user.image} alt={session.user.name ?? 'User'} width={28} height={28} className="rounded-full" />
-                      ) : (
-                        <div className="w-7 h-7 rounded-full bg-saffron flex items-center justify-center text-white text-xs font-bold">
-                          {session?.user?.name?.[0] ?? 'U'}
-                        </div>
-                      )}
-                      <span className="text-sm font-medium text-navy dark:text-dark-text max-w-[100px] truncate">
-                        {session?.user?.name?.split(' ')[0]}
-                      </span>
-                      <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {userMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-dark-surface border border-card-border dark:border-dark-border rounded-xl shadow-card-hover overflow-hidden z-50 animate-fade-in">
-                        <div className="px-4 py-3 border-b border-card-border dark:border-dark-border">
-                          <p className="text-sm font-semibold text-navy dark:text-dark-text truncate">{session?.user?.name}</p>
-                          <p className="text-xs text-muted truncate">{session?.user?.email}</p>
-                        </div>
-                        <Link href="/dashboard" className="flex items-center gap-2 px-4 py-2.5 text-sm text-navy dark:text-dark-text hover:bg-gray-50 dark:hover:bg-dark-border">
-                          📊 Dashboard
-                        </Link>
-                        <Link href="/generate" className="flex items-center gap-2 px-4 py-2.5 text-sm text-navy dark:text-dark-text hover:bg-gray-50 dark:hover:bg-dark-border">
-                          ⚡ Generate Video
-                        </Link>
-                        <Link href="/library" className="flex items-center gap-2 px-4 py-2.5 text-sm text-navy dark:text-dark-text hover:bg-gray-50 dark:hover:bg-dark-border">
-                          📚 Library
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Direct Sign Out button — always visible */}
-                  <button
-                    onClick={() => signOut({ callbackUrl: '/' })}
-                    className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full border border-red-200 dark:border-red-500/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 hover:border-red-300 text-sm font-medium transition-all duration-200"
-                    aria-label="Sign out"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Sign Out
-                  </button>
-                </>
               ) : (
                 <Link
-                  href="/login"
+                  href={cta.href}
                   className="hidden sm:inline-flex items-center gap-2 px-5 py-2 rounded-full bg-saffron text-white text-sm font-semibold hover:bg-saffron-500 hover:shadow-saffron hover:scale-[1.02] transition-all duration-200"
                 >
-                  Sign In
+                  {cta.label}
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               )}
@@ -188,7 +127,7 @@ export default function Navbar() {
         <div className="absolute inset-0 bg-black/20 dark:bg-black/50 backdrop-blur-sm" onClick={() => setIsMobileOpen(false)} />
         <div className={`absolute top-0 right-0 w-[280px] h-full bg-white dark:bg-dark-surface shadow-2xl transition-transform duration-300 ${isMobileOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           <div className="p-6 pt-20 flex flex-col gap-2">
-            {navLinks.map(link => (
+            {publicLinks.map(link => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -201,28 +140,9 @@ export default function Navbar() {
             ))}
 
             <div className="mt-4 pt-4 border-t border-card-border dark:border-dark-border space-y-3">
-              {isLoggedIn ? (
-                <>
-                  <div className="flex items-center gap-3 px-2">
-                    {session?.user?.image ? (
-                      <Image src={session.user.image} alt="" width={36} height={36} className="rounded-full" />
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-saffron flex items-center justify-center text-white font-bold">{session?.user?.name?.[0]}</div>
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-navy dark:text-dark-text truncate">{session?.user?.name}</p>
-                      <p className="text-xs text-muted truncate">{session?.user?.email}</p>
-                    </div>
-                  </div>
-                  <button onClick={() => signOut({ callbackUrl: '/' })} className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium border border-card-border dark:border-dark-border text-red-500">
-                    <LogOut className="w-4 h-4" /> Sign Out
-                  </button>
-                </>
-              ) : (
-                <Link href="/login" className="w-full flex items-center justify-center gap-2 btn-saffron">
-                  Sign In <ArrowRight className="w-4 h-4" />
-                </Link>
-              )}
+              <Link href={cta.href} className="w-full flex items-center justify-center gap-2 btn-saffron">
+                {cta.label} <ArrowRight className="w-4 h-4" />
+              </Link>
 
               <button onClick={toggleTheme} className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium border border-card-border dark:border-dark-border text-navy dark:text-dark-text">
                 {theme === 'dark' ? <><Sun className="w-4 h-4" /> Light Mode</> : <><Moon className="w-4 h-4" /> Dark Mode</>}

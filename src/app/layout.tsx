@@ -4,6 +4,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import AuthSessionProvider from '@/components/session-provider';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
+import AppShell from '@/components/app-shell';
 import CursorEffect from '@/components/cursor-effect';
 import ServiceWorkerRegister from '@/components/sw-register';
 
@@ -53,10 +54,11 @@ export default function RootLayout({
             <CursorEffect />
             <ServiceWorkerRegister />
             <Navbar />
-            <main id="main-content" className="min-h-screen">
-              {children}
-            </main>
-            <Footer />
+            <AppShell footer={<Footer />}>
+              <main id="main-content" className="min-h-screen">
+                {children}
+              </main>
+            </AppShell>
           </ThemeProvider>
         </AuthSessionProvider>
       </body>

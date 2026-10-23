@@ -1,5 +1,5 @@
 // VidyaAI service worker — basic offline shell + runtime caching.
-const CACHE = 'vidyaai-v1';
+const CACHE = 'vidyaai-v2';
 const PRECACHE = ['/', '/library', '/offline'];
 
 self.addEventListener('install', (event) => {
@@ -20,8 +20,9 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  // Only handle GET; never cache API calls (always fresh).
-  if (request.method !== 'GET' || request.url.includes('/api/')) return;
+  // Only handle GET; never cache API calls (always fresh) or Next.js build
+  // assets — those are content-hashed, and a stale copy breaks the page.
+  if (request.method !== 'GET' || request.url.includes('/api/') || request.url.includes('/_next/')) return;
 
   event.respondWith(
     fetch(request)
