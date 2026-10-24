@@ -11,9 +11,8 @@ export const metadata = { title: 'Study planner — VidyaAI' };
 export default async function PlannerPage() {
   if (!(await currentUser())) redirect(`/login?callbackUrl=${encodeURIComponent('/planner')}`);
   return (
-    <StudyShell icon={<CalendarDays />} badge="Study planner" title="Be exam-ready with a" accent="day-by-day plan"
-      subtitle="Tell us your exam date, subjects and daily time — get a plan with lessons, practice, revision and mock tests that re-plans if you fall behind."
-      perks={[{ emoji: '📅', text: 'Day-by-day' }, { emoji: '🔁', text: 'Auto re-plan' }, { emoji: '✅', text: 'Tick off tasks, earn XP' }, { emoji: '🎯', text: 'Mock tests built in' }]}>
+    <StudyShell theme="plan" icon={<CalendarDays />} title="Study Planner"
+      subtitle="Give your exam date, subjects and daily time — get a day-by-day plan that re-plans itself if you fall behind.">
       <PlannerCreateForm />
       <StudySection title="Your plans" hint="Open a plan to see today's tasks">
         <PlannerList />

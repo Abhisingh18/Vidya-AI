@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { CalendarCheck, Clapperboard, FileText, Layers, NotebookText, Trash2 } from 'lucide-react';
 import { daysBetween, localToday, type StudySource } from '@/lib/flashcards';
 import { api, EmptyState, Spinner } from '@/components/teacher/ui';
-import { AccentStrip, itemCardCls } from './study-shell';
+import { Cover, itemCardCls } from './study-shell';
 
 interface DeckRow {
   id: string; title: string; grade: string; language: string; updatedAt: string; emoji: string;
@@ -50,10 +50,12 @@ export default function FlashcardDeckList() {
           const Icon = SOURCE_ICON[d.source?.kind ?? 'topic'];
           return (
             <li key={d.id} className={itemCardCls}>
-              <AccentStrip />
-              <Link href={`/flashcards/${d.id}`} className="block p-5">
+              <Link href={`/flashcards/${d.id}`} className="block">
+                <Cover theme="flash" emoji={d.emoji || '🗂️'} badge={d.due > 0
+                  ? <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-indigo-600 shadow" data-testid="due-badge">{d.due} due today</span>
+                  : <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-emerald-600 shadow">✓ Caught up</span>} />
+                <div className="p-4">
                 <div className="flex items-start gap-3 pr-8">
-                  <div className="w-11 h-11 shrink-0 rounded-xl bg-saffron/10 flex items-center justify-center text-2xl">{d.emoji || '🗂️'}</div>
                   <div className="min-w-0">
                     <p className="font-heading font-semibold text-navy dark:text-dark-text line-clamp-2" dir="auto">{d.title}</p>
                     <p className="text-xs text-muted mt-1 flex items-center gap-1.5">
@@ -61,18 +63,15 @@ export default function FlashcardDeckList() {
                     </p>
                   </div>
                 </div>
-                <div className="mt-4 flex items-center gap-2 flex-wrap">
-                  {d.due > 0 ? (
-                    <span className="pill bg-saffron text-white font-semibold" data-testid="due-badge">{d.due} due today</span>
-                  ) : (
-                    <span className="pill-teal font-semibold"><CalendarCheck className="w-3.5 h-3.5" /> All caught up</span>
-                  )}
-                  {d.due > 0 && d.fresh > 0 && <span className="text-xs text-muted">{d.fresh === d.due ? 'all new' : `${d.fresh} new`}</span>}
-                  {d.due === 0 && <span className="text-xs text-muted">{nextLabel(d.next, today)}</span>}
+                <div className="mt-3 flex items-center gap-2 flex-wrap text-xs text-muted">
+                  {d.due > 0 && d.fresh > 0 && <span>{d.fresh === d.due ? 'all new cards' : `${d.fresh} new`}</span>}
+                  {d.due === 0 && <span className="inline-flex items-center gap-1"><CalendarCheck className="w-3.5 h-3.5" /> {nextLabel(d.next, today)}</span>}
+                  {d.due > 0 && <span className="font-semibold text-indigo-600 dark:text-indigo-300">Start reviewing →</span>}
+                </div>
                 </div>
               </Link>
               <button onClick={() => remove(d)} aria-label={`Delete ${d.title}`}
-                className="absolute top-4 right-4 w-8 h-8 rounded-lg flex items-center justify-center text-muted sm:opacity-0 group-hover:opacity-100 focus:opacity-100 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition">
+                className="absolute left-3 top-3 z-10 w-8 h-8 rounded-full flex items-center justify-center bg-black/25 text-white sm:opacity-0 group-hover:opacity-100 focus:opacity-100 hover:bg-red-500 transition">
                 <Trash2 className="w-4 h-4" />
               </button>
             </li>

@@ -19,9 +19,8 @@ export default async function FlashcardsPage({ searchParams }: { searchParams: R
     redirect(`/login?callbackUrl=${encodeURIComponent(back)}`);
   }
   return (
-    <StudyShell icon={<Layers />} badge="Flashcards" title="Remember more with" accent="smart flashcards"
-      subtitle="Make a deck from any topic, your notes or a video lesson. Review a few minutes a day — each card comes back just before you'd forget it."
-      perks={[{ emoji: '🧠', text: 'Spaced repetition' }, { emoji: '📎', text: 'From your notes or PDF' }, { emoji: '🎬', text: 'From any lesson video' }, { emoji: '🌐', text: '23 languages' }]}>
+    <StudyShell theme="flash" icon={<Layers />} title="Flashcards"
+      subtitle="Make a deck from any topic, your notes or a lesson video. Review a few minutes a day — each card returns just before you would forget it.">
       <StudyCreateForm kind="flashcards" videoId={video} notesId={notes} defaultTopic={topic} />
       <StudySection title="Your decks" hint="Open a deck to review the cards due today">
         <FlashcardDeckList />

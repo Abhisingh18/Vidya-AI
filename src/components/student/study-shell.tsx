@@ -1,48 +1,58 @@
-// Shared look of the student study studios (Flashcards, Revision Notes, Mock Tests,
-// Study Planner): an animated backdrop, a centred hero with perks, a glass card for
-// the create form and a section for the saved items. Server-renderable.
+// Shared frame of the student study studios (Flashcards, Revision Notes, Mock Tests,
+// Study Planner). Each studio has its own colour; the page is a compact header, the
+// create form beside a live preview of what it will make (in the form components),
+// and below that a shelf of saved items with a coloured cover. Server-renderable.
 
 import type { ReactNode } from 'react';
-import GenerateBackdrop from '@/components/generate/backdrop';
 
-/** Glass card for a studio's create form. */
+export type StudyTheme = 'flash' | 'notes' | 'mock' | 'plan';
+
+export const THEMES: Record<StudyTheme, { tile: string; cover: string; wash: string; text: string; soft: string; dot: string }> = {
+  flash: { tile: 'from-indigo-500 to-violet-600', cover: 'from-indigo-500 via-violet-500 to-fuchsia-500', wash: 'from-indigo-500/[0.14] via-violet-500/[0.07]', text: 'text-indigo-600 dark:text-indigo-300', soft: 'bg-indigo-500/10', dot: 'bg-indigo-500' },
+  notes: { tile: 'from-emerald-500 to-teal-600', cover: 'from-emerald-500 via-teal-500 to-cyan-500', wash: 'from-emerald-500/[0.14] via-teal-500/[0.07]', text: 'text-emerald-600 dark:text-emerald-300', soft: 'bg-emerald-500/10', dot: 'bg-emerald-500' },
+  mock: { tile: 'from-orange-500 to-rose-500', cover: 'from-orange-500 via-rose-500 to-pink-500', wash: 'from-orange-500/[0.14] via-rose-500/[0.07]', text: 'text-orange-600 dark:text-orange-300', soft: 'bg-orange-500/10', dot: 'bg-orange-500' },
+  plan: { tile: 'from-sky-500 to-blue-600', cover: 'from-sky-500 via-blue-500 to-indigo-500', wash: 'from-sky-500/[0.14] via-blue-500/[0.07]', text: 'text-sky-600 dark:text-sky-300', soft: 'bg-sky-500/10', dot: 'bg-sky-500' },
+};
+
+/** Card around a studio's create form. */
 export const studioCardCls =
-  'relative rounded-[28px] border border-card-border bg-white/95 p-5 shadow-[0_24px_60px_-28px_rgba(26,26,46,0.35)] backdrop-blur-xl sm:p-7 dark:border-dark-border dark:bg-dark-surface/95';
+  'relative rounded-3xl border border-card-border bg-white p-5 shadow-card sm:p-7 dark:border-dark-border dark:bg-dark-surface dark:shadow-card-dark';
 
-/** Card in a saved-items grid (lift on hover, accent strip along the top). */
+/** Card of a saved item: lifts on hover. */
 export const itemCardCls =
-  'group relative overflow-hidden rounded-2xl border border-card-border bg-white shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-saffron/50 hover:shadow-card-hover dark:border-dark-border dark:bg-dark-surface dark:shadow-card-dark';
+  'group relative overflow-hidden rounded-2xl border border-card-border bg-white shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover dark:border-dark-border dark:bg-dark-surface dark:shadow-card-dark';
 
-export function AccentStrip() {
-  return <span aria-hidden className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-saffron via-rose-500 to-indigo-brand opacity-0 transition-opacity group-hover:opacity-100" />;
+export function AccentStrip() { return null; }
+
+/** Coloured cover on top of a saved item: a big emoji, floating shapes, an optional badge. */
+export function Cover({ theme, emoji, badge }: { theme: StudyTheme; emoji: string; badge?: ReactNode }) {
+  return (
+    <div className={`relative h-24 overflow-hidden bg-gradient-to-br ${THEMES[theme].cover}`}>
+      <span aria-hidden className="absolute -right-6 -top-8 h-28 w-28 rounded-full bg-white/15" />
+      <span aria-hidden className="absolute -bottom-10 left-1/3 h-24 w-24 rounded-full bg-black/10" />
+      <span aria-hidden className="absolute bottom-3 right-16 h-3 w-3 rounded-full bg-white/50" />
+      <span className="absolute bottom-3 left-5 text-4xl drop-shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6" style={{ fontFamily: '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif' }}>{emoji}</span>
+      {badge && <div className="absolute right-3 top-3">{badge}</div>}
+    </div>
+  );
 }
 
-export interface Perk { emoji: string; text: string }
-
-export default function StudyShell({ icon, badge, title, accent, subtitle, perks, children }: {
-  icon: ReactNode; badge: string; title: string; accent: string; subtitle: string; perks: Perk[]; children: ReactNode;
+export default function StudyShell({ theme, icon, title, subtitle, children }: {
+  theme: StudyTheme; icon: ReactNode; title: string; subtitle: string; children: ReactNode;
 }) {
+  const t = THEMES[theme];
   return (
     <main className="relative min-h-screen overflow-x-clip bg-off-white dark:bg-dark-bg">
-      <GenerateBackdrop quiet />
-      <div className="relative mx-auto max-w-5xl px-4 pb-20 pt-24 sm:px-6">
-        <header className="mx-auto max-w-2xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-saffron/20 bg-white/80 px-3 py-1 text-xs font-medium text-saffron backdrop-blur dark:bg-dark-surface/80">
-            <span className="[&>svg]:h-3.5 [&>svg]:w-3.5">{icon}</span> {badge}
+      <div aria-hidden className={`pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b ${t.wash} to-transparent`} />
+      <div className="relative mx-auto max-w-6xl px-4 pb-20 pt-24 sm:px-6">
+        <header className="mb-7 flex items-start gap-4">
+          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${t.tile} text-white shadow-lg [&>svg]:h-6 [&>svg]:w-6`}>{icon}</div>
+          <div className="min-w-0">
+            <h1 className="font-heading text-2xl font-extrabold tracking-tight text-navy sm:text-3xl dark:text-dark-text">{title}</h1>
+            <p className="mt-1 max-w-2xl text-sm text-muted sm:text-base">{subtitle}</p>
           </div>
-          <h1 className="mt-4 font-heading text-4xl font-extrabold tracking-tight text-navy sm:text-5xl dark:text-dark-text">
-            {title} <span className="text-gradient-saffron">{accent}</span>
-          </h1>
-          <p className="mx-auto mt-3 max-w-xl text-muted">{subtitle}</p>
-          <ul className="mt-5 flex flex-wrap items-center justify-center gap-2">
-            {perks.map(p => (
-              <li key={p.text} className="inline-flex items-center gap-1.5 rounded-full border border-card-border bg-white/80 px-3 py-1.5 text-xs font-medium text-navy backdrop-blur dark:border-dark-border dark:bg-dark-surface/80 dark:text-dark-text">
-                <span aria-hidden>{p.emoji}</span> {p.text}
-              </li>
-            ))}
-          </ul>
         </header>
-        <div className="relative z-10 mx-auto mt-8 max-w-3xl">{children}</div>
+        {children}
       </div>
     </main>
   );
@@ -51,8 +61,8 @@ export default function StudyShell({ icon, badge, title, accent, subtitle, perks
 /** Heading above the saved items. */
 export function StudySection({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
-    <section className="relative z-10 mx-auto mt-14 max-w-5xl">
-      <div className="mb-4 flex items-end justify-between gap-3">
+    <section className="mt-14">
+      <div className="mb-4 flex items-end justify-between gap-3 border-b border-card-border pb-3 dark:border-dark-border">
         <h2 className="font-heading text-xl font-bold text-navy dark:text-dark-text">{title}</h2>
         {hint && <p className="hidden text-xs text-muted sm:block">{hint}</p>}
       </div>

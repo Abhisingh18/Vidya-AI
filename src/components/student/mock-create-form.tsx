@@ -12,6 +12,7 @@ import type { SourceFile } from '@/lib/source';
 import SourceUpload from '@/components/teacher/source-upload';
 import { api, ErrorNote, inputCls, labelCls, textareaCls } from '@/components/teacher/ui';
 import { studioCardCls } from './study-shell';
+import { MockPreview } from './study-previews';
 
 export default function MockCreateForm({ defaultTopics = '', defaultSubject = '', defaultLength }: { defaultTopics?: string; defaultSubject?: string; defaultLength?: string }) {
   const router = useRouter();
@@ -41,6 +42,7 @@ export default function MockCreateForm({ defaultTopics = '', defaultSubject = ''
   };
 
   return (
+    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
     <form onSubmit={submit} className={`${studioCardCls} space-y-5`}>
       <div className="grid sm:grid-cols-3 gap-3">
         <div>
@@ -98,11 +100,13 @@ export default function MockCreateForm({ defaultTopics = '', defaultSubject = ''
 
       {error && <ErrorNote>{error}</ErrorNote>}
       <div className="flex flex-wrap items-center gap-3">
-        <button type="submit" disabled={busy || !!missing} className="btn-saffron h-12 px-7 text-base disabled:opacity-60 disabled:cursor-not-allowed">
+        <button type="submit" disabled={busy || !!missing} className="btn-saffron h-12 whitespace-nowrap px-7 text-base disabled:opacity-60 disabled:cursor-not-allowed">
           {busy ? <><Loader2 className="w-4 h-4 animate-spin" /> Writing your test…</> : <><Sparkles className="w-4 h-4" /> Create mock test</>}
         </button>
         <span className="text-xs text-muted">{busy ? 'Usually 30–90 seconds.' : missing}</span>
       </div>
     </form>
+    <MockPreview subject={subject} grade={grade} minutes={MOCK_LENGTHS[length].minutes} summary={lengthSummary(length)} marks={lengthMarks(length)} />
+    </div>
   );
 }

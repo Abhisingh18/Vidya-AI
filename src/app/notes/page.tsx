@@ -16,9 +16,8 @@ export default async function NotesPage({ searchParams }: { searchParams: Record
     redirect(`/login?callbackUrl=${encodeURIComponent(`/notes${video ? `?video=${encodeURIComponent(video)}` : ''}`)}`);
   }
   return (
-    <StudyShell icon={<NotebookText />} badge="Revision notes" title="One page to" accent="revise anything"
-      subtitle="A sheet for any topic, your notes or a video lesson: key points, terms, formulas, a mind map, memory tricks and a quick self-check."
-      perks={[{ emoji: '🗺️', text: 'Mind map' }, { emoji: '🧮', text: 'Formulas & terms' }, { emoji: '🖨️', text: 'Print or save' }, { emoji: '🃏', text: 'Turn into flashcards' }]}>
+    <StudyShell theme="notes" icon={<NotebookText />} title="Revision Notes"
+      subtitle="A one-page sheet for any topic, your notes or a lesson: key points, formulas, a mind map, memory tricks and a self-check.">
       <StudyCreateForm kind="notes" videoId={video} />
       <StudySection title="Your revision sheets" hint="Edit, print or turn a sheet into flashcards">
         <NotesList />

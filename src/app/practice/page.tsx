@@ -11,9 +11,8 @@ export const metadata = { title: 'Mock tests — VidyaAI' };
 export default async function PracticePage({ searchParams }: { searchParams: { topic?: string; subject?: string; length?: string } }) {
   if (!(await currentUser())) redirect(`/login?callbackUrl=${encodeURIComponent('/practice')}`);
   return (
-    <StudyShell icon={<ClipboardCheck />} badge="Mock tests" title="Practise like the" accent="real exam"
-      subtitle="Timed tests from your chapters or syllabus. MCQs are checked instantly, written answers get AI feedback, and you see which chapters need work."
-      perks={[{ emoji: '⏱️', text: 'Timed' }, { emoji: '✍️', text: 'AI-graded written answers' }, { emoji: '📊', text: 'Chapter-wise report' }, { emoji: '⚡', text: 'XP for every test' }]}>
+    <StudyShell theme="mock" icon={<ClipboardCheck />} title="Mock Tests"
+      subtitle="Timed tests from your chapters or syllabus. MCQs are checked instantly, written answers get AI feedback, and you see which chapters need work.">
       <MockCreateForm
         defaultTopics={typeof searchParams.topic === 'string' ? searchParams.topic.slice(0, 2000) : ''}
         defaultSubject={typeof searchParams.subject === 'string' ? searchParams.subject.slice(0, 100) : ''}
