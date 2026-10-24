@@ -6,6 +6,7 @@ import { TOOLS, type ToolDef, type ToolId, type ToolOutput } from '@/lib/toolkit
 import { GRADES, LANGUAGES } from '@/lib/teacher-docs';
 import type { SourceFile } from '@/lib/source';
 import { api, bareFieldCls, ComposerBox, ErrorNote, inputCls, labelCls, textareaCls } from '@/components/teacher/ui';
+import PageHero from '@/components/ui/page-hero';
 import SourceUpload from '@/components/teacher/source-upload';
 
 const TOOL_ICON: Record<ToolId, LucideIcon> = { rubric: ListChecks, ncert: BookMarked, translate: Languages, parent: MessageCircleHeart };
@@ -57,30 +58,17 @@ export default function ToolkitPage() {
     <main className="min-h-screen bg-off-white px-3 pb-3 pt-20 sm:px-5 lg:pt-5 dark:bg-dark-bg">
       <div className="mx-auto min-h-[calc(100vh-1.5rem)] max-w-6xl overflow-hidden rounded-3xl border border-card-border bg-white shadow-card lg:min-h-[calc(100vh-2.5rem)] dark:border-dark-border dark:bg-dark-surface dark:shadow-card-dark">
         {/* hero: slow aurora over a fine grid, the four tools as cards that lift into the page */}
-        <header className="relative overflow-hidden bg-[#1a1a2e] px-5 pb-24 pt-8 text-white sm:px-8 sm:pt-10">
-          <div aria-hidden className="pointer-events-none absolute inset-0">
-            <div className="gen-aurora absolute -left-24 -top-32 h-96 w-96 rounded-full bg-saffron/40 blur-[110px]" />
-            <div className="gen-aurora absolute -right-16 top-0 h-80 w-80 rounded-full bg-rose-500/25 blur-[110px] [animation-delay:-7s]" />
-            <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)', backgroundSize: '44px 44px' }} />
-          </div>
-          <div className="relative flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-saffron to-orange-600 shadow-saffron"><Wrench className="h-6 w-6" /></div>
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-saffron">For teachers</p>
-              <h1 className="font-heading text-3xl font-extrabold tracking-tight sm:text-4xl">Teacher Toolkit</h1>
-            </div>
-          </div>
-          <p className="relative mt-4 max-w-xl text-sm text-white/70 sm:text-base">Rubrics, NCERT mapping, translations and parent messages in seconds, ready to use in class.</p>
-        </header>
+        <PageHero icon={<Wrench />} eyebrow="For teachers" title="Teacher Toolkit" glyphs={['A+', 'अ', '✉️', 'NCERT', '📚', '✓', 'அ', 'বা']} className="!pb-24"
+          subtitle="Rubrics, NCERT mapping, translations and parent messages in seconds, ready to use in class." />
 
         <div className="relative -mt-14 px-4 sm:px-8">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" role="tablist">
+          <div className="ph-stagger grid gap-3 sm:grid-cols-2 xl:grid-cols-4" role="tablist">
             {TOOLS.map((t, i) => {
               const Icon = TOOL_ICON[t.id];
               const on = tool.id === t.id;
               return (
                 <button key={t.id} role="tab" aria-selected={on} onClick={() => pick(t)}
-                  className={`group relative overflow-hidden rounded-2xl border p-4 text-left shadow-card backdrop-blur transition-all duration-300 hover:-translate-y-1 ${on
+                  className={`ph-shine group relative overflow-hidden rounded-2xl border p-4 text-left shadow-card backdrop-blur transition-all duration-300 hover:-translate-y-1 ${on
                     ? 'border-saffron bg-white ring-4 ring-saffron/15 dark:bg-dark-surface'
                     : 'border-card-border bg-white/95 hover:border-saffron/50 dark:border-dark-border dark:bg-dark-surface/95'}`}>
                   <span aria-hidden className={`absolute -right-3 -top-5 font-heading text-7xl font-extrabold transition-colors ${on ? 'text-saffron/15' : 'text-navy/[0.05] dark:text-white/[0.06]'}`}>{i + 1}</span>

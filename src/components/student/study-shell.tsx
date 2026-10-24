@@ -4,6 +4,7 @@
 // and below that a shelf of saved items with a coloured cover. Server-renderable.
 
 import type { ReactNode } from 'react';
+import PageHero, { type HeroStat } from '@/components/ui/page-hero';
 
 export type StudyTheme = 'flash' | 'notes' | 'mock' | 'plan';
 
@@ -21,7 +22,7 @@ export const studioCardCls =
 
 /** Card of a saved item: lifts on hover. */
 export const itemCardCls =
-  'group relative overflow-hidden rounded-2xl border border-card-border bg-white shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover dark:border-dark-border dark:bg-dark-surface dark:shadow-card-dark';
+  'ph-shine group relative overflow-hidden rounded-2xl border border-card-border bg-white shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover dark:border-dark-border dark:bg-dark-surface dark:shadow-card-dark';
 
 export function AccentStrip() { return null; }
 
@@ -38,31 +39,14 @@ export function Cover({ theme, emoji, badge }: { theme: StudyTheme; emoji: strin
   );
 }
 
-export default function StudyShell({ theme, icon, title, subtitle, eyebrow = 'For students', children }: {
-  theme: StudyTheme; icon: ReactNode; title: string; subtitle: string; eyebrow?: string; children: ReactNode;
+export default function StudyShell({ icon, title, subtitle, eyebrow = 'For students', stats, glyphs, children }: {
+  theme?: StudyTheme; icon: ReactNode; title: string; subtitle: string; eyebrow?: string; stats?: HeroStat[]; glyphs?: string[]; children: ReactNode;
 }) {
-  const t = THEMES[theme];
   return (
     <main className="min-h-screen bg-off-white px-3 pb-3 pt-20 sm:px-5 lg:pt-5 dark:bg-dark-bg">
       {/* the whole studio sits in one box that fills the screen */}
       <div className="mx-auto min-h-[calc(100vh-1.5rem)] max-w-6xl overflow-hidden rounded-3xl border border-card-border bg-white shadow-card lg:min-h-[calc(100vh-2.5rem)] dark:border-dark-border dark:bg-dark-surface dark:shadow-card-dark">
-        {/* hero: a slow saffron aurora over a fine grid, with the studio's icon watermarked on the right */}
-        <header className="relative overflow-hidden bg-[#1a1a2e] px-5 py-8 text-white sm:px-8 sm:py-10">
-          <div aria-hidden className="pointer-events-none absolute inset-0">
-            <div className="gen-aurora absolute -left-24 -top-32 h-96 w-96 rounded-full bg-saffron/40 blur-[110px]" />
-            <div className="gen-aurora absolute -right-16 top-0 h-80 w-80 rounded-full bg-rose-500/25 blur-[110px] [animation-delay:-7s]" />
-            <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)', backgroundSize: '44px 44px' }} />
-            <div className="gen-float absolute -right-4 top-1/2 hidden -translate-y-1/2 text-white/[0.07] sm:block [&>svg]:h-48 [&>svg]:w-48 [&>svg]:stroke-[1]">{icon}</div>
-          </div>
-          <div className="relative flex items-center gap-4">
-            <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${t.tile} text-white shadow-saffron [&>svg]:h-7 [&>svg]:w-7`}>{icon}</div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-saffron">{eyebrow}</p>
-              <h1 className="font-heading text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h1>
-            </div>
-          </div>
-          <p className="relative mt-4 max-w-xl text-sm text-white/70 sm:text-base">{subtitle}</p>
-        </header>
+        <PageHero icon={icon} eyebrow={eyebrow} title={title} subtitle={subtitle} stats={stats} glyphs={glyphs} />
         <div className="p-5 sm:p-8">{children}</div>
       </div>
     </main>
@@ -72,7 +56,7 @@ export default function StudyShell({ theme, icon, title, subtitle, eyebrow = 'Fo
 /** Heading above the saved items. */
 export function StudySection({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
-    <section className="mt-12">
+    <section className="ph-rise mt-12">
       <div className="mb-4 flex items-end justify-between gap-3 border-b border-card-border pb-3 dark:border-dark-border">
         <h2 className="font-heading text-xl font-bold text-navy dark:text-dark-text">{title}</h2>
         {hint && <p className="hidden text-xs text-muted sm:block">{hint}</p>}

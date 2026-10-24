@@ -1,5 +1,6 @@
 'use client';
 
+import PageHero from '@/components/ui/page-hero';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
@@ -48,15 +49,10 @@ export default function BookmarksPage() {
   return (
     <main className="min-h-screen bg-off-white dark:bg-dark-bg">
       <div className="container-main pt-24 pb-16">
-        <header className="mb-8 animate-fade-in-up">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-saffron flex items-center justify-center shadow-md">
-              <Bookmark className="w-5 h-5 text-white fill-white" />
-            </div>
-            <h1 className="text-4xl font-heading font-bold text-navy dark:text-dark-text">Saved Videos</h1>
-          </div>
-          <p className="text-muted text-lg">Your bookmarked lessons — revisit them anytime.</p>
-        </header>
+        <div className="mb-8 overflow-hidden rounded-3xl shadow-card">
+          <PageHero icon={<Bookmark className="fill-white" />} eyebrow="Your shelf" title="Saved Videos" glyphs={['★', '🔖', '▶', '📌', '∑', '🧪']}
+            subtitle="Your bookmarked lessons — revisit them anytime." />
+        </div>
 
         {status === 'unauthenticated' ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">

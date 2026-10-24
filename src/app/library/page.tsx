@@ -1,5 +1,6 @@
 'use client';
 
+import PageHero from '@/components/ui/page-hero';
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, Play, Eye, Star, ArrowUpRight, ChevronDown, Triangle, Atom, FlaskConical, Leaf, Monitor, Landmark, BookOpen, Sparkles, Clock, Check, Clapperboard } from 'lucide-react';
@@ -261,22 +262,11 @@ export default function LibraryPage() {
       <div className="container-main pt-24 pb-16">
 
         {/* Header */}
-        <header className="animate-fade-in-up">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-saffron flex items-center justify-center shadow-saffron/30 shadow-md">
-              <BookOpen className="w-5 h-5 text-white" />
-            </div>
-            <h1 className="text-4xl font-heading font-bold text-navy dark:text-dark-text">VidyaAI Library</h1>
-          </div>
-          <p className="text-muted text-lg mt-1">Learn with the community — all generated animated videos in one place</p>
-          <p className="text-sm text-muted mt-2 flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-saffron inline-block" />{totalVideos} videos</span>
-            <span className="text-card-border dark:text-dark-border">·</span>
-            <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-indigo-brand inline-block" />{uniqueLanguages} languages</span>
-            <span className="text-card-border dark:text-dark-border">·</span>
-            <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-teal inline-block" />{uniqueSubjects} subjects</span>
-          </p>
-        </header>
+        <div className="overflow-hidden rounded-3xl shadow-card">
+          <PageHero icon={<BookOpen />} eyebrow="Community" title="VidyaAI Library" glyphs={['∫', '🧬', 'F = ma', '🌍', 'DNA', '🔭', 'x²', '⚡']}
+            subtitle="Learn with the community — all generated animated videos in one place"
+            stats={[{ label: 'videos', value: totalVideos }, { label: 'languages', value: uniqueLanguages }, { label: 'subjects', value: uniqueSubjects }]} />
+        </div>
 
         {/* Progress bar — shows the logged-in user's completion across the library */}
         {watched.size > 0 && totalVideos > 0 && (

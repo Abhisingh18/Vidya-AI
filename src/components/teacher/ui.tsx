@@ -1,7 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Sparkles } from 'lucide-react';
+import PageHero from '@/components/ui/page-hero';
 
 export const inputCls =
   'w-full h-11 px-3.5 rounded-xl border-2 border-card-border dark:border-dark-border bg-white dark:bg-dark-bg text-navy dark:text-dark-text text-sm outline-none transition-all focus:border-saffron focus:ring-2 focus:ring-saffron/20';
@@ -30,15 +31,8 @@ export function TeacherPage({ children }: { children: ReactNode }) {
 
 export function PageHeader({ icon, title, subtitle, action }: { icon?: ReactNode; title: string; subtitle?: string; action?: ReactNode }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
-      <div className="flex items-start gap-3">
-        {icon && <div className="w-11 h-11 shrink-0 rounded-xl bg-gradient-saffron flex items-center justify-center text-white">{icon}</div>}
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-heading font-bold text-navy dark:text-dark-text">{title}</h1>
-          {subtitle && <p className="text-muted mt-1">{subtitle}</p>}
-        </div>
-      </div>
-      {action}
+    <div className="mb-8 overflow-hidden rounded-3xl shadow-card">
+      <PageHero icon={icon ?? <Sparkles />} eyebrow="VidyaAI" title={title} subtitle={subtitle} action={action} />
     </div>
   );
 }

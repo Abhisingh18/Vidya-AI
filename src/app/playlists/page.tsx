@@ -1,5 +1,6 @@
 'use client';
 
+import PageHero from '@/components/ui/page-hero';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
@@ -54,22 +55,13 @@ export default function PlaylistsPage() {
   return (
     <main className="min-h-screen bg-off-white dark:bg-dark-bg">
       <div className="container-main pt-24 pb-16">
-        <header className="mb-8 flex items-start justify-between gap-4 animate-fade-in-up">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-saffron flex items-center justify-center shadow-md">
-                <ListVideo className="w-5 h-5 text-white" />
-              </div>
-              <h1 className="text-4xl font-heading font-bold text-navy dark:text-dark-text">Playlists</h1>
-            </div>
-            <p className="text-muted text-lg">Organize lessons into courses — like &ldquo;Class 10 Physics&rdquo;.</p>
-          </div>
-          {status === 'authenticated' && (
-            <button onClick={() => setCreating(true)} className="btn-saffron text-sm shrink-0">
-              <Plus className="w-4 h-4" />New
-            </button>
-          )}
-        </header>
+        <div className="mb-8 overflow-hidden rounded-3xl shadow-card">
+          <PageHero icon={<ListVideo />} eyebrow="Courses" title="Playlists" glyphs={['▶', '1', '2', '3', '📺', '🎓', '✓', '📚']}
+            subtitle="Organize lessons into courses — like “Class 10 Physics”."
+            action={status === 'authenticated' ? (
+              <button onClick={() => setCreating(true)} className="btn-saffron text-sm shrink-0"><Plus className="w-4 h-4" />New</button>
+            ) : undefined} />
+        </div>
 
         {status === 'unauthenticated' ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
