@@ -5,7 +5,8 @@ import { Check, Copy, Loader2, Save, Sparkles, Wrench } from 'lucide-react';
 import { TOOLS, type ToolDef, type ToolId, type ToolOutput } from '@/lib/toolkit';
 import { GRADES, LANGUAGES } from '@/lib/teacher-docs';
 import type { SourceFile } from '@/lib/source';
-import { api, ErrorNote, inputCls, labelCls, PageHeader, panelCls, TeacherPage, textareaCls } from '@/components/teacher/ui';
+import { api, ErrorNote, inputCls, labelCls, textareaCls } from '@/components/teacher/ui';
+import StudyShell from '@/components/student/study-shell';
 import SourceUpload from '@/components/teacher/source-upload';
 
 function outputText(o: ToolOutput) {
@@ -51,21 +52,22 @@ export default function ToolkitPage() {
   };
 
   return (
-    <TeacherPage>
-      <PageHeader icon={<Wrench className="w-5 h-5" />} title="Teacher Toolkit" subtitle="Quick AI helpers for everyday teaching work." />
-
-      <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-6" role="tablist">
+    <StudyShell theme="plan" icon={<Wrench />} title="Teacher Toolkit" subtitle="Quick AI helpers for everyday teaching work.">
+      <div className="mx-auto max-w-2xl">
+      <div className="mb-6 flex flex-wrap justify-center gap-2" role="tablist">
         {TOOLS.map(t => (
-          <button key={t.id} role="tab" aria-selected={tool.id === t.id} onClick={() => pick(t)}
-            className={`${panelCls} p-4 text-left transition ${tool.id === t.id ? '!border-saffron ring-2 ring-saffron/20' : 'hover:border-saffron/40'}`}>
-            <p className="font-heading font-semibold text-navy dark:text-dark-text">{t.title}</p>
-            <p className="text-xs text-muted mt-1">{t.description}</p>
+          <button key={t.id} role="tab" aria-selected={tool.id === t.id} onClick={() => pick(t)} title={t.description}
+            className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${tool.id === t.id
+              ? 'border-saffron bg-saffron text-white shadow-saffron'
+              : 'border-card-border text-navy hover:border-saffron/50 hover:bg-saffron/5 dark:border-dark-border dark:text-dark-text'}`}>
+            {t.title}
           </button>
         ))}
       </div>
+      <p className="mb-6 text-center text-sm text-muted">{tool.description}</p>
 
-      <div className="grid lg:grid-cols-[380px_1fr] gap-5 items-start">
-        <form onSubmit={run} className={`${panelCls} p-5 space-y-4`}>
+      <div className="space-y-8">
+        <form onSubmit={run} className="space-y-5">
           {tool.fields.map((f, i) => (
             <div key={`${tool.id}-${f.name}`} className="space-y-4">
               <div>
@@ -94,15 +96,13 @@ export default function ToolkitPage() {
             </div>
           ))}
           {error && <ErrorNote>{error}</ErrorNote>}
-          <button type="submit" disabled={busy} className="btn-saffron w-full disabled:opacity-60">
+          <button type="submit" disabled={busy} className="btn-saffron mx-auto flex w-full sm:w-auto sm:min-w-[16rem] disabled:opacity-60">
             {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} {busy ? 'Working…' : 'Generate'}
           </button>
         </form>
 
-        <div className={`${panelCls} p-5 min-h-[300px]`}>
-          {!output ? (
-            <p className="text-sm text-muted text-center py-24">Your result will appear here — you can edit it before copying.</p>
-          ) : (
+        {output && (
+        <div className="rounded-2xl border border-card-border p-5 dark:border-dark-border">
             <>
               <div className="flex items-center gap-2 mb-4">
                 <input aria-label="Title" className="flex-1 bg-transparent font-heading font-bold text-lg text-navy dark:text-dark-text outline-none"
@@ -126,9 +126,10 @@ export default function ToolkitPage() {
                 ))}
               </div>
             </>
-          )}
         </div>
+        )}
       </div>
-    </TeacherPage>
+      </div>
+    </StudyShell>
   );
 }
