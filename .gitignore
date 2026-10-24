@@ -40,3 +40,7 @@ prisma/dev.db-journal
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local Indic-Speak TTS server (tools/indic-speak)
+tools/indic-speak/.venv/
+tools/indic-speak/models/

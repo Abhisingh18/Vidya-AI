@@ -1,0 +1,11 @@
+# Local inference for bodhan-ai/indic-speak (Python 3.10+)
+torch
+transformers>=5
+snac
+soundfile
+huggingface_hub
+numpy
+pyyaml
+einops
+fastapi
+uvicorn

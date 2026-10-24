@@ -13,10 +13,11 @@
 
 import { LANGUAGES } from './languages';
 import { PIPER_LOCALES, piperReady, piperSpeak } from './piper';
+import { indicSpeak, indicSpeakConfigured, indicSpeakLocales } from './indic-speak';
 
 export const MAX_TTS_CHARS = 400;
 export type VoiceGender = 'female' | 'male';
-export type TtsProvider = 'azure' | 'piper' | 'huggingface' | 'openrouter';
+export type TtsProvider = 'azure' | 'indic-speak' | 'piper' | 'huggingface' | 'openrouter';
 
 export interface SpokenAudio { audio: ArrayBuffer; contentType: string; voice: string }
 
@@ -59,7 +60,12 @@ async function openRouterAudioReady(): Promise<boolean> {
 export async function activeProviders(freeOnly = false): Promise<TtsProvider[]> {
   const out: TtsProvider[] = [];
   if (!freeOnly && azureConfigured()) out.push('azure');
+  // The local Indic-Speak model (tools/indic-speak) — richer than Piper but slower; it is the
+  // first choice only when INDIC_SPEAK_PREFER=1, otherwise it covers what Piper cannot voice.
+  const indic = indicSpeakConfigured();
+  if (indic && process.env.INDIC_SPEAK_PREFER === '1') out.push('indic-speak');
   if (piperReady()) out.push('piper');
+  if (indic && process.env.INDIC_SPEAK_PREFER !== '1') out.push('indic-speak');
   if (!freeOnly && hfReady()) out.push('huggingface');
   if (!freeOnly && await openRouterAudioReady()) out.push('openrouter');
   return out;
@@ -69,7 +75,7 @@ export async function activeProvider(freeOnly = false): Promise<TtsProvider | nu
   return (await activeProviders(freeOnly))[0] ?? null;
 }
 
-const SLOW_PROVIDERS: TtsProvider[] = ['huggingface'];
+const SLOW_PROVIDERS: TtsProvider[] = ['huggingface', 'indic-speak'];
 
 /**
  * BCP-47 locales some active provider can voice ([] when narration is off), and
@@ -80,6 +86,7 @@ export async function supportedLocales(freeOnly = false): Promise<{ languages: s
   const first = new Map<string, TtsProvider>();
   for (const p of await activeProviders(freeOnly)) {
     const list = p === 'azure' ? await azureLocales().catch(() => [])
+      : p === 'indic-speak' ? await indicSpeakLocales()
       : p === 'piper' ? PIPER_LOCALES
       : p === 'huggingface' ? HF_LOCALES
       : ['en-IN', ...LANGUAGES.map(l => l.code)];
@@ -100,6 +107,9 @@ export async function speak(text: string, locale: string, gender: VoiceGender, f
       if (provider === 'azure') {
         const voice = await pickAzureVoice(locale, gender, text);
         if (voice) return { audio: await azureSynthesize(text, voice), contentType: 'audio/mpeg', voice: voice.ShortName };
+      } else if (provider === 'indic-speak') {
+        const spoken = await indicSpeak(text, locale, gender);
+        if (spoken) return spoken;
       } else if (provider === 'piper') {
         const spoken = await piperSpeak(text, locale, gender);
         if (spoken) return spoken;
