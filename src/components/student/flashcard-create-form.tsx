@@ -123,7 +123,7 @@ export default function StudyCreateForm({ kind, videoId, notesId, defaultTopic =
   };
 
   return (
-    <form onSubmit={submit} className="mx-auto max-w-2xl space-y-6" aria-busy={busy}>
+    <form onSubmit={submit} className="space-y-6" aria-busy={busy}>
       {notes ? (
         <div className="flex items-center gap-3 p-3 rounded-xl bg-saffron/10 border border-saffron/30">
           <NotebookText className="w-5 h-5 text-saffron shrink-0" />

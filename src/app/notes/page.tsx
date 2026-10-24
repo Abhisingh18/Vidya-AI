@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { NotebookText } from 'lucide-react';
 import { currentUser } from '@/lib/session';
+import { NotesRich } from '@/components/landing/rich-demos';
 import StudyShell, { StudySection } from '@/components/student/study-shell';
 import StudyCreateForm from '@/components/student/flashcard-create-form';
 import NotesList from '@/components/student/notes-list';
@@ -18,7 +19,10 @@ export default async function NotesPage({ searchParams }: { searchParams: Record
   return (
     <StudyShell theme="notes" icon={<NotebookText />} title="Revision Notes"
       subtitle="A one-page sheet for any topic, notes or lesson: key points, formulas and a mind map.">
-      <StudyCreateForm kind="notes" videoId={video} />
+      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,460px)]">
+        <StudyCreateForm kind="notes" videoId={video} />
+        <div className="lg:sticky lg:top-5"><NotesRich /></div>
+      </div>
       <StudySection title="Your revision sheets">
         <NotesList />
       </StudySection>

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { Layers } from 'lucide-react';
 import { currentUser } from '@/lib/session';
+import { FlashcardsRich } from '@/components/landing/rich-demos';
 import StudyShell, { StudySection } from '@/components/student/study-shell';
 import StudyCreateForm from '@/components/student/flashcard-create-form';
 import FlashcardDeckList from '@/components/student/flashcard-deck-list';
@@ -21,7 +22,10 @@ export default async function FlashcardsPage({ searchParams }: { searchParams: R
   return (
     <StudyShell theme="flash" icon={<Layers />} title="Flashcards"
       subtitle="A deck from any topic, notes or lesson video — each card returns just before you forget it.">
-      <StudyCreateForm kind="flashcards" videoId={video} notesId={notes} defaultTopic={topic} />
+      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,460px)]">
+        <StudyCreateForm kind="flashcards" videoId={video} notesId={notes} defaultTopic={topic} />
+        <div className="lg:sticky lg:top-5"><FlashcardsRich /></div>
+      </div>
       <StudySection title="Your decks">
         <FlashcardDeckList />
       </StudySection>

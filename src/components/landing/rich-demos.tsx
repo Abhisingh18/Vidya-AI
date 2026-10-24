@@ -149,3 +149,52 @@ export function XpRich() {
     </Frame>
   );
 }
+
+// ── Revision notes: one-liner, key points, formula, mind map ─────────
+
+const BRANCHES = [
+  { l: 'Inputs', e: '☀️', x: 14, y: 20, c: '#FF6B1A' },
+  { l: 'Outputs', e: '🍬', x: 86, y: 20, c: '#6366F1' },
+  { l: 'Where', e: '🍃', x: 50, y: 88, c: '#14B8A6' },
+];
+
+export function NotesRich() {
+  const t = useTick(1300, 8);
+  return (
+    <Frame label="Revision notes · live preview" footer={<>
+      <span className={chip}>Mind map</span>
+      <span className={chip}>Formulas</span>
+      <span className={chip}>Printable</span>
+    </>}>
+      <div className="rounded-2xl bg-white p-4 text-navy shadow-2xl sm:p-5">
+        <div className={`rounded-xl bg-gradient-to-r from-saffron/15 to-indigo-brand/10 p-3 transition-all duration-500 ${t >= 0 ? 'ph-rise' : ''}`}>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-saffron">In one line</p>
+          <p className="font-heading text-sm font-extrabold sm:text-base">Plants turn light, water and CO₂ into food and oxygen.</p>
+        </div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <ol className="space-y-1.5 text-xs">
+            {['Happens in chloroplasts', 'Needs sunlight', 'Releases oxygen'].map((k, i) => (
+              <li key={k} className={`flex items-center gap-2 transition-all duration-500 ${t >= i + 1 ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'}`}>
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-saffron text-[10px] font-bold text-white">{i + 1}</span>{k}
+              </li>
+            ))}
+            <li className={`mt-2 rounded-lg bg-[#1a1a2e] px-3 py-2 font-heading text-[11px] font-bold text-white transition-all duration-500 ${t >= 4 ? 'ph-pop' : 'opacity-0'}`}>6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂</li>
+          </ol>
+          <div className="relative h-32 rounded-xl bg-off-white">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
+              {BRANCHES.map((b, i) => (
+                <line key={b.l} x1="50" y1="50" x2={b.x} y2={b.y} stroke={b.c} strokeWidth="1.2" strokeDasharray="60" strokeDashoffset={t >= 5 + Math.min(i, 2) * 0 ? 0 : 60} style={{ transition: `stroke-dashoffset 0.8s ${i * 0.25}s ease-out` }} />
+              ))}
+            </svg>
+            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-gradient-to-br from-saffron to-orange-600 px-2 py-1 text-[10px] font-bold text-white shadow-saffron">🌱 Photosynthesis</span>
+            {BRANCHES.map((b, i) => (
+              <span key={b.l} className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-md border bg-white px-1.5 py-0.5 text-[10px] font-bold transition-all duration-500 ${t >= 5 ? 'scale-100 opacity-100' : 'scale-50 opacity-0'}`}
+                style={{ left: `${b.x}%`, top: `${b.y}%`, borderColor: b.c, color: b.c, transitionDelay: `${0.3 + i * 0.25}s` }}>{b.e} {b.l}</span>
+            ))}
+          </div>
+        </div>
+        <p className={`mt-3 rounded-lg bg-teal/10 px-3 py-1.5 text-[11px] font-semibold text-teal transition-all duration-500 ${t >= 7 ? 'ph-pop' : 'opacity-0'}`}>✅ Q: Where does it happen? — Chloroplasts</p>
+      </div>
+    </Frame>
+  );
+}

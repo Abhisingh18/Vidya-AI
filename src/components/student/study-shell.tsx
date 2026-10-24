@@ -30,10 +30,11 @@ export function AccentStrip() { return null; }
 export function Cover({ theme, emoji, badge }: { theme: StudyTheme; emoji: string; badge?: ReactNode }) {
   return (
     <div className={`relative h-24 overflow-hidden bg-gradient-to-br ${THEMES[theme].cover}`}>
-      <span aria-hidden className="absolute -right-6 -top-8 h-28 w-28 rounded-full bg-white/15" />
-      <span aria-hidden className="absolute -bottom-10 left-1/3 h-24 w-24 rounded-full bg-black/10" />
+      <span aria-hidden className="ph-drift absolute -right-6 -top-8 h-28 w-28 rounded-full bg-white/15" />
+      <span aria-hidden className="ph-drift absolute -bottom-10 left-1/3 h-24 w-24 rounded-full bg-black/10 [animation-delay:-6s]" />
+      <span aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_20%_120%,rgba(255,255,255,0.28),transparent_55%)]" />
       <span aria-hidden className="absolute bottom-3 right-16 h-3 w-3 rounded-full bg-white/50" />
-      <span className="absolute bottom-3 left-5 text-4xl drop-shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6" style={{ fontFamily: '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif' }}>{emoji}</span>
+      <span className="ph-float absolute bottom-3 left-5 text-4xl drop-shadow-md transition-transform duration-300 group-hover:scale-125 group-hover:-rotate-6" style={{ fontFamily: '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif' }}>{emoji}</span>
       {badge && <div className="absolute right-3 top-3">{badge}</div>}
     </div>
   );

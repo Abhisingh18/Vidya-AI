@@ -44,7 +44,7 @@ export default function MockCreateForm({ defaultTopics = '', defaultSubject = ''
   };
 
   return (
-    <form onSubmit={submit} className="ph-stagger mx-auto max-w-2xl space-y-6">
+    <form onSubmit={submit} className="ph-stagger space-y-6">
       <div>
         <label className={labelCls} htmlFor="mock-subject">Subject</label>
         <div className="ph-glow"><input id="mock-subject" className={`${inputCls} !h-14 !rounded-2xl text-base`} value={subject} onChange={e => setSubject(e.target.value)} placeholder="e.g. Science" maxLength={100} /></div>
