@@ -16,8 +16,8 @@ export interface ShowcaseFeature { icon: ComponentType<{ className?: string }>; 
 const RICH: Partial<Record<FeatureDemoId, ComponentType>> = {
   slides: SlidesDemo, quiz: QuizDemo, lesson: LessonDemo, flashcards: FlashcardsRich, mock: MockRich, xp: XpRich,
 };
-const BASE_W = 260;
-const BASE_H = 124;
+const BASE_W = 270;
+const BASE_H = 144;
 const SECONDS = 7;
 
 /** The small card demos, blown up to fill the stage. */
