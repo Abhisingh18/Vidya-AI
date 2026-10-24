@@ -12,12 +12,12 @@ export default async function PracticePage({ searchParams }: { searchParams: { t
   if (!(await currentUser())) redirect(`/login?callbackUrl=${encodeURIComponent('/practice')}`);
   return (
     <StudyShell theme="mock" icon={<ClipboardCheck />} title="Mock Tests"
-      subtitle="Timed tests from your chapters or syllabus. MCQs are checked instantly, written answers get AI feedback, and you see which chapters need work.">
+      subtitle="Timed practice from your chapters, checked instantly.">
       <MockCreateForm
         defaultTopics={typeof searchParams.topic === 'string' ? searchParams.topic.slice(0, 2000) : ''}
         defaultSubject={typeof searchParams.subject === 'string' ? searchParams.subject.slice(0, 100) : ''}
         defaultLength={searchParams.length} />
-      <StudySection title="Your tests" hint="Retake a test to beat your best score">
+      <StudySection title="Your tests">
         <MockList />
       </StudySection>
     </StudyShell>
