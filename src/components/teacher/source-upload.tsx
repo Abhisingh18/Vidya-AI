@@ -5,7 +5,7 @@
 // (loaded only when a PDF is chosen), PPTX/DOCX by reading their XML with JSZip,
 // TXT/MD as is — so nothing but text is ever sent to the server.
 import { useEffect, useRef, useState } from 'react';
-import { ClipboardPaste, FileText, Loader2, Presentation, TriangleAlert, Type, Upload, X } from 'lucide-react';
+import { ClipboardPaste, FileText, Plus, Loader2, Presentation, TriangleAlert, Type, Upload, X } from 'lucide-react';
 import {
   cleanText, fitSources, MAX_SOURCE_BYTES, MAX_SOURCE_CHARS, MAX_SOURCE_FILES,
   type SourceFile, type SourceKind,
@@ -22,6 +22,8 @@ export interface SourceUploadProps {
   topic?: string;
   /** Title above the drop zone. */
   label?: string;
+  /** Just a "+" button (and paste) with the added files as chips: sits inside a field's box. */
+  compact?: boolean;
 }
 
 /** Text kept per file before trimming to MAX_SOURCE_CHARS (re-trimmed when the topic changes). */
@@ -296,7 +298,7 @@ const KIND_TINT: Record<SourceKind, string> = {
 interface Pending { id: number; name: string; status: string }
 interface Notice { id: number; text: string; paste?: boolean }
 
-export default function SourceUpload({ files, onChange, hint, disabled, topic, label = 'Your material' }: SourceUploadProps) {
+export default function SourceUpload({ files, onChange, hint, disabled, topic, label = 'Your material', compact = false }: SourceUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<Pending[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -396,7 +398,20 @@ export default function SourceUpload({ files, onChange, hint, disabled, topic, l
 
   return (
     <div className="space-y-2">
-      <div className="flex items-baseline justify-between gap-3">
+      {compact && (
+        <div className="flex items-center gap-1.5">
+          <button type="button" onClick={() => inputRef.current?.click()} disabled={locked} title="Add files: PDF, PPTX, DOCX, TXT" aria-label="Add files"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-card-border text-saffron transition hover:border-saffron hover:bg-saffron/10 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-border">
+            <Plus className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={() => setPasting(v => !v)} disabled={disabled || (atLimit && !pasting)} aria-expanded={pasting} title="Paste text instead" aria-label="Paste text instead"
+            className={`flex h-8 w-8 items-center justify-center rounded-full border transition disabled:cursor-not-allowed disabled:opacity-50 ${pasting ? 'border-saffron bg-saffron/10 text-saffron' : 'border-card-border text-muted hover:border-saffron hover:text-saffron dark:border-dark-border'}`}>
+            <ClipboardPaste className="h-4 w-4" />
+          </button>
+          {!files.length && !pending.length && <span className="ml-1 text-xs text-muted">Add a file (optional)</span>}
+        </div>
+      )}
+      {!compact && <div className="flex items-baseline justify-between gap-3">
         <p className={`${labelCls} !mb-0`}>
           {label} <span className="normal-case font-normal tracking-normal">(optional{files.length ? ` · ${files.length}/${MAX_SOURCE_FILES}` : ''})</span>
         </p>
@@ -404,8 +419,8 @@ export default function SourceUpload({ files, onChange, hint, disabled, topic, l
           className="inline-flex items-center gap-1 text-xs font-medium text-saffron hover:underline disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed">
           <ClipboardPaste className="w-3.5 h-3.5" /> {pasting ? 'Close paste box' : 'Paste text instead'}
         </button>
-      </div>
-      {hint && <p className="text-xs text-muted">{hint}</p>}
+      </div>}
+      {hint && !compact && <p className="text-xs text-muted">{hint}</p>}
 
       {pasting && (
         <div className="space-y-2">
@@ -420,7 +435,7 @@ export default function SourceUpload({ files, onChange, hint, disabled, topic, l
         </div>
       )}
 
-      {!pasting && (
+      {!pasting && !compact && (
         <button type="button" disabled={locked}
           onClick={() => inputRef.current?.click()}
           onDragOver={e => { e.preventDefault(); if (!locked) setDrag(true); }}

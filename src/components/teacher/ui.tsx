@@ -9,6 +9,17 @@ export const textareaCls = inputCls.replace('h-11', 'min-h-[88px] py-2.5 resize-
 export const labelCls = 'block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5';
 export const panelCls = 'bg-white dark:bg-dark-surface border border-card-border dark:border-dark-border rounded-2xl shadow-card dark:shadow-card-dark';
 
+/** Chat-style box: the field on top, a toolbar (the "+" upload) along the bottom. */
+export function ComposerBox({ children, footer }: { children: ReactNode; footer: ReactNode }) {
+  return (
+    <div className="rounded-2xl border-2 border-card-border bg-white transition-all focus-within:border-saffron focus-within:ring-2 focus-within:ring-saffron/20 dark:border-dark-border dark:bg-dark-bg">
+      {children}
+      <div className="px-2.5 pb-2.5">{footer}</div>
+    </div>
+  );
+}
+export const bareFieldCls = 'block w-full resize-none bg-transparent px-3.5 pt-3 pb-1 text-sm text-navy outline-none placeholder:text-muted dark:text-dark-text';
+
 export function TeacherPage({ children }: { children: ReactNode }) {
   return (
     <main className="min-h-screen bg-off-white dark:bg-dark-bg">

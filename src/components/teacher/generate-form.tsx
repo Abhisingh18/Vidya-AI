@@ -5,19 +5,13 @@ import { useRouter } from 'next/navigation';
 import { Loader2, Sparkles } from 'lucide-react';
 import { DOC_TYPES, GRADES, LANGUAGES, type GeneratedDocType } from '@/lib/teacher-docs';
 import type { SourceFile } from '@/lib/source';
-import { api, ErrorNote, inputCls, labelCls, textareaCls } from './ui';
+import { api, bareFieldCls, ComposerBox, ErrorNote, inputCls, labelCls, textareaCls } from './ui';
 import SourceUpload from './source-upload';
 
 const WAIT_COPY: Record<GeneratedDocType, string> = {
   slides: 'Designing your slides…',
   quiz: 'Writing questions and answers…',
   lesson: 'Planning your class period…',
-};
-
-const SOURCE_HINT: Record<GeneratedDocType, string> = {
-  slides: 'Upload your syllabus, notes, a textbook chapter or an old PPT — the slides will follow it.',
-  quiz: 'Upload the chapter or your notes — every question will come from this material.',
-  lesson: 'Upload the syllabus or chapter — the plan will follow its sequence and examples.',
 };
 
 export default function GenerateForm({ type, defaultTopic = '' }: { type: GeneratedDocType; defaultTopic?: string }) {
@@ -59,14 +53,14 @@ export default function GenerateForm({ type, defaultTopic = '' }: { type: Genera
         <label className={labelCls} htmlFor="topic">
           Topic {sources.length > 0 && <span className="normal-case font-normal tracking-normal">(optional with an upload)</span>}
         </label>
-        <input id="topic" className={inputCls} value={topic} onChange={e => setTopic(e.target.value)}
+        <ComposerBox footer={<SourceUpload compact files={sources} onChange={setSources} topic={topic} disabled={busy} />}>
+          <input id="topic" className={`${bareFieldCls} h-11`} value={topic} onChange={e => setTopic(e.target.value)}
           placeholder={sources.length
             ? 'Optional: narrow it down, e.g. Chapter 3 or Laws of motion'
             : 'e.g. Photosynthesis, Quadratic equations — optional if you upload a file'}
           required={!sources.length} maxLength={200} />
+        </ComposerBox>
       </div>
-
-      <SourceUpload files={sources} onChange={setSources} topic={topic} hint={SOURCE_HINT[type]} disabled={busy} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div>

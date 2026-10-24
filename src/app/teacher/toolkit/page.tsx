@@ -5,7 +5,7 @@ import { ArrowRight, BookMarked, Check, Copy, FileText, Languages, ListChecks, L
 import { TOOLS, type ToolDef, type ToolId, type ToolOutput } from '@/lib/toolkit';
 import { GRADES, LANGUAGES } from '@/lib/teacher-docs';
 import type { SourceFile } from '@/lib/source';
-import { api, ErrorNote, inputCls, labelCls, textareaCls } from '@/components/teacher/ui';
+import { api, bareFieldCls, ComposerBox, ErrorNote, inputCls, labelCls, textareaCls } from '@/components/teacher/ui';
 import SourceUpload from '@/components/teacher/source-upload';
 
 const TOOL_ICON: Record<ToolId, LucideIcon> = { rubric: ListChecks, ncert: BookMarked, translate: Languages, parent: MessageCircleHeart };
@@ -109,7 +109,17 @@ export default function ToolkitPage() {
                     {f.label}
                     {f.required && sources.length > 0 && <span className="normal-case font-normal tracking-normal"> (optional with an upload)</span>}
                   </label>
-                  {f.kind === 'textarea' ? (
+                  {i === 0 && (f.kind === 'textarea' || f.kind === 'text') ? (
+                    <ComposerBox footer={<SourceUpload key={tool.id} compact files={sources} onChange={setSources} topic={focus} disabled={busy} />}>
+                      {f.kind === 'textarea' ? (
+                        <textarea className={`${bareFieldCls} ${sources.length ? 'min-h-[72px]' : 'min-h-[110px]'}`} required={f.required && !sources.length} placeholder={f.placeholder}
+                          value={input[f.name] ?? ''} onChange={e => setInput(v => ({ ...v, [f.name]: e.target.value }))} />
+                      ) : (
+                        <input className={`${bareFieldCls} h-11`} required={f.required && !sources.length} placeholder={f.placeholder}
+                          value={input[f.name] ?? ''} onChange={e => setInput(v => ({ ...v, [f.name]: e.target.value }))} />
+                      )}
+                    </ComposerBox>
+                  ) : f.kind === 'textarea' ? (
                     <textarea className={`${textareaCls} ${sources.length ? 'min-h-[88px]' : 'min-h-[120px]'}`} required={f.required && !sources.length} placeholder={f.placeholder}
                       value={input[f.name] ?? ''} onChange={e => setInput(v => ({ ...v, [f.name]: e.target.value }))} />
                   ) : f.kind === 'text' ? (
@@ -123,10 +133,6 @@ export default function ToolkitPage() {
                     </select>
                   )}
                 </div>
-                {/* The upload sits right under the tool's main input: type it, upload it, or both. */}
-                {i === 0 && (
-                  <SourceUpload key={tool.id} files={sources} onChange={setSources} hint={tool.sourceHint} topic={focus} disabled={busy} />
-                )}
               </div>
             ))}
             {error && <ErrorNote>{error}</ErrorNote>}
