@@ -7,7 +7,6 @@ import { LANGUAGES } from '@/lib/languages';
 import { speechCode } from '@/lib/speak';
 import { api, ErrorNote, panelCls, Spinner } from '@/components/teacher/ui';
 import Pill from '@/components/generate/pill';
-import GenerateBackdrop from '@/components/generate/backdrop';
 import { LogoMark } from '@/components/brand/logo';
 import { compressImage, type PhotoData } from './doubt-photo';
 import DoubtResult from './doubt-result';
@@ -277,8 +276,9 @@ export default function DoubtSolver({ initialId }: { initialId?: string }) {
   );
 
   return (
-    <main ref={topRef} className="relative min-h-screen scroll-mt-24 overflow-x-clip bg-off-white dark:bg-dark-bg">
-      <GenerateBackdrop quiet={!idle} />
+    <main ref={topRef} className="min-h-screen scroll-mt-24 bg-off-white px-3 pb-3 pt-20 sm:px-5 lg:pt-5 dark:bg-dark-bg">
+      {/* the whole doubt solver sits in one box that fills the screen */}
+      <div className="relative mx-auto flex min-h-[calc(100vh-1.5rem)] max-w-6xl flex-col rounded-3xl border border-card-border bg-white shadow-card lg:min-h-[calc(100vh-2.5rem)] dark:border-dark-border dark:bg-dark-surface dark:shadow-card-dark">
       {xp > 0 && (
         <div role="status" className="fixed left-1/2 top-6 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full bg-navy px-5 py-2.5 text-sm font-semibold text-white shadow-lg animate-fade-in">
           <Sparkles className="h-4 w-4 text-saffron" /> +{xp} XP — doubt solved!
@@ -286,7 +286,7 @@ export default function DoubtSolver({ initialId }: { initialId?: string }) {
       )}
 
       {/* history */}
-      <div className="absolute right-4 top-20 z-30 sm:right-6 lg:top-6">
+      <div className="absolute right-4 top-4 z-30 sm:right-6">
         <button type="button" onClick={() => setHistoryOpen(o => !o)} aria-expanded={historyOpen}
           className="inline-flex items-center gap-1.5 rounded-full border border-card-border bg-white/90 px-3.5 py-2 text-xs font-semibold text-navy shadow-sm backdrop-blur transition-colors hover:border-saffron/50 hover:text-saffron dark:border-dark-border dark:bg-dark-surface/90 dark:text-dark-text">
           <History className="h-4 w-4" /> My doubts{history.length ? ` · ${history.length}` : ''}
@@ -303,9 +303,9 @@ export default function DoubtSolver({ initialId }: { initialId?: string }) {
         </div>
       )}
 
-      <div className="relative mx-auto max-w-4xl px-4 pt-24 sm:px-6">
+      <div className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 pt-16 sm:px-6">
         {idle ? (
-          <section className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center pb-16 text-center">
+          <section className="flex flex-1 flex-col items-center justify-center pb-16 text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-saffron/20 bg-white/80 px-3 py-1 text-xs font-medium text-saffron backdrop-blur dark:bg-dark-surface/80">
               <Camera className="h-3 w-3" /> Doubt solver
             </div>
@@ -364,7 +364,7 @@ export default function DoubtSolver({ initialId }: { initialId?: string }) {
                 </div>
               </div>
             </div>
-            <div className="sticky bottom-0 z-30 -mx-4 bg-gradient-to-t from-off-white via-off-white/95 to-transparent px-4 pb-4 pt-10 sm:-mx-6 sm:px-6 dark:from-dark-bg dark:via-dark-bg/95">
+            <div className="sticky bottom-0 z-30 -mx-4 mt-auto bg-gradient-to-t from-white via-white/95 to-transparent px-4 pb-4 pt-10 sm:-mx-6 sm:px-6 dark:from-dark-surface dark:via-dark-surface/95">
               {errorNote}
               {!busy && current && (
                 <div className="mb-2 flex justify-center">
@@ -378,6 +378,7 @@ export default function DoubtSolver({ initialId }: { initialId?: string }) {
             </div>
           </>
         )}
+      </div>
       </div>
     </main>
   );
