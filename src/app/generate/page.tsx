@@ -18,6 +18,7 @@ import Pill from '@/components/generate/pill';
 import { LogoMark } from '@/components/brand/logo';
 import { LANGUAGES as ALL_LANGUAGES } from '@/lib/languages';
 import { deriveTopic, type SourceFile } from '@/lib/source';
+import { takeDoubtVideo } from '@/lib/doubt-video';
 import {
   EXPLAINER_FORMAT, TARGET_MINUTES, explainerDuration, explainerToScript,
   type ExplainerContent, type ExplainerOutline, type ExplainerScene,
@@ -461,6 +462,7 @@ function GeneratePageInner() {
   const [sources, setSources]       = useState<SourceFile[]>([]);
   const [notesOpen, setNotesOpen]   = useState(false);
   const [asked, setAsked]           = useState<Asked | null>(null);
+  const [autoRun, setAutoRun]       = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Classic generator
@@ -772,6 +774,20 @@ function GeneratePageInner() {
     setAsked({ topic: topic.trim() || deriveTopic(sources), mode, language, grade, voiceType, notes: mode === 'explainer' ? sources.length : 0 });
     if (mode === 'explainer') startExplainer(); else handleGenerate();
   };
+  // A solved doubt sent here ("Video" in Ask a doubt): fill in its question and solution, then start.
+  useEffect(() => {
+    const h = takeDoubtVideo();
+    if (!h) return;
+    setMode('explainer');
+    setTopic(h.topic); setSources(h.sources); setGrade(h.grade); setLanguage(h.language);
+    setAutoRun(true);
+  }, []);
+  useEffect(() => {
+    if (!autoRun || !topic || !sources.length) return;
+    setAutoRun(false);
+    submit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoRun, topic, sources]);
   // Nothing asked yet (or the last request was in the other mode): show the start screen.
   const idle = mode === 'explainer' ? !job : !isGenerating && !generationDone;
 

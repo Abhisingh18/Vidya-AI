@@ -2,12 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
-  AlertTriangle, CheckCircle2, Eye, EyeOff, Lightbulb, ListOrdered, MessageCircle, PenLine, PlayCircle, Square, Volume2, Wand2,
+  AlertTriangle, CheckCircle2, Clapperboard, Eye, EyeOff, FileText, Lightbulb, ListOrdered, MessageCircle, PenLine, PlayCircle, Square, Volume2, Wand2,
 } from 'lucide-react';
 import type { Doubt } from '@/app/api/student/doubt/solver';
 import { getTtsStatus, speak, speechCode, stopSpeaking, useSpeakingId } from '@/lib/speak';
 import { api, panelCls } from '@/components/teacher/ui';
+import { buildDoubtVideo, stashDoubtVideo } from '@/lib/doubt-video';
 import DoubtFollowup, { type ChatMsg } from './doubt-followup';
 import { nativeName, SubjectPill } from './doubt-history';
 
@@ -15,6 +17,7 @@ const SIMPLER_PROMPT = 'Explain this more simply, please.';
 
 /** Hint-first view of a solved doubt: question → hints one by one → full solution → practice. */
 export default function DoubtResult({ id, doubt }: { id: string; doubt: Doubt }) {
+  const router = useRouter();
   const [hintsShown, setHintsShown] = useState(0);
   const [solution, setSolution] = useState(doubt.hints.length === 0);
   const [practiceAnswer, setPracticeAnswer] = useState(false);
@@ -31,6 +34,12 @@ export default function DoubtResult({ id, doubt }: { id: string; doubt: Doubt })
     getTtsStatus(); // warm up, so "Read aloud" starts quickly
     return () => stopSpeaking();
   }, []);
+
+  const watchVideo = () => {
+    stopSpeaking();
+    stashDoubtVideo(buildDoubtVideo(doubt));
+    router.push('/generate');
+  };
 
   const showSolution = () => {
     setSolution(true);
@@ -79,6 +88,16 @@ export default function DoubtResult({ id, doubt }: { id: string; doubt: Doubt })
 
   return (
     <div className="space-y-4">
+      {/* Answer as: text (this page) or a video made from this solution */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div role="tablist" aria-label="Answer format" className="inline-flex rounded-2xl border border-card-border bg-off-white p-1 dark:border-dark-border dark:bg-dark-bg">
+          <button role="tab" aria-selected className="inline-flex h-10 items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-saffron shadow-card dark:bg-dark-surface"><FileText className="h-4 w-4" /> Text</button>
+          <button role="tab" aria-selected={false} onClick={watchVideo} data-testid="doubt-video"
+            className="inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-muted transition hover:text-saffron"><Clapperboard className="h-4 w-4" /> Video</button>
+        </div>
+        <p className="hidden text-xs text-muted sm:block">Prefer to watch? Get this exact solution as a narrated video.</p>
+      </div>
+
       {/* Question */}
       <section className={`${panelCls} p-5`}>
         <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -214,7 +233,7 @@ export default function DoubtResult({ id, doubt }: { id: string; doubt: Doubt })
           <ActionButton onClick={() => openChat(false)} active={chatOpen} icon={<MessageCircle className="w-4 h-4" />} label="Ask a follow-up" />
           <Link href={`/generate?topic=${encodeURIComponent(doubt.topic || doubt.chapter || doubt.subject)}`}
             className="inline-flex items-center justify-center gap-2 h-11 px-3 rounded-xl bg-indigo-brand text-white text-sm font-semibold hover:bg-indigo-brand-600 transition-colors text-center">
-            <PlayCircle className="w-4 h-4 shrink-0" /> <span className="truncate">Watch a video</span>
+            <PlayCircle className="w-4 h-4 shrink-0" /> <span className="truncate">Topic video</span>
           </Link>
         </div>
         {noVoice && (
@@ -229,6 +248,20 @@ export default function DoubtResult({ id, doubt }: { id: string; doubt: Doubt })
           <DoubtFollowup messages={chat} busy={chatBusy} langCode={lang} onSend={t => send(t)} onNoVoice={() => setNoVoice(true)} />
         </section>
       )}
+      <section className="relative overflow-hidden rounded-3xl bg-[#1a1a2e] p-5 text-white sm:p-6">
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div className="gen-aurora absolute -left-10 -top-16 h-56 w-56 rounded-full bg-saffron/35 blur-[80px]" />
+          <div className="gen-aurora absolute -right-10 bottom-0 h-48 w-48 rounded-full bg-rose-500/25 blur-[80px] [animation-delay:-7s]" />
+        </div>
+        <div className="relative flex flex-wrap items-center gap-4">
+          <span className="ph-pulse flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-saffron to-orange-600 shadow-saffron"><Clapperboard className="h-6 w-6" /></span>
+          <div className="min-w-0 flex-1">
+            <p className="font-heading text-lg font-extrabold">Watch this solution as a video</p>
+            <p className="text-sm text-white/70">A narrated, animated explanation of this exact question, in {nativeName(doubt.language)}.</p>
+          </div>
+          <button type="button" onClick={watchVideo} className="btn-saffron !px-6 !py-3 text-sm"><PlayCircle className="h-5 w-5" /> Make the video</button>
+        </div>
+      </section>
     </div>
   );
 }

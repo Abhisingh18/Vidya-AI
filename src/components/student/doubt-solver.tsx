@@ -1,7 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowUp, Camera, GraduationCap, History, ImagePlus, Languages, Loader2, Sparkles, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ArrowUp, Camera, Clapperboard, FileText, GraduationCap, History, ImagePlus, Languages, Loader2, Sparkles, X } from 'lucide-react';
+import { buildDoubtVideo, stashDoubtVideo } from '@/lib/doubt-video';
 import type { Doubt, DoubtSummary } from '@/app/api/student/doubt/solver';
 import { LANGUAGES } from '@/lib/languages';
 import { speechCode } from '@/lib/speak';
@@ -16,6 +18,7 @@ import VoiceInput from './voice-input';
 const GRADES = ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 'College'];
 const LANG_KEY = 'vidyaai-doubt-language';
 const GRADE_KEY = 'vidyaai-doubt-grade';
+const FORMAT_KEY = 'vidyaai-doubt-format';
 const MAX_TEXT = 2000;
 
 const PHASES_PHOTO = ['Reading your photo…', 'Understanding the question…', 'Working out the steps…', 'Writing hints and a practice question…'];
@@ -35,6 +38,8 @@ const gradeName = (g: string) => (g === 'College' ? 'College' : `Class ${g}`);
 type SolveError = { message: string; unreadable?: boolean };
 
 export default function DoubtSolver({ initialId }: { initialId?: string }) {
+  const router = useRouter();
+  const [answerAs, setAnswerAs] = useState<'text' | 'video'>('text');
   const [language, setLanguage] = useState('English');
   const [grade, setGrade] = useState('9');
   const [photo, setPhoto] = useState<PhotoData | null>(null);
@@ -67,6 +72,7 @@ export default function DoubtSolver({ initialId }: { initialId?: string }) {
     if (l && LANGUAGES.some(x => x.name === l)) setLanguage(l);
     const g = store.get(GRADE_KEY);
     if (g && GRADES.includes(g)) setGrade(g);
+    if (store.get(FORMAT_KEY) === 'video') setAnswerAs('video');
   }, []);
   const chooseLanguage = (l: string) => { setLanguage(l); store.set(LANG_KEY, l); };
   const chooseGrade = (g: string) => { setGrade(g); store.set(GRADE_KEY, g); };
@@ -161,6 +167,8 @@ export default function DoubtSolver({ initialId }: { initialId?: string }) {
       setText('');
       setUrl(id);
       scrollTop();
+      // "Video" was chosen up front: go straight to making the video from this solution.
+      if (answerAs === 'video') { stashDoubtVideo(buildDoubtVideo(doubt)); router.push('/generate'); }
     } catch (err) {
       if ((err as Error).name !== 'AbortError') setError({ message: 'Network error — check your internet and try again.' });
     } finally {
@@ -240,6 +248,10 @@ export default function DoubtSolver({ initialId }: { initialId?: string }) {
         <Pill icon={<GraduationCap className="h-3.5 w-3.5" />} title="Class" up={docked} disabled={busy}
           label={gradeName(grade)} value={grade} onChange={chooseGrade}
           options={GRADES.map(g => ({ value: g, label: gradeName(g) }))} />
+        <Pill icon={answerAs === 'video' ? <Clapperboard className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5" />} title="Answer as" up={docked} disabled={busy}
+          label={answerAs === 'video' ? 'Video' : 'Text'} value={answerAs}
+          onChange={v => { setAnswerAs(v); store.set(FORMAT_KEY, v); }}
+          options={[{ value: 'text', label: 'Text', hint: 'Step-by-step answer here', icon: '📝' }, { value: 'video', label: 'Video', hint: 'Narrated, animated explanation', icon: '🎬' }]} />
         <button type="submit" disabled={!ready || busy || listening} aria-label="Solve my doubt" title="Solve (Enter)"
           className="ml-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-saffron text-white shadow-saffron transition-all hover:scale-105 disabled:cursor-not-allowed disabled:bg-card-border disabled:text-muted disabled:shadow-none dark:disabled:bg-dark-border">
           {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowUp className="h-5 w-5" />}
