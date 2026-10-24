@@ -36,7 +36,7 @@ export default function MockList() {
             <p className="text-xs text-muted mt-1">Class {t.grade} · {t.language} · {t.questionCount} questions · {t.minutes} min · {t.maxScore} marks</p>
             <div className="mt-4 flex items-center gap-2">
               {t.bestPct === null ? <span className="pill-saffron font-semibold">Not attempted</span> : (
-                <span className={`pill font-semibold ${t.bestPct >= 75 ? 'bg-teal/10 text-teal' : t.bestPct >= 50 ? 'bg-amber-400/15 text-amber-600' : 'bg-red-500/10 text-red-500'}`}>
+                <span className={`pill font-semibold ${t.bestPct >= 75 ? 'bg-saffron text-white' : t.bestPct >= 50 ? 'bg-saffron/15 text-orange-700' : 'bg-gray-100 text-muted dark:bg-dark-border'}`}>
                   Best {t.bestPct}%{t.bestPending ? ' (grading…)' : ''}
                 </span>
               )}

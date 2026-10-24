@@ -7,16 +7,17 @@ import type { ReactNode } from 'react';
 
 export type StudyTheme = 'flash' | 'notes' | 'mock' | 'plan';
 
+// One colour for every studio: the VidyaAI saffron.
 export const THEMES: Record<StudyTheme, { tile: string; cover: string; wash: string; text: string; soft: string; dot: string }> = {
-  flash: { tile: 'from-indigo-500 to-violet-600', cover: 'from-indigo-500 via-violet-500 to-fuchsia-500', wash: 'from-indigo-500/[0.14] via-violet-500/[0.07]', text: 'text-indigo-600 dark:text-indigo-300', soft: 'bg-indigo-500/10', dot: 'bg-indigo-500' },
-  notes: { tile: 'from-emerald-500 to-teal-600', cover: 'from-emerald-500 via-teal-500 to-cyan-500', wash: 'from-emerald-500/[0.14] via-teal-500/[0.07]', text: 'text-emerald-600 dark:text-emerald-300', soft: 'bg-emerald-500/10', dot: 'bg-emerald-500' },
-  mock: { tile: 'from-orange-500 to-rose-500', cover: 'from-orange-500 via-rose-500 to-pink-500', wash: 'from-orange-500/[0.14] via-rose-500/[0.07]', text: 'text-orange-600 dark:text-orange-300', soft: 'bg-orange-500/10', dot: 'bg-orange-500' },
-  plan: { tile: 'from-sky-500 to-blue-600', cover: 'from-sky-500 via-blue-500 to-indigo-500', wash: 'from-sky-500/[0.14] via-blue-500/[0.07]', text: 'text-sky-600 dark:text-sky-300', soft: 'bg-sky-500/10', dot: 'bg-sky-500' },
+  flash: { tile: 'from-saffron to-orange-600', cover: 'from-orange-400 via-saffron to-orange-600', wash: '', text: 'text-saffron', soft: 'bg-saffron/10', dot: 'bg-saffron' },
+  notes: { tile: 'from-saffron to-orange-600', cover: 'from-orange-400 via-saffron to-orange-600', wash: '', text: 'text-saffron', soft: 'bg-saffron/10', dot: 'bg-saffron' },
+  mock: { tile: 'from-saffron to-orange-600', cover: 'from-orange-400 via-saffron to-orange-600', wash: '', text: 'text-saffron', soft: 'bg-saffron/10', dot: 'bg-saffron' },
+  plan: { tile: 'from-saffron to-orange-600', cover: 'from-orange-400 via-saffron to-orange-600', wash: '', text: 'text-saffron', soft: 'bg-saffron/10', dot: 'bg-saffron' },
 };
 
 /** Card around a studio's create form. */
 export const studioCardCls =
-  'relative rounded-3xl border border-card-border bg-white p-5 shadow-card sm:p-7 dark:border-dark-border dark:bg-dark-surface dark:shadow-card-dark';
+  'relative rounded-2xl border border-card-border bg-off-white/70 p-5 sm:p-6 dark:border-dark-border dark:bg-dark-bg/60';
 
 /** Card of a saved item: lifts on hover. */
 export const itemCardCls =
@@ -42,11 +43,11 @@ export default function StudyShell({ theme, icon, title, subtitle, children }: {
 }) {
   const t = THEMES[theme];
   return (
-    <main className="relative min-h-screen overflow-x-clip bg-off-white dark:bg-dark-bg">
-      <div aria-hidden className={`pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b ${t.wash} to-transparent`} />
-      <div className="relative mx-auto max-w-6xl px-4 pb-20 pt-24 sm:px-6">
-        <header className="mb-7 flex items-start gap-4">
-          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${t.tile} text-white shadow-lg [&>svg]:h-6 [&>svg]:w-6`}>{icon}</div>
+    <main className="min-h-screen bg-off-white px-3 pb-3 pt-20 sm:px-5 lg:pt-5 dark:bg-dark-bg">
+      {/* the whole studio sits in one box that fills the screen */}
+      <div className="mx-auto min-h-[calc(100vh-1.5rem)] max-w-6xl rounded-3xl border border-card-border bg-white p-5 shadow-card sm:p-8 lg:min-h-[calc(100vh-2.5rem)] dark:border-dark-border dark:bg-dark-surface dark:shadow-card-dark">
+        <header className="mb-7 flex items-start gap-4 border-b border-card-border pb-6 dark:border-dark-border">
+          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${t.tile} text-white shadow-saffron [&>svg]:h-6 [&>svg]:w-6`}>{icon}</div>
           <div className="min-w-0">
             <h1 className="font-heading text-2xl font-extrabold tracking-tight text-navy sm:text-3xl dark:text-dark-text">{title}</h1>
             <p className="mt-1 max-w-2xl text-sm text-muted sm:text-base">{subtitle}</p>
@@ -61,7 +62,7 @@ export default function StudyShell({ theme, icon, title, subtitle, children }: {
 /** Heading above the saved items. */
 export function StudySection({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
-    <section className="mt-14">
+    <section className="mt-12">
       <div className="mb-4 flex items-end justify-between gap-3 border-b border-card-border pb-3 dark:border-dark-border">
         <h2 className="font-heading text-xl font-bold text-navy dark:text-dark-text">{title}</h2>
         {hint && <p className="hidden text-xs text-muted sm:block">{hint}</p>}

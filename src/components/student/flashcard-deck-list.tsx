@@ -52,8 +52,8 @@ export default function FlashcardDeckList() {
             <li key={d.id} className={itemCardCls}>
               <Link href={`/flashcards/${d.id}`} className="block">
                 <Cover theme="flash" emoji={d.emoji || '🗂️'} badge={d.due > 0
-                  ? <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-indigo-600 shadow" data-testid="due-badge">{d.due} due today</span>
-                  : <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-emerald-600 shadow">✓ Caught up</span>} />
+                  ? <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-orange-600 shadow" data-testid="due-badge">{d.due} due today</span>
+                  : <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-orange-600 shadow">✓ Caught up</span>} />
                 <div className="p-4">
                 <div className="flex items-start gap-3 pr-8">
                   <div className="min-w-0">
@@ -66,7 +66,7 @@ export default function FlashcardDeckList() {
                 <div className="mt-3 flex items-center gap-2 flex-wrap text-xs text-muted">
                   {d.due > 0 && d.fresh > 0 && <span>{d.fresh === d.due ? 'all new cards' : `${d.fresh} new`}</span>}
                   {d.due === 0 && <span className="inline-flex items-center gap-1"><CalendarCheck className="w-3.5 h-3.5" /> {nextLabel(d.next, today)}</span>}
-                  {d.due > 0 && <span className="font-semibold text-indigo-600 dark:text-indigo-300">Start reviewing →</span>}
+                  {d.due > 0 && <span className="font-semibold text-orange-600 dark:text-orange-300">Start reviewing →</span>}
                 </div>
                 </div>
               </Link>

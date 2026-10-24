@@ -33,7 +33,7 @@ export default function NotesList() {
       {notes.map(n => (
         <li key={n.id} className={itemCardCls}>
           <Link href={`/notes/${n.id}`} className="block">
-            <Cover theme="notes" emoji={n.emoji || '📄'} badge={<span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-emerald-700 shadow">Class {n.grade}</span>} />
+            <Cover theme="notes" emoji={n.emoji || '📄'} badge={<span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-orange-700 shadow">Class {n.grade}</span>} />
             <div className="p-4">
             <div className="flex items-start gap-3 pr-8">
               <div className="min-w-0">
@@ -44,7 +44,7 @@ export default function NotesList() {
             {n.oneLine && <p className="text-sm text-navy/70 dark:text-dark-text/70 mt-3 line-clamp-2" dir="auto">{n.oneLine}</p>}
             {n.branches.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-1.5">
-                {n.branches.slice(0, 4).map(b => <span key={b} className="pill bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs" dir="auto">{b}</span>)}
+                {n.branches.slice(0, 4).map(b => <span key={b} className="pill bg-saffron/10 text-orange-700 dark:text-orange-300 text-xs" dir="auto">{b}</span>)}
               </div>
             )}
             </div>

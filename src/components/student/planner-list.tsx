@@ -13,9 +13,9 @@ interface PlanRow {
   status: { state: PlanState; overdue: number; daysLeft: number };
 }
 export const STATE_CHIP: Record<PlanState, { label: string; cls: string }> = {
-  'on-track': { label: 'On track', cls: 'bg-teal/10 text-teal' },
-  behind: { label: 'Behind', cls: 'bg-amber-400/15 text-amber-700' },
-  ahead: { label: 'Ahead', cls: 'bg-indigo-brand/10 text-indigo-brand' },
+  'on-track': { label: 'On track', cls: 'bg-saffron/15 text-orange-700' },
+  behind: { label: 'Behind', cls: 'bg-navy/10 text-navy dark:bg-white/10 dark:text-white' },
+  ahead: { label: 'Ahead', cls: 'bg-saffron text-white' },
   'exam-over': { label: 'Exam over', cls: 'bg-gray-100 dark:bg-dark-border text-muted' },
 };
 
