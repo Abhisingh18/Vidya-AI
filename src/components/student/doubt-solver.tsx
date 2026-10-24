@@ -32,14 +32,6 @@ interface Current { id: string; doubt: Doubt }
 /** What the student sent (the chat bubble above the answer). */
 interface Sent { text: string; photo: string | null }
 
-const EXAMPLES = [
-  { emoji: '🚆', text: 'A train covers 240 km in 3 hours. Find its speed in m/s.' },
-  { emoji: '📐', text: 'Solve x² − 5x + 6 = 0 step by step.' },
-  { emoji: '🌤️', text: 'Why is the sky blue?' },
-  { emoji: '🧪', text: 'Balance the equation: H₂ + O₂ → H₂O' },
-  { emoji: '🧬', text: 'What is the difference between mitosis and meiosis?' },
-  { emoji: '🏛️', text: 'What were the main causes of the revolt of 1857?' },
-];
 const gradeName = (g: string) => (g === 'College' ? 'College' : `Class ${g}`);
 type SolveError = { message: string; unreadable?: boolean };
 
@@ -327,15 +319,6 @@ export default function DoubtSolver({ initialId }: { initialId?: string }) {
               {errorNote}
               {composer(false)}
               <p className="mt-2.5 text-center text-[11px] text-muted">📷 One question per photo works best · Enter to send, Shift + Enter for a new line · drag & drop or Ctrl/⌘ + V a picture</p>
-            </div>
-            <div className="mt-6 grid w-full max-w-3xl grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-              {EXAMPLES.map(x => (
-                <button key={x.text} type="button" onClick={() => { setText(x.text); inputRef.current?.focus(); }}
-                  className="group flex items-start gap-2.5 rounded-2xl border border-card-border bg-white/80 p-3 text-left backdrop-blur transition-all hover:-translate-y-0.5 hover:border-saffron/40 hover:shadow-card dark:border-dark-border dark:bg-dark-surface/80">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-saffron/10 text-lg">{x.emoji}</span>
-                  <span className="min-w-0 text-sm leading-snug text-navy transition-colors group-hover:text-saffron dark:text-dark-text">{x.text}</span>
-                </button>
-              ))}
             </div>
             {history.length > 0 && (
               <div className="mt-6 flex w-full max-w-3xl flex-wrap items-center justify-center gap-2 text-xs text-muted">
