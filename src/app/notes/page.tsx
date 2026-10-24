@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { NotebookText } from 'lucide-react';
 import { currentUser } from '@/lib/session';
-import { PageHeader, TeacherPage } from '@/components/teacher/ui';
+import StudyShell, { StudySection } from '@/components/student/study-shell';
 import StudyCreateForm from '@/components/student/flashcard-create-form';
 import NotesList from '@/components/student/notes-list';
 
@@ -16,12 +16,13 @@ export default async function NotesPage({ searchParams }: { searchParams: Record
     redirect(`/login?callbackUrl=${encodeURIComponent(`/notes${video ? `?video=${encodeURIComponent(video)}` : ''}`)}`);
   }
   return (
-    <TeacherPage>
-      <PageHeader icon={<NotebookText className="w-5 h-5" />} title="Revision Notes"
-        subtitle="A one-page sheet for any topic, your notes or a video lesson: key points, terms, formulas, a mind map, memory tricks and a quick self-check." />
+    <StudyShell icon={<NotebookText />} badge="Revision notes" title="One page to" accent="revise anything"
+      subtitle="A sheet for any topic, your notes or a video lesson: key points, terms, formulas, a mind map, memory tricks and a quick self-check."
+      perks={[{ emoji: '🗺️', text: 'Mind map' }, { emoji: '🧮', text: 'Formulas & terms' }, { emoji: '🖨️', text: 'Print or save' }, { emoji: '🃏', text: 'Turn into flashcards' }]}>
       <StudyCreateForm kind="notes" videoId={video} />
-      <h2 className="font-heading font-semibold text-navy dark:text-dark-text mt-10 mb-4">Your revision sheets</h2>
-      <NotesList />
-    </TeacherPage>
+      <StudySection title="Your revision sheets" hint="Edit, print or turn a sheet into flashcards">
+        <NotesList />
+      </StudySection>
+    </StudyShell>
   );
 }

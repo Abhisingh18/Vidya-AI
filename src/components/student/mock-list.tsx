@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ClipboardCheck, Trash2 } from 'lucide-react';
-import { api, EmptyState, panelCls, Spinner } from '@/components/teacher/ui';
+import { api, EmptyState, Spinner } from '@/components/teacher/ui';
+import { AccentStrip, itemCardCls } from './study-shell';
 
 interface TestRow {
   id: string; title: string; subject: string; grade: string; language: string; minutes: number;
@@ -25,7 +26,8 @@ export default function MockList() {
   return (
     <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4" data-testid="mock-list">
       {tests.map(t => (
-        <li key={t.id} className={`${panelCls} group relative hover:border-saffron/50 transition-colors`}>
+        <li key={t.id} className={`${itemCardCls}`}>
+          <AccentStrip />
           <Link href={`/practice/${t.id}`} className="block p-5">
             <p className="font-heading font-semibold text-navy dark:text-dark-text line-clamp-2 pr-8" dir="auto">{t.title}</p>
             <p className="text-xs text-muted mt-1">Class {t.grade} · {t.language} · {t.questionCount} questions · {t.minutes} min · {t.maxScore} marks</p>

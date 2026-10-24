@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { NotebookText, Trash2 } from 'lucide-react';
-import { api, EmptyState, panelCls, Spinner, timeAgo } from '@/components/teacher/ui';
+import { api, EmptyState, Spinner, timeAgo } from '@/components/teacher/ui';
+import { AccentStrip, itemCardCls } from './study-shell';
 
 interface NotesRow {
   id: string; title: string; grade: string; language: string; updatedAt: string;
@@ -30,7 +31,8 @@ export default function NotesList() {
   return (
     <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4" data-testid="notes-list">
       {notes.map(n => (
-        <li key={n.id} className={`${panelCls} group relative hover:border-saffron/50 hover:shadow-card-hover transition-all`}>
+        <li key={n.id} className={`${itemCardCls}`}>
+          <AccentStrip />
           <Link href={`/notes/${n.id}`} className="block p-5">
             <div className="flex items-start gap-3 pr-8">
               <div className="w-11 h-11 shrink-0 rounded-xl bg-saffron/10 flex items-center justify-center text-2xl">{n.emoji || '📄'}</div>

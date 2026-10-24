@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CalendarDays, Trash2 } from 'lucide-react';
 import { formatDate, type PlanState } from '@/lib/planner';
-import { api, EmptyState, panelCls, Spinner } from '@/components/teacher/ui';
+import { api, EmptyState, Spinner } from '@/components/teacher/ui';
+import { AccentStrip, itemCardCls } from './study-shell';
 
 interface PlanRow {
   id: string; title: string; examDate: string; subjects: string[];
@@ -31,7 +32,8 @@ export default function PlannerList() {
   return (
     <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4" data-testid="plan-list">
       {plans.map(p => (
-        <li key={p.id} className={`${panelCls} group relative hover:border-saffron/50 transition-colors`}>
+        <li key={p.id} className={`${itemCardCls}`}>
+          <AccentStrip />
           <Link href={`/planner/${p.id}`} className="block p-5">
             <p className="font-heading font-semibold text-navy dark:text-dark-text line-clamp-2 pr-8" dir="auto">{p.title}</p>
             <p className="text-xs text-muted mt-1">Exam {formatDate(p.examDate)} · {p.status.daysLeft > 0 ? `${p.status.daysLeft} days left` : 'today/past'} · {p.subjects.join(', ')}</p>

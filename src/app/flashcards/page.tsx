@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { Layers } from 'lucide-react';
 import { currentUser } from '@/lib/session';
-import { PageHeader, TeacherPage } from '@/components/teacher/ui';
+import StudyShell, { StudySection } from '@/components/student/study-shell';
 import StudyCreateForm from '@/components/student/flashcard-create-form';
 import FlashcardDeckList from '@/components/student/flashcard-deck-list';
 
@@ -19,12 +19,13 @@ export default async function FlashcardsPage({ searchParams }: { searchParams: R
     redirect(`/login?callbackUrl=${encodeURIComponent(back)}`);
   }
   return (
-    <TeacherPage>
-      <PageHeader icon={<Layers className="w-5 h-5" />} title="Flashcards"
-        subtitle="Make a deck from any topic, your notes or a video lesson. Review a few minutes a day — the app brings each card back just before you'd forget it." />
+    <StudyShell icon={<Layers />} badge="Flashcards" title="Remember more with" accent="smart flashcards"
+      subtitle="Make a deck from any topic, your notes or a video lesson. Review a few minutes a day — each card comes back just before you'd forget it."
+      perks={[{ emoji: '🧠', text: 'Spaced repetition' }, { emoji: '📎', text: 'From your notes or PDF' }, { emoji: '🎬', text: 'From any lesson video' }, { emoji: '🌐', text: '23 languages' }]}>
       <StudyCreateForm kind="flashcards" videoId={video} notesId={notes} defaultTopic={topic} />
-      <h2 className="font-heading font-semibold text-navy dark:text-dark-text mt-10 mb-4">Your decks</h2>
-      <FlashcardDeckList />
-    </TeacherPage>
+      <StudySection title="Your decks" hint="Open a deck to review the cards due today">
+        <FlashcardDeckList />
+      </StudySection>
+    </StudyShell>
   );
 }

@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CalendarCheck, Clapperboard, FileText, Layers, NotebookText, Trash2 } from 'lucide-react';
 import { daysBetween, localToday, type StudySource } from '@/lib/flashcards';
-import { api, EmptyState, panelCls, Spinner } from '@/components/teacher/ui';
+import { api, EmptyState, Spinner } from '@/components/teacher/ui';
+import { AccentStrip, itemCardCls } from './study-shell';
 
 interface DeckRow {
   id: string; title: string; grade: string; language: string; updatedAt: string; emoji: string;
@@ -48,7 +49,8 @@ export default function FlashcardDeckList() {
         {decks.map(d => {
           const Icon = SOURCE_ICON[d.source?.kind ?? 'topic'];
           return (
-            <li key={d.id} className={`${panelCls} group relative hover:border-saffron/50 hover:shadow-card-hover transition-all`}>
+            <li key={d.id} className={itemCardCls}>
+              <AccentStrip />
               <Link href={`/flashcards/${d.id}`} className="block p-5">
                 <div className="flex items-start gap-3 pr-8">
                   <div className="w-11 h-11 shrink-0 rounded-xl bg-saffron/10 flex items-center justify-center text-2xl">{d.emoji || '🗂️'}</div>

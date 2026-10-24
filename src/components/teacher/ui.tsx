@@ -50,8 +50,8 @@ export function ErrorNote({ children }: { children: ReactNode }) {
 
 export function EmptyState({ icon, title, children }: { icon: ReactNode; title: string; children?: ReactNode }) {
   return (
-    <div className={`${panelCls} p-10 text-center`}>
-      <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-saffron/10 text-saffron flex items-center justify-center">{icon}</div>
+    <div className="rounded-2xl border-2 border-dashed border-card-border bg-white/60 p-10 text-center backdrop-blur-sm dark:border-dark-border dark:bg-dark-surface/60">
+      <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-saffron/15 to-indigo-brand/15 text-saffron flex items-center justify-center">{icon}</div>
       <p className="font-heading font-semibold text-navy dark:text-dark-text">{title}</p>
       {children && <div className="text-sm text-muted mt-1">{children}</div>}
     </div>

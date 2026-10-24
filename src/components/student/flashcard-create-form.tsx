@@ -10,7 +10,8 @@ import { CARD_COUNTS, normalizeGrade, STUDY_GRADES, localToday } from '@/lib/fla
 import { LANGUAGES } from '@/lib/languages';
 import type { SourceFile } from '@/lib/source';
 import SourceUpload from '@/components/teacher/source-upload';
-import { api, ErrorNote, inputCls, labelCls, panelCls } from '@/components/teacher/ui';
+import { api, ErrorNote, inputCls, labelCls } from '@/components/teacher/ui';
+import { studioCardCls } from './study-shell';
 
 type Kind = 'flashcards' | 'notes';
 type Tab = 'topic' | 'upload' | 'video';
@@ -117,7 +118,7 @@ export default function StudyCreateForm({ kind, videoId, notesId, defaultTopic =
   };
 
   return (
-    <form onSubmit={submit} className={`${panelCls} p-4 sm:p-6 space-y-5`} aria-busy={busy}>
+    <form onSubmit={submit} className={`${studioCardCls} space-y-5`} aria-busy={busy}>
       {notes ? (
         <div className="flex items-center gap-3 p-3 rounded-xl bg-saffron/10 border border-saffron/30">
           <NotebookText className="w-5 h-5 text-saffron shrink-0" />
@@ -228,7 +229,7 @@ export default function StudyCreateForm({ kind, videoId, notesId, defaultTopic =
       {error && <ErrorNote>{error}</ErrorNote>}
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <button type="submit" disabled={busy || !ready} className="btn-saffron w-full sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100">
+        <button type="submit" disabled={busy || !ready} className="btn-saffron h-12 w-full px-7 text-base sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100">
           {busy ? <><Loader2 className="w-4 h-4 animate-spin" /> {copy.busy}</> : <><Sparkles className="w-4 h-4" /> {copy.button}</>}
         </button>
         <p className="text-xs text-muted">{busy ? copy.wait : 'Made for your class, in your language — CBSE / NCERT level.'}</p>

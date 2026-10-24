@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { CalendarDays } from 'lucide-react';
 import { currentUser } from '@/lib/session';
-import { PageHeader, TeacherPage } from '@/components/teacher/ui';
+import StudyShell, { StudySection } from '@/components/student/study-shell';
 import PlannerCreateForm from '@/components/student/planner-create-form';
 import PlannerList from '@/components/student/planner-list';
 
@@ -11,12 +11,13 @@ export const metadata = { title: 'Study planner — VidyaAI' };
 export default async function PlannerPage() {
   if (!(await currentUser())) redirect(`/login?callbackUrl=${encodeURIComponent('/planner')}`);
   return (
-    <TeacherPage>
-      <PageHeader icon={<CalendarDays className="w-5 h-5" />} title="Study Planner"
-        subtitle="Tell us your exam date, subjects and how much time you have — get a day-by-day plan with lessons, practice, revision and mock tests." />
+    <StudyShell icon={<CalendarDays />} badge="Study planner" title="Be exam-ready with a" accent="day-by-day plan"
+      subtitle="Tell us your exam date, subjects and daily time — get a plan with lessons, practice, revision and mock tests that re-plans if you fall behind."
+      perks={[{ emoji: '📅', text: 'Day-by-day' }, { emoji: '🔁', text: 'Auto re-plan' }, { emoji: '✅', text: 'Tick off tasks, earn XP' }, { emoji: '🎯', text: 'Mock tests built in' }]}>
       <PlannerCreateForm />
-      <h2 className="font-heading font-semibold text-navy dark:text-dark-text mt-10 mb-4">Your plans</h2>
-      <PlannerList />
-    </TeacherPage>
+      <StudySection title="Your plans" hint="Open a plan to see today's tasks">
+        <PlannerList />
+      </StudySection>
+    </StudyShell>
   );
 }

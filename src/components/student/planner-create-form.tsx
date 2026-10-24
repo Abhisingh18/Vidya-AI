@@ -7,7 +7,8 @@ import { addDays, istDate, MAX_SUBJECTS, PLAN_CLASSES, WEEKDAYS, type Confidence
 import { LANGUAGES } from '@/lib/languages';
 import type { SourceFile } from '@/lib/source';
 import SourceUpload from '@/components/teacher/source-upload';
-import { api, ErrorNote, inputCls, labelCls, panelCls, textareaCls } from '@/components/teacher/ui';
+import { api, ErrorNote, inputCls, labelCls, textareaCls } from '@/components/teacher/ui';
+import { studioCardCls } from './study-shell';
 
 interface SubjectRow { name: string; chapters: string; confidence: Confidence }
 const CONF: { id: Confidence; label: string }[] = [{ id: 'low', label: '😟 Weak' }, { id: 'medium', label: '🙂 OK' }, { id: 'high', label: '😎 Strong' }];
@@ -48,7 +49,7 @@ export default function PlannerCreateForm() {
   };
 
   return (
-    <form onSubmit={submit} className={`${panelCls} p-5 lg:p-6 space-y-5`}>
+    <form onSubmit={submit} className={`${studioCardCls} space-y-5`}>
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="lg:col-span-2">
           <label className={labelCls} htmlFor="plan-exam">Exam</label>
@@ -123,7 +124,7 @@ export default function PlannerCreateForm() {
 
       {error && <ErrorNote>{error}</ErrorNote>}
       <div className="flex flex-wrap items-center gap-3">
-        <button type="submit" disabled={busy || !!missing} className="btn-saffron disabled:opacity-60 disabled:cursor-not-allowed">
+        <button type="submit" disabled={busy || !!missing} className="btn-saffron h-12 px-7 text-base disabled:opacity-60 disabled:cursor-not-allowed">
           {busy ? <><Loader2 className="w-4 h-4 animate-spin" /> Planning your days…</> : <><Sparkles className="w-4 h-4" /> Make my study plan</>}
         </button>
         <span className="text-xs text-muted">{busy ? 'Usually 20–60 seconds.' : missing}</span>
