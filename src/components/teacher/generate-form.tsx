@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Loader2, Sparkles } from 'lucide-react';
 import { DOC_TYPES, GRADES, LANGUAGES, type GeneratedDocType } from '@/lib/teacher-docs';
 import type { SourceFile } from '@/lib/source';
-import { api, ErrorNote, inputCls, labelCls, panelCls, textareaCls } from './ui';
+import { api, ErrorNote, inputCls, labelCls, textareaCls } from './ui';
 import SourceUpload from './source-upload';
 
 const WAIT_COPY: Record<GeneratedDocType, string> = {
@@ -54,7 +54,7 @@ export default function GenerateForm({ type, defaultTopic = '' }: { type: Genera
   };
 
   return (
-    <form onSubmit={submit} className={`${panelCls} p-5 lg:p-6 space-y-4`}>
+    <form onSubmit={submit} className="mx-auto max-w-2xl space-y-5">
       <div>
         <label className={labelCls} htmlFor="topic">
           Topic {sources.length > 0 && <span className="normal-case font-normal tracking-normal">(optional with an upload)</span>}
@@ -115,18 +115,20 @@ export default function GenerateForm({ type, defaultTopic = '' }: { type: Genera
         )}
       </div>
 
-      <div>
-        <label className={labelCls} htmlFor="extra">Notes for the AI <span className="normal-case font-normal">(optional)</span></label>
-        <textarea id="extra" className={textareaCls} value={extra} onChange={e => setExtra(e.target.value)} maxLength={500}
-          placeholder="e.g. Focus on numericals, include a lab activity, students struggle with fractions…" />
-      </div>
+      <details className="group rounded-xl border border-card-border dark:border-dark-border" open={!!extra}>
+        <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-navy dark:text-dark-text">Add notes for the AI <span className="font-normal text-muted">(optional)</span></summary>
+        <div className="px-4 pb-4">
+          <textarea id="extra" className={textareaCls} value={extra} onChange={e => setExtra(e.target.value)} maxLength={500}
+            placeholder="e.g. Focus on numericals, include a lab activity…" />
+        </div>
+      </details>
 
       {error && <ErrorNote>{error}</ErrorNote>}
 
-      <button type="submit" disabled={busy || !ready} className="btn-saffron w-full sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed">
+      <button type="submit" disabled={busy || !ready} className="btn-saffron mx-auto flex w-full sm:min-w-[16rem] sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed">
         {busy ? <><Loader2 className="w-4 h-4 animate-spin" /> {WAIT_COPY[type]}</> : <><Sparkles className="w-4 h-4" /> Generate {DOC_TYPES[type].label.toLowerCase()}</>}
       </button>
-      {busy && <p className="text-xs text-muted">This usually takes 20–60 seconds.</p>}
+      {busy && <p className="text-center text-xs text-muted">This usually takes 20–60 seconds.</p>}
     </form>
   );
 }

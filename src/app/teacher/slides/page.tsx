@@ -1,16 +1,15 @@
 import { Presentation } from 'lucide-react';
-import { PageHeader, TeacherPage } from '@/components/teacher/ui';
 import GenerateForm from '@/components/teacher/generate-form';
 import DocList from '@/components/teacher/doc-list';
+import StudyShell, { StudySection } from '@/components/student/study-shell';
 
 export default function SlidesPage({ searchParams }: { searchParams: { topic?: string } }) {
   return (
-    <TeacherPage>
-      <PageHeader icon={<Presentation className="w-5 h-5" />} title="Lecture Slides"
-        subtitle="Generate a ready-to-teach deck, edit every slide, present in class or download as PowerPoint." />
+    <StudyShell theme="plan" icon={<Presentation />} title="Lecture Slides" subtitle="A ready-to-teach deck you can edit, present or download.">
       <GenerateForm type="slides" defaultTopic={searchParams.topic} />
-      <h2 className="font-heading font-semibold text-navy dark:text-dark-text mt-10 mb-4">Your decks</h2>
-      <DocList type="slides" />
-    </TeacherPage>
+      <StudySection title="Your decks">
+        <DocList type="slides" />
+      </StudySection>
+    </StudyShell>
   );
 }
