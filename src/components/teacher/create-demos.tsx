@@ -8,7 +8,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Check, Download, GraduationCap, Play, Users } from 'lucide-react';
 
 /** 0 … n-1, advancing every `ms`; stays on the last frame for people who prefer reduced motion. */
-function useTick(ms: number, n: number) {
+export function useTick(ms: number, n: number) {
   const [t, setT] = useState(0);
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setT(n - 1); return; }
@@ -18,7 +18,7 @@ function useTick(ms: number, n: number) {
   return t;
 }
 
-function Frame({ label, children, footer }: { label: string; children: ReactNode; footer?: ReactNode }) {
+export function Frame({ label, children, footer }: { label: string; children: ReactNode; footer?: ReactNode }) {
   return (
     <div className="ph-float relative overflow-hidden rounded-3xl bg-[#1a1a2e] p-3 shadow-card sm:p-4" aria-hidden>
       <div className="pointer-events-none absolute inset-0">
@@ -39,7 +39,7 @@ function Frame({ label, children, footer }: { label: string; children: ReactNode
   );
 }
 
-const chip = 'inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/80 backdrop-blur';
+export const chip = 'inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/80 backdrop-blur';
 
 // ── Slides ───────────────────────────────────────────────────────────
 

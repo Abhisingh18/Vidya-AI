@@ -13,6 +13,7 @@ import { homeForRole, parseRole } from '@/lib/roles';
 import ReelPreview from '@/components/landing/reel-preview';
 import VideoPreview from '@/components/landing/video-preview';
 import HeroVideo from '@/components/landing/hero-video';
+import FeatureShowcase from '@/components/landing/feature-showcase';
 import FeatureDemo, { type FeatureDemoId } from '@/components/landing/feature-demos';
 
 const PLACEHOLDERS = [
@@ -347,12 +348,15 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div key={tab} className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <FeatureShowcase features={features} />
+
+          <p className="mt-14 text-center text-xs font-semibold uppercase tracking-[0.18em] text-muted">Every tool at a glance</p>
+          <div key={tab} className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((f, i) => {
               const Icon = f.icon;
               return (
                 <Link key={f.title} href={f.href}
-                  className="group flex animate-fade-in-up flex-col rounded-2xl border border-card-border bg-white p-5 opacity-0 transition-all duration-300 hover:-translate-y-1 hover:border-saffron/40 hover:shadow-card-hover dark:border-dark-border dark:bg-dark-surface"
+                  className="ph-shine group flex animate-fade-in-up flex-col rounded-2xl border border-card-border bg-white p-5 opacity-0 transition-all duration-300 hover:-translate-y-1 hover:border-saffron/40 hover:shadow-card-hover dark:border-dark-border dark:bg-dark-surface"
                   style={{ animationDelay: `${i * 60}ms` }}>
                   {f.demo && <FeatureDemo id={f.demo} />}
                   {f.demo ? (

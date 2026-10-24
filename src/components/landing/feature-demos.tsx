@@ -401,7 +401,7 @@ function UploadDemo({ on }: { on: boolean }) {
   );
 }
 
-const DEMOS: Record<FeatureDemoId, (p: { on: boolean }) => ReactNode> = {
+export const DEMOS: Record<FeatureDemoId, (p: { on: boolean }) => ReactNode> = {
   video: VideoDemo, reels: ReelsDemo, doubt: DoubtDemo, flashcards: FlashcardDemo,
   notes: NotesDemo, mock: MockDemo, planner: PlannerDemo, xp: XpDemo,
   slides: SlidesDemo, quiz: QuizDemo, lesson: LessonDemo, exam: ExamDemo,
