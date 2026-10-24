@@ -40,6 +40,12 @@ const TABS: { id: Tab; label: string; icon: typeof PenLine }[] = [
   { id: 'video', label: 'From a video', icon: Clapperboard },
 ];
 
+const IDEAS = ['Photosynthesis', 'Newton’s laws', 'Quadratic equations', 'The Mughal Empire', 'Acids, bases and salts', 'Human heart'];
+const STEPS: Record<Kind, string[]> = {
+  flashcards: ['Reading your topic', 'Writing the cards', 'Adding memory tricks'],
+  notes: ['Reading your topic', 'Summarising key points', 'Drawing the mind map'],
+};
+
 const chip = (on: boolean) =>
   `px-3.5 h-10 rounded-xl text-sm font-semibold border-2 transition-colors ${on
     ? 'border-saffron bg-saffron text-white shadow-saffron'
@@ -130,22 +136,30 @@ export default function StudyCreateForm({ kind, videoId, notesId, defaultTopic =
         </div>
       ) : (
         <>
-          <div role="tablist" aria-label="Make it from" className="grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl bg-off-white dark:bg-dark-bg border border-card-border dark:border-dark-border">
+          <div role="tablist" aria-label="Make it from" className="relative grid grid-cols-3 gap-1.5 rounded-2xl border border-card-border bg-off-white p-1.5 dark:border-dark-border dark:bg-dark-bg">
+            <span aria-hidden className="absolute inset-y-1.5 left-1.5 w-[calc((100%-0.75rem-0.75rem)/3)] rounded-xl bg-white shadow-card transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] dark:bg-dark-surface"
+              style={{ transform: `translateX(calc(${TABS.findIndex(t => t.id === tab)} * (100% + 0.375rem)))` }} />
             {TABS.map(t => (
               <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}
-                className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 sm:h-11 rounded-xl text-xs sm:text-sm font-semibold transition-all ${tab === t.id
-                  ? 'bg-white dark:bg-dark-surface text-saffron shadow-card'
-                  : 'text-muted hover:text-navy dark:hover:text-dark-text'}`}>
-                <t.icon className="w-4 h-4" /> {t.label}
+                className={`relative z-10 flex flex-col items-center justify-center gap-1 rounded-xl py-2 text-xs font-semibold transition-colors sm:h-11 sm:flex-row sm:gap-2 sm:text-sm ${tab === t.id ? 'text-saffron' : 'text-muted hover:text-navy dark:hover:text-dark-text'}`}>
+                <t.icon className={`h-4 w-4 transition-transform ${tab === t.id ? 'scale-110' : ''}`} /> {t.label}
               </button>
             ))}
           </div>
 
           {tab === 'topic' && (
-            <div>
+            <div className="ph-rise">
               <label className={labelCls} htmlFor={`${kind}-topic`}>Topic or chapter</label>
-              <input id={`${kind}-topic`} className={inputCls} value={topic} onChange={e => setTopic(e.target.value)}
-                placeholder={copy.placeholder} maxLength={200} autoComplete="off" />
+              <div className="ph-glow">
+                <input id={`${kind}-topic`} className={`${inputCls} !h-14 !rounded-2xl !text-base`} value={topic} onChange={e => setTopic(e.target.value)}
+                  placeholder={copy.placeholder} maxLength={200} autoComplete="off" />
+              </div>
+              <div className="ph-stagger mt-3 flex flex-wrap gap-2" aria-label="Ideas">
+                {IDEAS.map(i => (
+                  <button key={i} type="button" onClick={() => setTopic(i)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-all hover:-translate-y-0.5 ${topic === i ? 'border-saffron bg-saffron text-white shadow-saffron' : 'border-card-border text-muted hover:border-saffron/50 hover:text-saffron dark:border-dark-border'}`}>{i}</button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -215,10 +229,10 @@ export default function StudyCreateForm({ kind, videoId, notesId, defaultTopic =
         </div>
         {kind === 'flashcards' && (
           <div>
-            <span className={labelCls} id="card-count-label">Cards</span>
+            <span className={labelCls} id="card-count-label">Cards in the deck</span>
             <div role="radiogroup" aria-labelledby="card-count-label" className="flex gap-1.5">
               {CARD_COUNTS.map(n => (
-                <button key={n} type="button" role="radio" aria-checked={count === n} onClick={() => setCount(n)} className={`${chip(count === n)} flex-1 sm:flex-none min-w-[3rem]`}>{n}</button>
+                <button key={n} type="button" role="radio" aria-checked={count === n} onClick={() => setCount(n)} className={`${chip(count === n)} flex-1 sm:flex-none min-w-[3rem] hover:-translate-y-0.5 ${count === n ? 'ph-pop' : ''}`}>{n}</button>
               ))}
             </div>
           </div>
@@ -231,7 +245,19 @@ export default function StudyCreateForm({ kind, videoId, notesId, defaultTopic =
         <button type="submit" disabled={busy || !ready} className="btn-saffron h-12 w-full whitespace-nowrap px-7 text-base sm:w-auto sm:min-w-[16rem] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100">
           {busy ? <><Loader2 className="w-4 h-4 animate-spin" /> {copy.busy}</> : <><Sparkles className="w-4 h-4" /> {copy.button}</>}
         </button>
-        <p className="min-h-[1rem] text-xs text-muted">{busy ? copy.wait : ''}</p>
+        {busy ? (
+          <div className="w-full max-w-md" aria-live="polite">
+            <div className="ph-sweep h-1.5 overflow-hidden rounded-full bg-saffron/15" />
+            <div className="mt-3 flex flex-wrap justify-center gap-2">
+              {STEPS[kind].map((st, i) => (
+                <span key={st} className="inline-flex animate-pulse items-center gap-1.5 rounded-full bg-saffron/10 px-3 py-1 text-xs font-semibold text-saffron" style={{ animationDelay: `${i * 0.4}s` }}>
+                  <span className="h-1.5 w-1.5 rounded-full bg-saffron" />{st}
+                </span>
+              ))}
+            </div>
+            <p className="mt-2 text-center text-xs text-muted">{copy.wait}</p>
+          </div>
+        ) : <p className="min-h-[1rem]" />}
       </div>
     </form>
   );

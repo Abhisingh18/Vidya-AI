@@ -29,7 +29,7 @@ export default function NotesList() {
     return <EmptyState icon={<NotebookText className="w-6 h-6" />} title="No revision sheets yet">Make your first one above — it takes under a minute.</EmptyState>;
   }
   return (
-    <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4" data-testid="notes-list">
+    <ul className="ph-stagger grid sm:grid-cols-2 xl:grid-cols-3 gap-4" data-testid="notes-list">
       {notes.map(n => (
         <li key={n.id} className={itemCardCls}>
           <Link href={`/notes/${n.id}`} className="block">

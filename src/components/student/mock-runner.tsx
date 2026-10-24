@@ -5,13 +5,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
-  AlertTriangle, ArrowLeft, Check, Clock, Flag, Loader2, PlayCircle, RotateCcw, Sparkles, Trophy, X,
+  AlertTriangle, ArrowLeft, Check, ClipboardCheck, Clock, Flag, Loader2, PlayCircle, RotateCcw, Sparkles, Trophy, X,
 } from 'lucide-react';
 import {
   chapterStats, formatSeconds, isAnswered, MOCK_TYPE_LABEL, weakChapters,
   type AttemptSummary, type MockAnswer, type MockAttempt, type MockConfig, type MockQuestion, type PublicQuestion,
 } from '@/lib/mock';
 import { api, ErrorNote, panelCls, Spinner, TeacherPage, textareaCls } from '@/components/teacher/ui';
+import PageHero from '@/components/ui/page-hero';
+import Confetti from '@/components/ui/confetti';
+import ScoreRing from '@/components/ui/score-ring';
 
 interface TestData {
   id: string; title: string; grade: string; language: string; config: MockConfig; maxScore: number;
@@ -108,12 +111,11 @@ export default function MockRunner({ id }: { id: string }) {
   if (!test) return <TeacherPage><Spinner label="Loading the test…" /></TeacherPage>;
 
   const header = (
-    <div className="flex items-center gap-3 mb-6">
-      <Link href="/practice" aria-label="Back" className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center border border-card-border dark:border-dark-border hover:border-saffron hover:text-saffron"><ArrowLeft className="w-4 h-4" /></Link>
-      <div className="min-w-0">
-        <h1 className="text-xl lg:text-2xl font-heading font-bold text-navy dark:text-dark-text truncate" dir="auto">{test.title}</h1>
-        <p className="text-xs text-muted">Class {test.grade} · {test.language} · {test.questions.length} questions · {test.config.minutes} min · {test.maxScore} marks</p>
-      </div>
+    <div className="mb-6 overflow-hidden rounded-3xl shadow-card">
+      <PageHero icon={<ClipboardCheck />} glyphs={['?', 'A', 'B', 'C', 'D', '✓', '⏱', '%']} title={test.title}
+        eyebrow={<Link href="/practice" className="inline-flex items-center gap-1.5 hover:text-white"><ArrowLeft className="h-3.5 w-3.5" /> Mock tests</Link>}
+        subtitle={`Class ${test.grade} · ${test.language}`}
+        stats={[{ label: 'questions', value: test.questions.length }, { label: 'minutes', value: test.config.minutes }, { label: 'marks', value: test.maxScore }]} />
     </div>
   );
 
@@ -122,30 +124,38 @@ export default function MockRunner({ id }: { id: string }) {
     return (
       <TeacherPage>
         {header}
-        <div className="grid lg:grid-cols-[1fr_340px] gap-5 items-start">
-          <div className={`${panelCls} p-6`}>
-            <h2 className="font-heading font-semibold text-lg text-navy dark:text-dark-text">Before you start</h2>
-            <ul className="mt-3 space-y-2 text-sm text-navy/80 dark:text-dark-text/80">
-              <li className="flex gap-2"><Clock className="w-4 h-4 text-saffron shrink-0 mt-0.5" /> You have <b>{test.config.minutes} minutes</b>. The test submits itself when time is up.</li>
-              <li className="flex gap-2"><Check className="w-4 h-4 text-saffron shrink-0 mt-0.5" /> {test.questions.filter(q => q.type === 'mcq').length} MCQs are checked instantly; {test.questions.filter(q => q.type !== 'mcq').length} written answers get AI feedback.</li>
-              <li className="flex gap-2"><Flag className="w-4 h-4 text-saffron shrink-0 mt-0.5" /> Flag questions to come back to. Your answers are saved on this device as you go.</li>
+        <div className="grid items-start gap-5 lg:grid-cols-[1fr_340px]">
+          <div className={`${panelCls} p-6 sm:p-8`}>
+            <h2 className="font-heading text-xl font-extrabold text-navy dark:text-dark-text">Before you start</h2>
+            <ul className="ph-stagger mt-4 grid gap-3 sm:grid-cols-3">
+              {[
+                { Icon: Clock, t: `${test.config.minutes} minutes`, d: 'The test submits itself when time is up.' },
+                { Icon: Check, t: 'Instant marking', d: `${test.questions.filter(q => q.type === 'mcq').length} MCQs are checked at once; ${test.questions.filter(q => q.type !== 'mcq').length} written answers get AI feedback.` },
+                { Icon: Flag, t: 'Flag & return', d: 'Mark tricky questions. Answers are saved on this device as you go.' },
+              ].map(({ Icon, t, d }) => (
+                <li key={t} className="ph-shine rounded-2xl border border-card-border bg-off-white/60 p-4 dark:border-dark-border dark:bg-dark-bg/50">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-saffron to-orange-600 text-white shadow-saffron"><Icon className="h-5 w-5" /></span>
+                  <p className="mt-3 font-heading font-bold text-navy dark:text-dark-text">{t}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted">{d}</p>
+                </li>
+              ))}
             </ul>
-            <button onClick={start} className="btn-saffron mt-6"><PlayCircle className="w-5 h-5" /> Start test</button>
+            <button onClick={start} className="btn-saffron ph-pulse mt-7 !px-8 !py-3.5 text-base"><PlayCircle className="h-5 w-5" /> Start test</button>
           </div>
           <div className={`${panelCls} p-5`}>
-            <h3 className="font-heading font-semibold text-navy dark:text-dark-text mb-3">Your attempts</h3>
+            <h3 className="mb-3 font-heading font-bold text-navy dark:text-dark-text">Your attempts</h3>
             {test.attempts.length ? (
               <ul className="space-y-2">
                 {test.attempts.slice().reverse().map(a => (
                   <li key={a.no}>
-                    <button onClick={() => openReview(a.no)} className="w-full flex items-center justify-between rounded-xl border border-card-border dark:border-dark-border px-3 py-2 hover:border-saffron text-sm">
+                    <button onClick={() => openReview(a.no)} className="flex w-full items-center justify-between rounded-xl border border-card-border px-3 py-2.5 text-sm transition hover:-translate-y-0.5 hover:border-saffron dark:border-dark-border">
                       <span>Attempt {a.no} · {new Date(a.submittedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
-                      <span className="font-semibold text-navy dark:text-dark-text">{a.pct}%{a.pending ? ' …' : ''}</span>
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${a.pct >= 75 ? 'bg-teal/10 text-teal' : a.pct >= 50 ? 'bg-amber-400/15 text-amber-600' : 'bg-red-500/10 text-red-500'}`}>{a.pct}%{a.pending ? ' …' : ''}</span>
                     </button>
                   </li>
                 ))}
               </ul>
-            ) : <p className="text-sm text-muted">No attempts yet.</p>}
+            ) : <p className="text-sm text-muted">No attempts yet. Your scores will show here.</p>}
           </div>
         </div>
       </TeacherPage>
@@ -165,31 +175,36 @@ export default function MockRunner({ id }: { id: string }) {
   return (
     <TeacherPage>
       {header}
-      <div className={`sticky top-16 lg:top-4 z-30 mb-5 ${panelCls} px-4 py-3 flex flex-wrap items-center gap-3`}>
-        <span className={`flex items-center gap-1.5 font-mono text-lg font-bold ${remaining <= 60 ? 'text-red-500 animate-pulse' : low ? 'text-amber-600' : 'text-navy dark:text-dark-text'}`} aria-live="polite">
-          <Clock className="w-5 h-5" /> {clock(remaining)}
-        </span>
-        <span className="text-sm text-muted">{answered}/{test.questions.length} answered</span>
-        {warned && <span className="pill bg-amber-400/15 text-amber-700 font-semibold"><AlertTriangle className="w-3.5 h-3.5" /> {warned}</span>}
-        <button onClick={() => {
-          const left = test.questions.length - answered;
-          if (!confirm(left ? `${left} question(s) are unanswered. Submit anyway?` : 'Submit your test?')) return;
-          void submit(false);
-        }} disabled={submitting} className="btn-saffron !py-2 !px-5 text-sm ml-auto disabled:opacity-60">
-          {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Checking…</> : 'Submit test'}
-        </button>
+      <div className="sticky top-16 z-30 mb-5 overflow-hidden rounded-2xl bg-[#1a1a2e] text-white shadow-card lg:top-4">
+        <div className="flex flex-wrap items-center gap-3 px-4 py-3">
+          <span className={`flex items-center gap-1.5 font-mono text-xl font-bold ${remaining <= 60 ? 'animate-pulse text-red-400' : low ? 'text-amber-300' : 'text-white'}`} aria-live="polite">
+            <Clock className="h-5 w-5" /> {clock(remaining)}
+          </span>
+          <span className="text-sm text-white/70">{answered}/{test.questions.length} answered</span>
+          {warned && <span className="pill bg-amber-400/20 font-semibold text-amber-200"><AlertTriangle className="h-3.5 w-3.5" /> {warned}</span>}
+          <button onClick={() => {
+            const left = test.questions.length - answered;
+            if (!confirm(left ? `${left} question(s) are unanswered. Submit anyway?` : 'Submit your test?')) return;
+            void submit(false);
+          }} disabled={submitting} className="btn-saffron ml-auto !px-5 !py-2 text-sm disabled:opacity-60">
+            {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Checking…</> : 'Submit test'}
+          </button>
+        </div>
+        {/* time left (shrinks) over answered (grows) */}
+        <div className="h-1.5 bg-white/10"><div className={`h-full transition-[width] duration-1000 ease-linear ${low ? 'bg-amber-400' : 'bg-saffron'}`} style={{ width: `${limitSec ? Math.max(0, Math.min(100, (remaining / limitSec) * 100)) : 0}%` }} /></div>
+        <div className="h-1 bg-white/5"><div className="h-full bg-teal transition-[width] duration-500" style={{ width: `${test.questions.length ? (answered / test.questions.length) * 100 : 0}%` }} /></div>
       </div>
       {submitError && <div className="mb-4"><ErrorNote>{submitError}</ErrorNote></div>}
 
       <div className="grid lg:grid-cols-[1fr_220px] gap-5 items-start">
-        <ol className="space-y-4">
+        <ol className="ph-stagger space-y-4">
           {test.questions.map((q, i) => {
             const a = answers[q.id];
             const flagged = saved?.flagged.includes(q.id);
             return (
               <li key={q.id} id={`q-${q.id}`} className={`${panelCls} p-5 scroll-mt-36 ${flagged ? 'ring-2 ring-amber-400' : ''}`}>
                 <div className="flex items-start gap-3">
-                  <span className="w-8 h-8 shrink-0 rounded-lg bg-saffron/10 text-saffron font-heading font-bold text-sm flex items-center justify-center">{i + 1}</span>
+                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl font-heading text-sm font-bold transition-all ${isAnswered(a) ? 'bg-teal text-white' : 'bg-gradient-to-br from-saffron to-orange-600 text-white shadow-saffron'}`}>{isAnswered(a) ? <Check className="h-4 w-4" /> : i + 1}</span>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs text-muted">{MOCK_TYPE_LABEL[q.type]} · {q.marks} mark{q.marks === 1 ? '' : 's'} · {q.chapter}</p>
                     <p className="font-medium text-navy dark:text-dark-text mt-1 whitespace-pre-line" dir="auto">{q.text}</p>
@@ -202,9 +217,10 @@ export default function MockRunner({ id }: { id: string }) {
                 {q.type === 'mcq' ? (
                   <div className="mt-3 grid gap-2 sm:ml-11">
                     {q.options.map((o, j) => (
-                      <label key={j} className={`flex items-center gap-3 rounded-xl border-2 px-3 py-2.5 cursor-pointer text-sm transition ${a === j ? 'border-saffron bg-saffron/5' : 'border-card-border dark:border-dark-border hover:border-saffron/40'}`} dir="auto">
-                        <input type="radio" name={q.id} checked={a === j} onChange={() => answer(q.id, j)} className="accent-[#FF6B2C]" />
-                        <span className="font-semibold text-muted">{String.fromCharCode(65 + j)}.</span> {o}
+                      <label key={j} className={`group flex cursor-pointer items-center gap-3 rounded-xl border-2 p-2 pr-3 text-sm transition-all hover:-translate-y-0.5 ${a === j ? 'border-saffron bg-saffron/5 shadow-saffron' : 'border-card-border hover:border-saffron/40 dark:border-dark-border'}`} dir="auto">
+                        <input type="radio" name={q.id} checked={a === j} onChange={() => answer(q.id, j)} className="sr-only" />
+                        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-heading text-sm font-bold transition-all ${a === j ? 'scale-105 bg-saffron text-white' : 'bg-off-white text-muted group-hover:text-saffron dark:bg-dark-bg'}`}>{String.fromCharCode(65 + j)}</span>
+                        <span className="min-w-0 flex-1">{o}</span>
                       </label>
                     ))}
                   </div>
@@ -253,14 +269,16 @@ function MockResult({ test, review, note, onAgain, onRegraded }: {
 
   return (
     <TeacherPage>
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/practice" aria-label="Back" className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center border border-card-border dark:border-dark-border hover:border-saffron hover:text-saffron"><ArrowLeft className="w-4 h-4" /></Link>
-        <h1 className="text-xl lg:text-2xl font-heading font-bold text-navy dark:text-dark-text truncate" dir="auto">{test.title} — Attempt {attempt.no}</h1>
+      <div className="mb-6 overflow-hidden rounded-3xl shadow-card">
+        <PageHero icon={<Trophy />} glyphs={['🏆', '%', '✓', '★', '📈', '🎯', '∑', '⭐']} title={`Attempt ${attempt.no} · ${pct}%`}
+          eyebrow={<Link href="/practice" className="inline-flex items-center gap-1.5 hover:text-white"><ArrowLeft className="h-3.5 w-3.5" /> Mock tests</Link>}
+          subtitle={test.title} stats={[{ label: 'marks', value: attempt.score, suffix: ` / ${attempt.maxScore}` }, { label: 'xp earned', value: attempt.xp }]} />
       </div>
 
-      <div className="grid lg:grid-cols-[320px_1fr] gap-5 items-start mb-6">
+      <div className="ph-stagger mb-6 grid items-start gap-5 lg:grid-cols-[320px_1fr]">
         <div className={`${panelCls} p-6 text-center`}>
-          <div className={`w-28 h-28 mx-auto rounded-full flex items-center justify-center text-3xl font-heading font-bold ${pct >= 75 ? 'bg-teal/10 text-teal' : pct >= 50 ? 'bg-amber-400/15 text-amber-600' : 'bg-red-500/10 text-red-500'}`}>{pct}%</div>
+          {pct >= 75 && <Confetti />}
+          <ScoreRing pct={pct} size={150} label="score" />
           <p className="mt-3 font-heading font-semibold text-lg text-navy dark:text-dark-text">{attempt.score} / {attempt.maxScore} marks</p>
           <p className="text-sm text-muted">{formatSeconds(attempt.timeTakenSec)}{attempt.autoSubmitted ? ' · submitted when time ran out' : ''}</p>
           {attempt.xp > 0 && <p className="mt-2 pill-saffron font-semibold inline-flex"><Trophy className="w-3.5 h-3.5" /> +{attempt.xp} XP</p>}

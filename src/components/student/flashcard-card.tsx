@@ -37,7 +37,7 @@ export default function FlashcardCard({ card, flipped, onFlip, onSpeak, speaking
   );
 
   return (
-    <div className="[perspective:1600px] w-full">
+    <div className="w-full [perspective:1600px]">
       <div
         role="button" tabIndex={0} aria-pressed={flipped}
         aria-label={flipped ? `Answer: ${card.back}. Click to see the question.` : `Question: ${card.front}. Click to see the answer.`}
@@ -48,14 +48,16 @@ export default function FlashcardCard({ card, flipped, onFlip, onSpeak, speaking
         style={{ transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
       >
         {/* Front */}
-        <div className={`${face} bg-white dark:bg-dark-surface border-card-border dark:border-dark-border shadow-card-hover dark:shadow-card-dark-hover group-focus-visible:ring-4 group-focus-visible:ring-saffron/30`}>
-          <div className="h-1.5 bg-gradient-saffron shrink-0" />
+        <div className={`${face} bg-white dark:bg-dark-surface border-card-border dark:border-dark-border shadow-[0_30px_70px_-20px_rgba(255,107,26,0.55)] group-focus-visible:ring-4 group-focus-visible:ring-saffron/30`}>
+          <span aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-saffron/10" />
+          <span aria-hidden className="pointer-events-none absolute -bottom-12 -left-8 h-40 w-40 rounded-full bg-indigo-brand/10" />
+          <div className="h-2 shrink-0 bg-gradient-to-r from-saffron via-rose-400 to-orange-500" />
           <div className="flex items-center justify-between px-5 pt-4">
             <KindChip kind={card.kind} />
             {speak}
           </div>
           <div className="flex-1 min-h-0 overflow-y-auto px-6 sm:px-10 flex flex-col items-center justify-center text-center gap-4">
-            {card.emoji && <span className="text-5xl sm:text-6xl leading-none drop-shadow-sm" aria-hidden>{card.emoji}</span>}
+            {card.emoji && <span className="ph-float text-6xl leading-none drop-shadow-md sm:text-7xl" aria-hidden>{card.emoji}</span>}
             <p dir="auto" className={`font-heading font-bold text-navy dark:text-dark-text leading-snug ${sizeFor(card.front, true)}`}>{card.front}</p>
           </div>
           <p className="text-center text-xs text-muted pb-4 flex items-center justify-center gap-1.5">
@@ -64,9 +66,9 @@ export default function FlashcardCard({ card, flipped, onFlip, onSpeak, speaking
         </div>
 
         {/* Back */}
-        <div className={`${face} [transform:rotateY(180deg)] bg-gradient-to-br from-saffron-50 via-white to-indigo-brand-50 dark:from-[#2a1a14] dark:via-dark-surface dark:to-[#191838] border-saffron/30 dark:border-saffron/30 shadow-card-hover dark:shadow-card-dark-hover`}>
+        <div className={`${face} [transform:rotateY(180deg)] bg-gradient-to-br from-saffron-50 via-white to-indigo-brand-50 dark:from-[#2a1a14] dark:via-dark-surface dark:to-[#191838] border-saffron/30 dark:border-saffron/30 shadow-[0_30px_70px_-20px_rgba(99,102,241,0.5)]`}>
           <div className="flex items-center justify-between px-5 pt-4">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-saffron">Answer</span>
+            <span className="rounded-full bg-saffron px-3 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white">Answer</span>
             {speak}
           </div>
           <div className="flex-1 min-h-0 overflow-y-auto px-6 sm:px-10 py-2 flex flex-col items-center justify-center text-center gap-4">

@@ -24,7 +24,7 @@ export default function MockList() {
   if (!tests) return <Spinner label="Loading your tests…" />;
   if (!tests.length) return <EmptyState icon={<ClipboardCheck className="w-6 h-6" />} title="No mock tests yet">Create one above and practise like the real exam.</EmptyState>;
   return (
-    <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4" data-testid="mock-list">
+    <ul className="ph-stagger grid sm:grid-cols-2 xl:grid-cols-3 gap-4" data-testid="mock-list">
       {tests.map(t => (
         <li key={t.id} className={itemCardCls}>
           <Link href={`/practice/${t.id}`} className="block">

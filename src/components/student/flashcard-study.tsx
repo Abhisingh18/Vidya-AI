@@ -15,6 +15,9 @@ import {
 } from '@/lib/flashcards';
 import { langCode } from '@/lib/languages';
 import { api, ErrorNote, panelCls, Spinner, TeacherPage } from '@/components/teacher/ui';
+import PageHero from '@/components/ui/page-hero';
+import Confetti from '@/components/ui/confetti';
+import ScoreRing from '@/components/ui/score-ring';
 import FlashcardCard from './flashcard-card';
 import FlashcardBrowse, { type CardText } from './flashcard-browse';
 import { nextLabel } from './flashcard-deck-list';
@@ -58,6 +61,7 @@ export default function FlashcardStudy({ id }: { id: string }) {
   const [saveState, setSaveState] = useState<'saved' | 'saving' | 'error'>('saved');
   const [speaking, setSpeaking] = useState(false);
   const [title, setTitle] = useState('');
+  const [combo, setCombo] = useState(0);
 
   const url = `/api/student/flashcards/${id}`;
   const pending = useRef<ReviewInput[]>([]);
@@ -161,6 +165,7 @@ export default function FlashcardStudy({ id }: { id: string }) {
     next.done = next.pos >= queue.length;
     stopSpeaking();
     setFlipped(false);
+    setCombo(c => (g >= 2 ? c + 1 : 0));
     setSession(next);
     if (next.done) void finish(next);
   }, [session, current, flipped, today, sendReviews, finish]);
@@ -263,36 +268,40 @@ export default function FlashcardStudy({ id }: { id: string }) {
     <TeacherPage>
       <div className="max-w-3xl mx-auto">
         {/* Header */}
-        <div className="flex items-start gap-3 mb-5">
-          <Link href="/flashcards" aria-label="All decks" className="mt-1 w-9 h-9 shrink-0 rounded-full flex items-center justify-center border border-card-border dark:border-dark-border text-navy dark:text-dark-text hover:border-saffron hover:text-saffron">
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
-          <div className="min-w-0 flex-1">
-            <input value={title} onChange={e => onTitle(e.target.value)} aria-label="Deck title" maxLength={200} dir="auto"
-              className="w-full bg-transparent text-xl sm:text-2xl font-heading font-bold text-navy dark:text-dark-text outline-none border-b-2 border-transparent focus:border-saffron/50 truncate" />
-            <p className="text-xs text-muted flex flex-wrap items-center gap-x-1.5 gap-y-1 mt-1">
-              <SourceIcon className="w-3.5 h-3.5" />
-              {deck.source?.kind === 'video' ? <>From video <Link href={`/library/${deck.source.refId}`} className="text-saffron hover:underline truncate max-w-[12rem]">{deck.source.label}</Link> ·</> : null}
-              {deck.source?.kind === 'notes' ? <>From notes <Link href={`/notes/${deck.source.refId}`} className="text-saffron hover:underline truncate max-w-[12rem]">{deck.source.label}</Link> ·</> : null}
-              <span>Class {deck.grade} · {deck.language} · {deck.cards.length} cards</span>
+        <div className="mb-5 overflow-hidden rounded-3xl shadow-card">
+          <PageHero icon={<Layers />} glyphs={['?', '💡', '🧠', '✓', '⭐', '🔁', '∑', '📚']} title={title}
+            eyebrow={<Link href="/flashcards" className="inline-flex items-center gap-1.5 hover:text-white"><ArrowLeft className="h-3.5 w-3.5" /> All decks</Link>}
+            titleNode={<input value={title} onChange={e => onTitle(e.target.value)} aria-label="Deck title" maxLength={200} dir="auto"
+              className="w-full truncate border-b-2 border-transparent bg-transparent font-heading text-2xl font-extrabold tracking-tight text-white outline-none focus:border-saffron/60 sm:text-3xl" />}
+            stats={[{ label: 'cards', value: deck.cards.length }, { label: 'due today', value: summary.due }]}>
+            <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-white/70">
+              <SourceIcon className="h-3.5 w-3.5" />
+              {deck.source?.kind === 'video' ? <>From video <Link href={`/library/${deck.source.refId}`} className="max-w-[12rem] truncate text-saffron hover:underline">{deck.source.label}</Link> ·</> : null}
+              {deck.source?.kind === 'notes' ? <>From notes <Link href={`/notes/${deck.source.refId}`} className="max-w-[12rem] truncate text-saffron hover:underline">{deck.source.label}</Link> ·</> : null}
+              <span>Class {deck.grade} · {deck.language}</span>
               <SaveBadge state={saveState} onRetry={retry} />
             </p>
-          </div>
+          </PageHero>
         </div>
 
-        <div className="flex items-center gap-2 mb-6">
-          <div role="tablist" aria-label="Mode" className="inline-flex p-1 rounded-xl bg-off-white dark:bg-dark-bg border border-card-border dark:border-dark-border">
+        <div className="mb-6 flex items-center gap-2">
+          <div role="tablist" aria-label="Mode" className="inline-flex rounded-xl border border-card-border bg-off-white p-1 dark:border-dark-border dark:bg-dark-bg">
             {(['study', 'browse'] as const).map(m => (
               <button key={m} role="tab" aria-selected={mode === m} onClick={() => { setMode(m); setFlipped(false); stopSpeaking(); }}
-                className={`px-4 h-9 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 transition-all ${mode === m ? 'bg-white dark:bg-dark-surface text-saffron shadow-card' : 'text-muted hover:text-navy dark:hover:text-dark-text'}`}>
-                {m === 'study' ? <><Play className="w-4 h-4" /> Study</> : <><BookOpen className="w-4 h-4" /> Browse</>}
+                className={`inline-flex h-9 items-center gap-1.5 rounded-lg px-4 text-sm font-semibold transition-all ${mode === m ? 'bg-white text-saffron shadow-card dark:bg-dark-surface' : 'text-muted hover:text-navy dark:hover:text-dark-text'}`}>
+                {m === 'study' ? <><Play className="h-4 w-4" /> Study</> : <><BookOpen className="h-4 w-4" /> Browse</>}
               </button>
             ))}
           </div>
+          {mode === 'study' && combo >= 2 && (
+            <span key={combo} className="ph-pop inline-flex items-center gap-1.5 rounded-full bg-saffron/10 px-3 py-1.5 text-sm font-bold text-saffron" data-testid="combo">
+              <span className="ph-flame">🔥</span> {combo} in a row
+            </span>
+          )}
           {mode === 'study' && (
             <button onClick={shuffleNow} aria-pressed={shuffle} title="Shuffle the cards"
-              className={`ml-auto h-9 px-3.5 rounded-xl text-sm font-semibold inline-flex items-center gap-1.5 border-2 transition-colors ${shuffle ? 'border-saffron text-saffron bg-saffron/10' : 'border-card-border dark:border-dark-border text-muted hover:text-saffron hover:border-saffron/50'}`}>
-              <Shuffle className="w-4 h-4" /> Shuffle{shuffle ? ' on' : ''}
+              className={`ml-auto inline-flex h-9 items-center gap-1.5 rounded-xl border-2 px-3.5 text-sm font-semibold transition-colors ${shuffle ? 'border-saffron bg-saffron/10 text-saffron' : 'border-card-border text-muted hover:border-saffron/50 hover:text-saffron dark:border-dark-border'}`}>
+              <Shuffle className="h-4 w-4" /> Shuffle{shuffle ? ' on' : ''}
             </button>
           )}
         </div>
@@ -302,15 +311,21 @@ export default function FlashcardStudy({ id }: { id: string }) {
         )}
 
         {mode === 'study' && current && intervals && (
-          <div data-testid="study">
-            <div className="flex items-center justify-between text-xs font-semibold text-muted mb-2">
+          <div data-testid="study" className="relative overflow-hidden rounded-3xl bg-[#1a1a2e] p-4 sm:p-7">
+            <div aria-hidden className="pointer-events-none absolute inset-0">
+              <div className="gen-aurora absolute -left-16 -top-24 h-72 w-72 rounded-full bg-saffron/30 blur-[100px]" />
+              <div className="gen-aurora absolute -right-10 bottom-0 h-64 w-64 rounded-full bg-indigo-brand/30 blur-[100px] [animation-delay:-8s]" />
+              <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)', backgroundSize: '44px 44px' }} />
+            </div>
+            <div className="relative">
+            <div className="mb-2 flex items-center justify-between text-xs font-semibold text-white/70">
               <span>
                 {session.practice ? 'Practice round · doesn’t change your schedule' : isNewCard(current) ? 'New card' : 'Review'}
               </span>
               <span data-testid="progress-label">{session.pos + 1} / {session.queue.length}</span>
             </div>
-            <div className="h-2 rounded-full bg-card-border dark:bg-dark-border overflow-hidden mb-5" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Session progress">
-              <div className="h-full bg-gradient-saffron rounded-full transition-[width] duration-500 ease-out" style={{ width: `${progress}%` }} />
+            <div className="mb-5 h-2.5 overflow-hidden rounded-full bg-white/10" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Session progress">
+              <div className="h-full rounded-full bg-gradient-to-r from-saffron to-rose-400 shadow-[0_0_12px_rgba(255,107,26,0.8)] transition-[width] duration-500 ease-out" style={{ width: `${progress}%` }} />
             </div>
 
             <div key={`${current.id}-${session.pos}`} className="animate-fade-in">
@@ -319,7 +334,7 @@ export default function FlashcardStudy({ id }: { id: string }) {
 
             <div className="mt-5 min-h-[76px]">
               {!flipped ? (
-                <button onClick={() => setFlipped(true)} className="btn-saffron w-full !py-4 text-base" data-testid="show-answer">
+                <button onClick={() => setFlipped(true)} className="btn-saffron ph-pulse w-full !py-4 text-base" data-testid="show-answer">
                   Show answer <kbd className="hidden sm:inline font-mono text-[11px] px-1.5 py-0.5 rounded bg-white/20">Space</kbd>
                 </button>
               ) : (
@@ -335,7 +350,8 @@ export default function FlashcardStudy({ id }: { id: string }) {
                 </div>
               )}
             </div>
-            <p className="hidden sm:block text-center text-xs text-muted mt-4">Space to flip · 1 Again · 2 Hard · 3 Good · 4 Easy</p>
+            <p className="mt-4 hidden text-center text-xs text-white/50 sm:block">Space to flip · 1 Again · 2 Hard · 3 Good · 4 Easy</p>
+            </div>
           </div>
         )}
 
@@ -383,8 +399,12 @@ function SessionSummary({ session, deck, today, saveState, onPractice, onBrowse 
   return (
     <div className={`${panelCls} p-6 sm:p-8 animate-fade-in-up`} data-testid="summary">
       <div className="text-center">
-        <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-saffron text-white flex items-center justify-center shadow-saffron">
-          {pct >= 80 ? <Trophy className="w-8 h-8" /> : <PartyPopper className="w-8 h-8" />}
+        {pct >= 50 && <Confetti />}
+        <div className="mb-3 flex items-center justify-center gap-3">
+          <ScoreRing pct={pct} size={120} label="first try" />
+          <span className="ph-pop flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-saffron to-orange-600 text-white shadow-saffron">
+            {pct >= 80 ? <Trophy className="h-6 w-6" /> : <PartyPopper className="h-6 w-6" />}
+          </span>
         </div>
         <h2 className="text-2xl font-heading font-bold text-navy dark:text-dark-text">{session.practice ? 'Practice round done!' : 'Session complete!'}</h2>
         <p className="text-muted mt-1">

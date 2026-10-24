@@ -42,10 +42,24 @@ export default function FlashcardDeckList() {
   const dueTotal = decks.reduce((n, d) => n + d.due, 0);
   return (
     <>
-      {dueTotal > 0 && (
-        <p className="text-sm text-muted -mt-2 mb-4"><span className="font-semibold text-saffron">{dueTotal} cards</span> waiting for you today across {decks.filter(d => d.due).length} deck{decks.filter(d => d.due).length === 1 ? '' : 's'}.</p>
-      )}
-      <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4" data-testid="deck-list">
+      {dueTotal > 0 && (() => {
+        const first = decks.find(d => d.due > 0)!;
+        return (
+          <div className="ph-rise relative mb-5 overflow-hidden rounded-2xl bg-gradient-to-r from-saffron to-orange-600 p-5 text-white shadow-saffron">
+            <span aria-hidden className="absolute -right-6 -top-10 h-36 w-36 rounded-full bg-white/15" />
+            <span aria-hidden className="absolute bottom-[-3rem] right-24 h-28 w-28 rounded-full bg-black/10" />
+            <div className="relative flex flex-wrap items-center gap-4">
+              <span className="ph-flame text-4xl" aria-hidden>🔥</span>
+              <div className="min-w-0 flex-1">
+                <p className="font-heading text-xl font-extrabold">{dueTotal} card{dueTotal === 1 ? '' : 's'} waiting today</p>
+                <p className="text-sm text-white/85">across {decks.filter(d => d.due).length} deck{decks.filter(d => d.due).length === 1 ? '' : 's'} — a few minutes keeps them from fading.</p>
+              </div>
+              <Link href={`/flashcards/${first.id}`} className="rounded-full bg-white px-5 py-2.5 text-sm font-bold text-orange-600 shadow transition hover:scale-105">Start reviewing →</Link>
+            </div>
+          </div>
+        );
+      })()}
+      <ul className="ph-stagger grid sm:grid-cols-2 xl:grid-cols-3 gap-4" data-testid="deck-list">
         {decks.map(d => {
           const Icon = SOURCE_ICON[d.source?.kind ?? 'topic'];
           return (
@@ -62,6 +76,9 @@ export default function FlashcardDeckList() {
                       <Icon className="w-3.5 h-3.5 shrink-0" /> Class {d.grade} · {d.language} · {d.total} cards
                     </p>
                   </div>
+                </div>
+                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-card-border dark:bg-dark-border" title="Cards not due">
+                  <div className="h-full rounded-full bg-gradient-to-r from-saffron to-orange-500 transition-all duration-700" style={{ width: `${d.total ? Math.round(((d.total - d.due) / d.total) * 100) : 0}%` }} />
                 </div>
                 <div className="mt-3 flex items-center gap-2 flex-wrap text-xs text-muted">
                   {d.due > 0 && d.fresh > 0 && <span>{d.fresh === d.due ? 'all new cards' : `${d.fresh} new`}</span>}

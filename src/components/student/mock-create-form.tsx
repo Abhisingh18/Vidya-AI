@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Paperclip, Sparkles } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import {
   lengthMarks, lengthSummary, MOCK_CLASSES, MOCK_DIFFICULTIES, MOCK_DIFFICULTY_LIST, MOCK_LENGTH_LIST, MOCK_LENGTHS,
   type MockDifficulty, type MockLength,
@@ -10,7 +10,11 @@ import {
 import { LANGUAGES } from '@/lib/languages';
 import type { SourceFile } from '@/lib/source';
 import SourceUpload from '@/components/teacher/source-upload';
-import { api, ErrorNote, inputCls, labelCls, textareaCls } from '@/components/teacher/ui';
+import { api, bareFieldCls, ComposerBox, ErrorNote, inputCls, labelCls } from '@/components/teacher/ui';
+
+const LEN_ICON: Record<MockLength, string> = { quick: '⚡', standard: '🎯', full: '🏆' };
+const DIFF_ICON: Record<MockDifficulty, string> = { easy: '🌱', balanced: '⚖️', hard: '🔥' };
+const STEPS = ['Reading your chapters', 'Writing the questions', 'Building the answer key'];
 
 export default function MockCreateForm({ defaultTopics = '', defaultSubject = '', defaultLength }: { defaultTopics?: string; defaultSubject?: string; defaultLength?: string }) {
   const router = useRouter();
@@ -21,7 +25,6 @@ export default function MockCreateForm({ defaultTopics = '', defaultSubject = ''
   const [difficulty, setDifficulty] = useState<MockDifficulty>('balanced');
   const [topics, setTopics] = useState(defaultTopics);
   const [sources, setSources] = useState<SourceFile[]>([]);
-  const [attach, setAttach] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,47 +43,52 @@ export default function MockCreateForm({ defaultTopics = '', defaultSubject = ''
     }
   };
 
-  const seg = (on: boolean) => `h-10 flex-1 rounded-lg px-3 text-sm font-semibold transition-all ${on ? 'bg-white text-saffron shadow-sm dark:bg-dark-surface' : 'text-muted hover:text-navy dark:hover:text-dark-text'}`;
-  const track = 'flex gap-1 rounded-xl bg-gray-100 p-1 dark:bg-dark-bg';
-
   return (
-    <form onSubmit={submit} className="mx-auto max-w-2xl space-y-6">
+    <form onSubmit={submit} className="ph-stagger mx-auto max-w-2xl space-y-6">
       <div>
         <label className={labelCls} htmlFor="mock-subject">Subject</label>
-        <input id="mock-subject" className={`${inputCls} !h-12 text-base`} value={subject} onChange={e => setSubject(e.target.value)} placeholder="e.g. Science" maxLength={100} />
+        <div className="ph-glow"><input id="mock-subject" className={`${inputCls} !h-14 !rounded-2xl text-base`} value={subject} onChange={e => setSubject(e.target.value)} placeholder="e.g. Science" maxLength={100} /></div>
       </div>
 
       <div>
         <label className={labelCls} htmlFor="mock-topics">Chapters or topics {sources.length > 0 && <span className="normal-case font-normal">(optional)</span>}</label>
-        <textarea id="mock-topics" className={`${textareaCls} min-h-[104px]`} value={topics} onChange={e => setTopics(e.target.value)} maxLength={4000}
-          placeholder={'One per line — e.g. Light, Electricity'} />
-        <button type="button" onClick={() => setAttach(a => !a)} className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-saffron hover:underline">
-          <Paperclip className="h-4 w-4" /> {attach || sources.length ? 'Syllabus or notes' : 'Attach syllabus or notes'}{sources.length ? ` · ${sources.length}` : ''}
-        </button>
-        {(attach || sources.length > 0) && (
-          <div className="mt-3 rounded-2xl border border-card-border bg-off-white/70 p-3 dark:border-dark-border dark:bg-dark-bg/60">
-            <SourceUpload files={sources} onChange={setSources} disabled={busy} topic={`${subject} ${topics}`.trim()} hint="" />
-          </div>
-        )}
+        <ComposerBox footer={<SourceUpload compact files={sources} onChange={setSources} disabled={busy} topic={`${subject} ${topics}`.trim()} />}>
+          <textarea id="mock-topics" className={`${bareFieldCls} min-h-[96px]`} value={topics} onChange={e => setTopics(e.target.value)} maxLength={4000}
+            placeholder={'One per line — e.g. Light, Electricity'} />
+        </ComposerBox>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <p className={labelCls}>Length</p>
-          <div role="radiogroup" aria-label="Test length" className={track}>
-            {MOCK_LENGTH_LIST.map(l => (
-              <button key={l} type="button" role="radio" aria-checked={length === l} onClick={() => setLength(l)} className={seg(length === l)}>{MOCK_LENGTHS[l].minutes} min</button>
-            ))}
-          </div>
-          <p className="mt-1.5 text-xs text-muted">{lengthSummary(length)} · {lengthMarks(length)} marks</p>
+      <div>
+        <p className={labelCls}>How long?</p>
+        <div role="radiogroup" aria-label="Test length" className="grid grid-cols-3 gap-3">
+          {MOCK_LENGTH_LIST.map(l => {
+            const on = length === l;
+            return (
+              <button key={l} type="button" role="radio" aria-checked={on} onClick={() => setLength(l)}
+                className={`group rounded-2xl border-2 p-3 text-left transition-all hover:-translate-y-0.5 ${on ? 'border-saffron bg-saffron/5 shadow-saffron' : 'border-card-border hover:border-saffron/50 dark:border-dark-border'}`}>
+                <span className={`block text-2xl transition-transform group-hover:scale-110 ${on ? 'ph-pop' : ''}`}>{LEN_ICON[l]}</span>
+                <span className="mt-1 block font-heading text-lg font-extrabold text-navy dark:text-dark-text">{MOCK_LENGTHS[l].minutes} min</span>
+                <span className="block text-[11px] leading-snug text-muted">{lengthSummary(l)} · {lengthMarks(l)} marks</span>
+              </button>
+            );
+          })}
         </div>
-        <div>
-          <p className={labelCls}>Difficulty</p>
-          <div role="radiogroup" aria-label="Difficulty" className={track}>
-            {MOCK_DIFFICULTY_LIST.map(d => (
-              <button key={d} type="button" role="radio" aria-checked={difficulty === d} onClick={() => setDifficulty(d)} title={MOCK_DIFFICULTIES[d].hint} className={seg(difficulty === d)}>{MOCK_DIFFICULTIES[d].label}</button>
-            ))}
-          </div>
+      </div>
+
+      <div>
+        <p className={labelCls}>How tough?</p>
+        <div role="radiogroup" aria-label="Difficulty" className="grid grid-cols-3 gap-3">
+          {MOCK_DIFFICULTY_LIST.map(d => {
+            const on = difficulty === d;
+            return (
+              <button key={d} type="button" role="radio" aria-checked={on} onClick={() => setDifficulty(d)}
+                className={`group rounded-2xl border-2 p-3 text-left transition-all hover:-translate-y-0.5 ${on ? 'border-saffron bg-saffron/5 shadow-saffron' : 'border-card-border hover:border-saffron/50 dark:border-dark-border'}`}>
+                <span className={`block text-2xl transition-transform group-hover:scale-110 ${on ? 'ph-pop' : ''}`}>{DIFF_ICON[d]}</span>
+                <span className="mt-1 block font-heading font-bold text-navy dark:text-dark-text">{MOCK_DIFFICULTIES[d].label}</span>
+                <span className="block text-[11px] leading-snug text-muted">{MOCK_DIFFICULTIES[d].hint}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -104,7 +112,19 @@ export default function MockCreateForm({ defaultTopics = '', defaultSubject = ''
         <button type="submit" disabled={busy || !!missing} className="btn-saffron h-12 w-full whitespace-nowrap px-7 text-base disabled:opacity-60 disabled:cursor-not-allowed sm:w-auto sm:min-w-[16rem]">
           {busy ? <><Loader2 className="w-4 h-4 animate-spin" /> Writing your test…</> : <><Sparkles className="w-4 h-4" /> Create mock test</>}
         </button>
-        <span className="min-h-[1rem] text-xs text-muted">{busy ? 'Usually 30–90 seconds.' : missing}</span>
+        {busy ? (
+          <div className="w-full max-w-md" aria-live="polite">
+            <div className="ph-sweep h-1.5 overflow-hidden rounded-full bg-saffron/15" />
+            <div className="mt-3 flex flex-wrap justify-center gap-2">
+              {STEPS.map((st, i) => (
+                <span key={st} className="inline-flex animate-pulse items-center gap-1.5 rounded-full bg-saffron/10 px-3 py-1 text-xs font-semibold text-saffron" style={{ animationDelay: `${i * 0.4}s` }}>
+                  <span className="h-1.5 w-1.5 rounded-full bg-saffron" />{st}
+                </span>
+              ))}
+            </div>
+            <p className="mt-2 text-center text-xs text-muted">Usually 30–90 seconds.</p>
+          </div>
+        ) : <span className="min-h-[1rem] text-xs text-muted">{missing}</span>}
       </div>
     </form>
   );
