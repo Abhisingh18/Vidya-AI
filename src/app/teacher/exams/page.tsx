@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   AlertTriangle, Award, BookOpenCheck, CalendarClock, CalendarRange, CheckCircle2, GraduationCap, ListChecks,
-  ChevronDown, Loader2, Paperclip, Plus, RotateCcw, School, ScrollText, SlidersHorizontal, Sparkles, Trash2, type LucideIcon,
+  ChevronDown, Loader2, Plus, RotateCcw, School, ScrollText, SlidersHorizontal, Sparkles, Trash2, type LucideIcon,
 } from 'lucide-react';
 import {
   blueprintFor, blueprintTotal, DIFFICULTY_PRESETS, EXAM_TYPE_LIST, EXAM_TYPES, formatDuration, MAX_SECTION_QUESTIONS,
@@ -37,7 +37,7 @@ function defaultExamName(type: ExamType, pattern: ExamPattern) {
 
 export default function ExamsPage({ searchParams }: { searchParams: { topic?: string } }) {
   return (
-    <StudyShell theme="mock" icon={<ScrollText />} title="Exam Papers"
+    <StudyShell eyebrow="For teachers" theme="mock" icon={<ScrollText />} title="Exam Papers"
       subtitle="Unit test to annual or university paper, with a marking scheme. Edit and print.">
       <ExamForm defaultTopics={searchParams?.topic ?? ''} />
       <StudySection title="Your exam papers">
@@ -66,7 +66,6 @@ function ExamForm({ defaultTopics }: { defaultTopics: string }) {
   const [duration, setDuration] = useState(initial.duration);
   const [mix, setMix] = useState<DifficultyMix>(DIFFICULTY_PRESETS[1].mix);
   const [blueprint, setBlueprint] = useState<SectionSpec[]>(initial.sections);
-  const [attach, setAttach] = useState(false);
   const [busy, setBusy] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -214,14 +213,9 @@ function ExamForm({ defaultTopics }: { defaultTopics: string }) {
               ? 'One chapter per line — e.g.\nCh 1 Chemical Reactions\nCh 2 Acids, Bases and Salts'
               : 'One unit per line — e.g.\nUnit I – Arrays and stacks\nUnit II – Linked lists'} />
         </Labelled>
-        <button type="button" onClick={() => setAttach(a => !a)} className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-saffron hover:underline">
-          <Paperclip className="h-4 w-4" /> Add your PDF{sources.length ? ` · ${sources.length}` : ''}
-        </button>
-        {(attach || sources.length > 0) && (
-          <div className="mt-3 rounded-2xl border border-card-border bg-off-white/70 p-3 dark:border-dark-border dark:bg-dark-bg/60">
-            <SourceUpload files={sources} onChange={setSources} disabled={busy} topic={`${subject} ${topics}`.trim()} hint="" label="Syllabus, notes or a past paper" />
-          </div>
-        )}
+        <div className="mt-2">
+          <SourceUpload compact files={sources} onChange={setSources} disabled={busy} topic={`${subject} ${topics}`.trim()} />
+        </div>
       </div>
 
       {/* 4. Marks, time, difficulty */}

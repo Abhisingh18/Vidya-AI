@@ -5,7 +5,7 @@ import StudyShell, { StudySection } from '@/components/student/study-shell';
 
 export default function LessonPlansPage({ searchParams }: { searchParams: { topic?: string } }) {
   return (
-    <StudyShell theme="plan" icon={<NotebookPen />} title="Lesson Plans" subtitle="Objectives, class flow, activities and homework.">
+    <StudyShell eyebrow="For teachers" theme="plan" icon={<NotebookPen />} title="Lesson Plans" subtitle="Objectives, class flow, activities and homework.">
       <GenerateForm type="lesson" defaultTopic={searchParams.topic} />
       <StudySection title="Your lesson plans">
         <DocList type="lesson" />

@@ -38,22 +38,32 @@ export function Cover({ theme, emoji, badge }: { theme: StudyTheme; emoji: strin
   );
 }
 
-export default function StudyShell({ theme, icon, title, subtitle, children }: {
-  theme: StudyTheme; icon: ReactNode; title: string; subtitle: string; children: ReactNode;
+export default function StudyShell({ theme, icon, title, subtitle, eyebrow = 'For students', children }: {
+  theme: StudyTheme; icon: ReactNode; title: string; subtitle: string; eyebrow?: string; children: ReactNode;
 }) {
   const t = THEMES[theme];
   return (
     <main className="min-h-screen bg-off-white px-3 pb-3 pt-20 sm:px-5 lg:pt-5 dark:bg-dark-bg">
       {/* the whole studio sits in one box that fills the screen */}
-      <div className="mx-auto min-h-[calc(100vh-1.5rem)] max-w-6xl rounded-3xl border border-card-border bg-white p-5 shadow-card sm:p-8 lg:min-h-[calc(100vh-2.5rem)] dark:border-dark-border dark:bg-dark-surface dark:shadow-card-dark">
-        <header className="mb-7 flex items-start gap-4 border-b border-card-border pb-6 dark:border-dark-border">
-          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${t.tile} text-white shadow-saffron [&>svg]:h-6 [&>svg]:w-6`}>{icon}</div>
-          <div className="min-w-0">
-            <h1 className="font-heading text-2xl font-extrabold tracking-tight text-navy sm:text-3xl dark:text-dark-text">{title}</h1>
-            <p className="mt-1 max-w-2xl text-sm text-muted sm:text-base">{subtitle}</p>
+      <div className="mx-auto min-h-[calc(100vh-1.5rem)] max-w-6xl overflow-hidden rounded-3xl border border-card-border bg-white shadow-card lg:min-h-[calc(100vh-2.5rem)] dark:border-dark-border dark:bg-dark-surface dark:shadow-card-dark">
+        {/* hero: a slow saffron aurora over a fine grid, with the studio's icon watermarked on the right */}
+        <header className="relative overflow-hidden bg-[#1a1a2e] px-5 py-8 text-white sm:px-8 sm:py-10">
+          <div aria-hidden className="pointer-events-none absolute inset-0">
+            <div className="gen-aurora absolute -left-24 -top-32 h-96 w-96 rounded-full bg-saffron/40 blur-[110px]" />
+            <div className="gen-aurora absolute -right-16 top-0 h-80 w-80 rounded-full bg-rose-500/25 blur-[110px] [animation-delay:-7s]" />
+            <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)', backgroundSize: '44px 44px' }} />
+            <div className="gen-float absolute -right-4 top-1/2 hidden -translate-y-1/2 text-white/[0.07] sm:block [&>svg]:h-48 [&>svg]:w-48 [&>svg]:stroke-[1]">{icon}</div>
           </div>
+          <div className="relative flex items-center gap-4">
+            <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${t.tile} text-white shadow-saffron [&>svg]:h-7 [&>svg]:w-7`}>{icon}</div>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-saffron">{eyebrow}</p>
+              <h1 className="font-heading text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h1>
+            </div>
+          </div>
+          <p className="relative mt-4 max-w-xl text-sm text-white/70 sm:text-base">{subtitle}</p>
         </header>
-        {children}
+        <div className="p-5 sm:p-8">{children}</div>
       </div>
     </main>
   );
