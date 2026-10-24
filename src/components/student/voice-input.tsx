@@ -59,10 +59,12 @@ export interface VoiceInputProps {
   bubble?: 'above' | 'below';
   className?: string;
   title?: string;
+  /** Small round button (composer toolbars). */
+  compact?: boolean;
 }
 
 export default function VoiceInput({
-  lang, onText, onInterim, onListeningChange, disabled, bubble = 'above', className = '', title = 'Speak your question',
+  lang, onText, onInterim, onListeningChange, disabled, bubble = 'above', className = '', title = 'Speak your question', compact = false,
 }: VoiceInputProps) {
   // null until mounted, so the server render and first client render match.
   const [supported, setSupported] = useState<boolean | null>(null);
@@ -164,7 +166,7 @@ export default function VoiceInput({
         aria-pressed={listening}
         aria-label={label}
         title={label}
-        className={`relative w-11 h-11 shrink-0 rounded-xl flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+        className={`relative shrink-0 flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${compact ? 'w-9 h-9 rounded-full' : 'w-11 h-11 rounded-xl'} ${
           listening
             ? 'bg-red-500 text-white shadow-[0_0_0_4px_rgba(239,68,68,0.2)]'
             : unsupported
@@ -172,8 +174,8 @@ export default function VoiceInput({
               : 'bg-saffron/10 text-saffron hover:bg-saffron/20 dark:bg-saffron/15'
         }`}
       >
-        {listening && <span className="absolute inset-0 rounded-xl bg-red-500/40 animate-ping" aria-hidden />}
-        {listening ? <Square className="relative w-4 h-4 fill-current" /> : unsupported ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+        {listening && <span className={`absolute inset-0 bg-red-500/40 animate-ping ${compact ? 'rounded-full' : 'rounded-xl'}`} aria-hidden />}
+        {listening ? <Square className="relative w-4 h-4 fill-current" /> : unsupported ? <MicOff className={compact ? 'w-4 h-4' : 'w-5 h-5'} /> : <Mic className={compact ? 'w-4 h-4' : 'w-5 h-5'} />}
       </button>
 
       {showBubble && (
