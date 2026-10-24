@@ -20,9 +20,9 @@ export default async function FlashcardsPage({ searchParams }: { searchParams: R
   }
   return (
     <StudyShell theme="flash" icon={<Layers />} title="Flashcards"
-      subtitle="Make a deck from any topic, your notes or a lesson video. Review a few minutes a day — each card returns just before you would forget it.">
+      subtitle="A deck from any topic, notes or lesson video — each card returns just before you forget it.">
       <StudyCreateForm kind="flashcards" videoId={video} notesId={notes} defaultTopic={topic} />
-      <StudySection title="Your decks" hint="Open a deck to review the cards due today">
+      <StudySection title="Your decks">
         <FlashcardDeckList />
       </StudySection>
     </StudyShell>

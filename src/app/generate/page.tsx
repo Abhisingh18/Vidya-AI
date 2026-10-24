@@ -15,7 +15,6 @@ import ExplainerPlayer from '@/components/explainer-player';
 import SlideView from '@/components/teacher/slide-view';
 import SourceUpload from '@/components/teacher/source-upload';
 import Pill from '@/components/generate/pill';
-import GenerateBackdrop from '@/components/generate/backdrop';
 import { LogoMark } from '@/components/brand/logo';
 import { LANGUAGES as ALL_LANGUAGES } from '@/lib/languages';
 import { deriveTopic, type SourceFile } from '@/lib/source';
@@ -43,14 +42,6 @@ const gradeLabel = (g: string) => (/^\d/.test(g) ? `Class ${g}` : g);
 /** What the student asked for (the chat bubble above the answer). */
 interface Asked { topic: string; mode: 'explainer' | 'classic'; language: string; grade: string; voiceType: 'male' | 'female'; notes: number }
 
-const SUGGESTIONS = [
-  { emoji: '📐', title: 'Pythagoras theorem', hint: 'with a visual proof', topic: 'Pythagoras theorem with a visual proof' },
-  { emoji: '🍎', title: "Newton's laws of motion", hint: 'with everyday examples', topic: "Newton's three laws of motion with everyday examples" },
-  { emoji: '🌱', title: 'Photosynthesis', hint: 'how plants make food', topic: 'Photosynthesis — how plants make their food' },
-  { emoji: '🧬', title: 'DNA structure', hint: 'the double helix', topic: 'Structure of DNA — the double helix' },
-  { emoji: '∫', title: 'Integration basics', hint: 'area under a curve', topic: 'Integration basics — area under a curve' },
-  { emoji: '🌍', title: 'Layers of the Earth', hint: 'from crust to core', topic: 'Layers of the Earth — from crust to core' },
-];
 
 /* Fake timeline for the classic (single-request) generator. */
 const STEPS = [
@@ -856,11 +847,12 @@ function GeneratePageInner() {
   );
 
   return (
-    <main className="relative min-h-screen overflow-x-clip bg-off-white dark:bg-dark-bg">
-      <GenerateBackdrop quiet={!idle} />
-      <div className="relative mx-auto max-w-4xl px-4 pt-24 sm:px-6">
+    <main className="min-h-screen bg-off-white px-3 pb-3 pt-20 sm:px-5 lg:pt-5 dark:bg-dark-bg">
+      {/* the whole generator sits in one box that fills the screen */}
+      <div className="relative mx-auto flex min-h-[calc(100vh-1.5rem)] max-w-6xl flex-col rounded-3xl border border-card-border bg-white shadow-card lg:min-h-[calc(100vh-2.5rem)] dark:border-dark-border dark:bg-dark-surface dark:shadow-card-dark">
+      <div className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 pt-12 sm:px-6">
         {idle ? (
-          <section className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center pb-16 text-center">
+          <section className="flex flex-1 flex-col items-center justify-center pb-16 text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-saffron/20 bg-white/80 px-3 py-1 text-xs font-medium text-saffron backdrop-blur dark:bg-dark-surface/80">
               <Sparkles className="h-3 w-3" /> AI video generator
             </div>
@@ -874,18 +866,6 @@ function GeneratePageInner() {
               {classicError}
               {composer(false)}
               {timing}
-            </div>
-            <div className="mt-6 grid w-full max-w-3xl grid-cols-2 gap-2.5 sm:grid-cols-3">
-              {SUGGESTIONS.map(x => (
-                <button key={x.title} type="button" onClick={() => { setTopic(x.topic); inputRef.current?.focus(); }}
-                  className="group flex items-start gap-2.5 rounded-2xl border border-card-border bg-white/80 p-3 text-left backdrop-blur transition-all hover:-translate-y-0.5 hover:border-saffron/40 hover:shadow-card dark:border-dark-border dark:bg-dark-surface/80">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-saffron/10 text-lg">{x.emoji}</span>
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold leading-snug text-navy transition-colors group-hover:text-saffron dark:text-dark-text">{x.title}</span>
-                    <span className="block text-xs leading-snug text-muted">{x.hint}</span>
-                  </span>
-                </button>
-              ))}
             </div>
           </section>
         ) : (
@@ -1183,13 +1163,14 @@ function GeneratePageInner() {
                 </div>
               </div>
             </div>
-            <div className="sticky bottom-0 z-30 -mx-4 bg-gradient-to-t from-off-white via-off-white/95 to-transparent px-4 pb-4 pt-10 sm:-mx-6 sm:px-6 dark:from-dark-bg dark:via-dark-bg/95">
+            <div className="sticky bottom-0 z-30 -mx-4 mt-auto bg-gradient-to-t from-white via-white/95 to-transparent px-4 pb-4 pt-10 sm:-mx-6 sm:px-6 dark:from-dark-surface dark:via-dark-surface/95">
               {classicError}
               {composer(true)}
               <p className="mt-2 text-center text-[11px] text-muted">VidyaAI can make mistakes — check important facts with your textbook.</p>
             </div>
           </>
         )}
+      </div>
       </div>
     </main>
   );

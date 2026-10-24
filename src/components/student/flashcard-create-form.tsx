@@ -11,8 +11,6 @@ import { LANGUAGES } from '@/lib/languages';
 import type { SourceFile } from '@/lib/source';
 import SourceUpload from '@/components/teacher/source-upload';
 import { api, ErrorNote, inputCls, labelCls } from '@/components/teacher/ui';
-import { studioCardCls } from './study-shell';
-import { FlashPreview, NotesPreview } from './study-previews';
 
 type Kind = 'flashcards' | 'notes';
 type Tab = 'topic' | 'upload' | 'video';
@@ -119,8 +117,7 @@ export default function StudyCreateForm({ kind, videoId, notesId, defaultTopic =
   };
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-    <form onSubmit={submit} className={`${studioCardCls} space-y-5`} aria-busy={busy}>
+    <form onSubmit={submit} className="mx-auto max-w-2xl space-y-6" aria-busy={busy}>
       {notes ? (
         <div className="flex items-center gap-3 p-3 rounded-xl bg-saffron/10 border border-saffron/30">
           <NotebookText className="w-5 h-5 text-saffron shrink-0" />
@@ -230,14 +227,12 @@ export default function StudyCreateForm({ kind, videoId, notesId, defaultTopic =
 
       {error && <ErrorNote>{error}</ErrorNote>}
 
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <button type="submit" disabled={busy || !ready} className="btn-saffron h-12 w-full whitespace-nowrap px-7 text-base sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100">
+      <div className="flex flex-col items-center gap-2">
+        <button type="submit" disabled={busy || !ready} className="btn-saffron h-12 w-full whitespace-nowrap px-7 text-base sm:w-auto sm:min-w-[16rem] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100">
           {busy ? <><Loader2 className="w-4 h-4 animate-spin" /> {copy.busy}</> : <><Sparkles className="w-4 h-4" /> {copy.button}</>}
         </button>
-        <p className="text-xs text-muted">{busy ? copy.wait : 'Made for your class, in your language — CBSE / NCERT level.'}</p>
+        <p className="min-h-[1rem] text-xs text-muted">{busy ? copy.wait : ''}</p>
       </div>
     </form>
-    {kind === 'flashcards' ? <FlashPreview topic={topic || video?.topic || notes?.title || ''} count={count} grade={grade} language={language} /> : <NotesPreview topic={topic || video?.topic || ''} grade={grade} language={language} />}
-    </div>
   );
 }

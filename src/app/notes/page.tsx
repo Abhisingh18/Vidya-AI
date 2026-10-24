@@ -17,9 +17,9 @@ export default async function NotesPage({ searchParams }: { searchParams: Record
   }
   return (
     <StudyShell theme="notes" icon={<NotebookText />} title="Revision Notes"
-      subtitle="A one-page sheet for any topic, your notes or a lesson: key points, formulas, a mind map, memory tricks and a self-check.">
+      subtitle="A one-page sheet for any topic, notes or lesson: key points, formulas and a mind map.">
       <StudyCreateForm kind="notes" videoId={video} />
-      <StudySection title="Your revision sheets" hint="Edit, print or turn a sheet into flashcards">
+      <StudySection title="Your revision sheets">
         <NotesList />
       </StudySection>
     </StudyShell>
