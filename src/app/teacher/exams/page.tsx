@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   AlertTriangle, Award, BookOpenCheck, CalendarClock, CalendarRange, CheckCircle2, GraduationCap, ListChecks,
-  Loader2, Plus, RotateCcw, School, ScrollText, SlidersHorizontal, Sparkles, Trash2, type LucideIcon,
+  ChevronDown, Loader2, Paperclip, Plus, RotateCcw, School, ScrollText, SlidersHorizontal, Sparkles, Trash2, type LucideIcon,
 } from 'lucide-react';
 import {
   blueprintFor, blueprintTotal, DIFFICULTY_PRESETS, EXAM_TYPE_LIST, EXAM_TYPES, formatDuration, MAX_SECTION_QUESTIONS,
@@ -15,7 +15,8 @@ import { LANGUAGES } from '@/lib/teacher-docs';
 import type { SourceFile } from '@/lib/source';
 import SourceUpload from '@/components/teacher/source-upload';
 import DocList from '@/components/teacher/doc-list';
-import { api, ErrorNote, inputCls, labelCls, PageHeader, panelCls, TeacherPage, textareaCls } from '@/components/teacher/ui';
+import { api, ErrorNote, inputCls, labelCls, textareaCls } from '@/components/teacher/ui';
+import StudyShell, { StudySection } from '@/components/student/study-shell';
 
 const TYPE_ICON: Record<ExamType, LucideIcon> = {
   'unit-test': ListChecks, quarterly: CalendarClock, 'half-yearly': CalendarRange, annual: Award,
@@ -36,13 +37,13 @@ function defaultExamName(type: ExamType, pattern: ExamPattern) {
 
 export default function ExamsPage({ searchParams }: { searchParams: { topic?: string } }) {
   return (
-    <TeacherPage>
-      <PageHeader icon={<ScrollText className="w-5 h-5" />} title="Exam Papers"
-        subtitle="Unit tests to annual board-style papers and university semester exams — sections, marks, internal choice and a marking scheme. Edit and print." />
+    <StudyShell theme="mock" icon={<ScrollText />} title="Exam Papers"
+      subtitle="Unit test to annual or university paper, with a marking scheme. Edit and print.">
       <ExamForm defaultTopics={searchParams?.topic ?? ''} />
-      <h2 className="font-heading font-semibold text-navy dark:text-dark-text mt-10 mb-4">Your exam papers</h2>
-      <DocList type="exam" />
-    </TeacherPage>
+      <StudySection title="Your exam papers">
+        <DocList type="exam" />
+      </StudySection>
+    </StudyShell>
   );
 }
 
@@ -65,6 +66,7 @@ function ExamForm({ defaultTopics }: { defaultTopics: string }) {
   const [duration, setDuration] = useState(initial.duration);
   const [mix, setMix] = useState<DifficultyMix>(DIFFICULTY_PRESETS[1].mix);
   const [blueprint, setBlueprint] = useState<SectionSpec[]>(initial.sections);
+  const [attach, setAttach] = useState(false);
   const [busy, setBusy] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -128,7 +130,7 @@ function ExamForm({ defaultTopics }: { defaultTopics: string }) {
   const labels = blueprint.map((_, i) => sectionLabel(i));
 
   return (
-    <form onSubmit={submit} className={`${panelCls} p-5 lg:p-6 space-y-6`}>
+    <form onSubmit={submit} className="space-y-7">
       {/* 1. Exam type */}
       <div>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
@@ -160,8 +162,8 @@ function ExamForm({ defaultTopics }: { defaultTopics: string }) {
         </div>
       </div>
 
-      {/* 2. Paper details */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* 2. Essentials */}
+      <div className="grid gap-3 sm:grid-cols-3">
         {pattern === 'school' ? (
           <Labelled label="Class">
             <select className={inputCls} value={grade} onChange={e => setGrade(e.target.value)}>
@@ -170,47 +172,56 @@ function ExamForm({ defaultTopics }: { defaultTopics: string }) {
           </Labelled>
         ) : (
           <Labelled label="Programme / semester">
-            <input className={inputCls} value={semester} onChange={e => setSemester(e.target.value)} maxLength={100} placeholder="e.g. B.Tech CSE · Semester III" />
+            <input className={inputCls} value={semester} onChange={e => setSemester(e.target.value)} maxLength={100} placeholder="e.g. B.Tech CSE · Sem III" />
           </Labelled>
         )}
         <Labelled label="Subject">
           <input className={inputCls} value={subject} onChange={e => setSubject(e.target.value)} maxLength={100} required
             placeholder={pattern === 'school' ? 'e.g. Science' : 'e.g. Data Structures'} />
         </Labelled>
-        <Labelled label={pattern === 'school' ? 'Subject code' : 'Course code'} optional>
-          <input className={inputCls} value={subjectCode} onChange={e => setSubjectCode(e.target.value)} maxLength={30} placeholder={pattern === 'school' ? 'e.g. 086' : 'e.g. CS301'} />
-        </Labelled>
         <Labelled label="Language">
           <select className={inputCls} value={language} onChange={e => setLanguage(e.target.value)}>
             {LANGUAGES.map(l => <option key={l}>{l}</option>)}
           </select>
         </Labelled>
-        <div className="sm:col-span-2">
+      </div>
+      <details className="group rounded-xl border border-card-border dark:border-dark-border">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-semibold text-navy dark:text-dark-text">
+          Paper details <span className="font-normal text-muted">· {pattern === 'school' ? 'school name, subject code' : 'college, course code'}, title</span>
+          <ChevronDown className="ml-auto h-4 w-4 text-muted transition-transform group-open:rotate-180" />
+        </summary>
+        <div className="grid gap-3 border-t border-card-border p-4 sm:grid-cols-2 dark:border-dark-border">
           <Labelled label={pattern === 'school' ? 'School name' : 'University / college name'} optional>
             <input className={inputCls} value={institution} onChange={e => setInstitution(e.target.value)} maxLength={150}
               placeholder={pattern === 'school' ? 'e.g. Kendriya Vidyalaya No. 2, Pune' : 'e.g. Government Engineering College, Thrissur'} />
           </Labelled>
-        </div>
-        <div className="sm:col-span-2">
-          <Labelled label="Exam name (printed on the paper)">
-            <input className={inputCls} value={examName} maxLength={150} onChange={e => { setExamName(e.target.value); setNameEdited(true); }} />
+          <Labelled label={pattern === 'school' ? 'Subject code' : 'Course code'} optional>
+            <input className={inputCls} value={subjectCode} onChange={e => setSubjectCode(e.target.value)} maxLength={30} placeholder={pattern === 'school' ? 'e.g. 086' : 'e.g. CS301'} />
           </Labelled>
+          <div className="sm:col-span-2">
+            <Labelled label="Exam name (printed on the paper)">
+              <input className={inputCls} value={examName} maxLength={150} onChange={e => { setExamName(e.target.value); setNameEdited(true); }} />
+            </Labelled>
+          </div>
         </div>
-      </div>
+      </details>
 
       {/* 3. Syllabus */}
-      <div className="grid lg:grid-cols-2 gap-4">
+      <div>
         <Labelled label="Chapters / topics to cover" optional={sources.length > 0}>
-          <textarea className={`${textareaCls} min-h-[132px]`} value={topics} onChange={e => setTopics(e.target.value)} maxLength={4000}
+          <textarea className={`${textareaCls} min-h-[112px]`} value={topics} onChange={e => setTopics(e.target.value)} maxLength={4000}
             placeholder={pattern === 'school'
-              ? 'One chapter per line, e.g.\nCh 1 Chemical Reactions and Equations\nCh 2 Acids, Bases and Salts\nCh 6 Life Processes'
-              : 'One unit per line, e.g.\nUnit I – Arrays, stacks and queues\nUnit II – Linked lists\nUnit III – Trees'} />
-          <span className="block text-xs text-muted mt-1">Questions are spread evenly across these, chapter by chapter.</span>
+              ? 'One chapter per line — e.g.\nCh 1 Chemical Reactions\nCh 2 Acids, Bases and Salts'
+              : 'One unit per line — e.g.\nUnit I – Arrays and stacks\nUnit II – Linked lists'} />
         </Labelled>
-        <div>
-          <SourceUpload files={sources} onChange={setSources} disabled={busy} topic={`${subject} ${topics}`.trim()}
-            hint="Upload the syllabus, chapter notes or a past paper (PDF, PPTX, DOCX, TXT) — questions will follow it." />
-        </div>
+        <button type="button" onClick={() => setAttach(a => !a)} className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-saffron hover:underline">
+          <Paperclip className="h-4 w-4" /> Add your PDF{sources.length ? ` · ${sources.length}` : ''}
+        </button>
+        {(attach || sources.length > 0) && (
+          <div className="mt-3 rounded-2xl border border-card-border bg-off-white/70 p-3 dark:border-dark-border dark:bg-dark-bg/60">
+            <SourceUpload files={sources} onChange={setSources} disabled={busy} topic={`${subject} ${topics}`.trim()} hint="" label="Syllabus, notes or a past paper" />
+          </div>
+        )}
       </div>
 
       {/* 4. Marks, time, difficulty */}
@@ -227,7 +238,6 @@ function ExamForm({ defaultTopics }: { defaultTopics: string }) {
             <input type="number" aria-label="Maximum marks" min={5} max={200} className={`${inputCls} !w-24`} value={maxMarks}
               onChange={e => setMaxMarks(Math.max(0, Math.min(200, Math.round(+e.target.value) || 0)))} />
           </div>
-          {presetMarks.length > 0 && <span className="block text-xs text-muted mt-1">Picking a preset loads its blueprint below.</span>}
         </div>
         <Labelled label="Time (minutes)">
           <input type="number" min={15} max={240} step={5} className={inputCls} value={duration}
@@ -235,7 +245,7 @@ function ExamForm({ defaultTopics }: { defaultTopics: string }) {
           <span className="block text-xs text-muted mt-1">{formatDuration(duration)}</span>
         </Labelled>
         <div>
-          <span className={labelCls}>Difficulty mix (easy / medium / hard %)</span>
+          <span className={labelCls}>Difficulty</span>
           <div className="flex flex-wrap gap-1.5 mb-2">
             {DIFFICULTY_PRESETS.map(p => {
               const on = p.mix.easy === mix.easy && p.mix.medium === mix.medium && p.mix.hard === mix.hard;
@@ -247,23 +257,33 @@ function ExamForm({ defaultTopics }: { defaultTopics: string }) {
               );
             })}
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            {(['easy', 'medium', 'hard'] as const).map(k => (
-              <label key={k} className="text-xs text-muted capitalize">
-                {k}
-                <input type="number" min={0} max={100} step={5} className={`${inputCls} !h-9 mt-0.5`} value={mix[k]}
-                  onChange={e => setMix(m => ({ ...m, [k]: Math.max(0, Math.min(100, Math.round(+e.target.value) || 0)) }))} />
-              </label>
-            ))}
-          </div>
-          {mix.easy + mix.medium + mix.hard !== 100 && <span className="block text-xs text-muted mt-1">Adds up to {mix.easy + mix.medium + mix.hard}% — it will be scaled to 100%.</span>}
+          <details className="text-xs">
+            <summary className="cursor-pointer text-muted hover:text-saffron">Easy {mix.easy}% · Medium {mix.medium}% · Hard {mix.hard}% — adjust</summary>
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {(['easy', 'medium', 'hard'] as const).map(k => (
+                <label key={k} className="capitalize text-muted">
+                  {k} %
+                  <input type="number" min={0} max={100} step={5} className={`${inputCls} !h-9 mt-0.5`} value={mix[k]}
+                    onChange={e => setMix(m => ({ ...m, [k]: Math.max(0, Math.min(100, Math.round(+e.target.value) || 0)) }))} />
+                </label>
+              ))}
+            </div>
+            {mix.easy + mix.medium + mix.hard !== 100 && <span className="mt-1 block text-muted">Adds up to {mix.easy + mix.medium + mix.hard}% — scaled to 100%.</span>}
+          </details>
         </div>
       </div>
 
-      {/* 5. Blueprint */}
-      <div>
+      {/* 5. Blueprint (collapsed: a one-line summary until the teacher wants to edit it) */}
+      <details className="group rounded-xl border border-card-border dark:border-dark-border" open={total !== maxMarks}>
+        <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-sm">
+          <span className="font-heading font-semibold text-navy dark:text-dark-text">Paper pattern</span>
+          <span className="text-muted">{blueprint.length} {word.toLowerCase()}s · {blueprint.reduce((t, r) => t + r.count, 0)} questions</span>
+          <span className={`font-semibold ${total === maxMarks ? 'text-saffron' : 'text-amber-600 dark:text-amber-400'}`}>{total} / {maxMarks} marks</span>
+          <span className="ml-auto inline-flex items-center gap-1 font-semibold text-saffron">Edit <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" /></span>
+        </summary>
+      <div className="border-t border-card-border p-4 dark:border-dark-border">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-          <span className={`${labelCls} !mb-0`}>Blueprint — {word.toLowerCase()}s, questions and marks</span>
+          <span className={`${labelCls} !mb-0`}>{word}s, questions and marks</span>
           {examType !== 'custom' && (
             <button type="button" onClick={() => applyPreset(examType, pattern, presetMarks.includes(maxMarks) ? maxMarks : undefined)} disabled={busy}
               className="text-xs text-saffron font-medium flex items-center gap-1 hover:underline"><RotateCcw className="w-3.5 h-3.5" /> Reset to {EXAM_TYPES[examType].label} pattern</button>
@@ -331,20 +351,19 @@ function ExamForm({ defaultTopics }: { defaultTopics: string }) {
           <span className="text-xs text-muted">{blueprint.reduce((t, r) => t + r.count, 0)} questions</span>
         </div>
       </div>
+      </details>
 
       {error && <ErrorNote>{error}</ErrorNote>}
 
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <button type="submit" disabled={busy || !!missing} className="btn-saffron w-full sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed">
+      <div className="flex flex-col items-center gap-2">
+        <button type="submit" disabled={busy || !!missing} className="btn-saffron h-12 w-full whitespace-nowrap px-7 text-base disabled:opacity-60 disabled:cursor-not-allowed sm:w-auto sm:min-w-[16rem]">
           {busy ? <><Loader2 className="w-4 h-4 animate-spin" /> Writing the paper…</> : <><Sparkles className="w-4 h-4" /> Generate question paper</>}
         </button>
         {busy ? (
           <p className="text-sm text-muted" aria-live="polite">
             Writing {word} {labels.join(', ')}… (about 1–2 minutes) · {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, '0')}
           </p>
-        ) : missing ? <p className="text-sm text-muted">{missing}</p> : (
-          <p className="text-sm text-muted">Answer key and marking scheme included. Each {word.toLowerCase()} is written separately, so it takes 1–2 minutes.</p>
-        )}
+        ) : <p className="min-h-[1.25rem] text-sm text-muted">{missing ?? 'Includes the answer key · takes 1–2 minutes'}</p>}
       </div>
     </form>
   );

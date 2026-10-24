@@ -26,6 +26,7 @@ export default function PlannerCreateForm() {
   const [language, setLanguage] = useState('English');
   const [subjects, setSubjects] = useState<SubjectRow[]>([{ name: '', chapters: '', confidence: 'medium' }]);
   const [sources, setSources] = useState<SourceFile[]>([]);
+  const [attach, setAttach] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -114,15 +115,22 @@ export default function PlannerCreateForm() {
             </div>
           ))}
         </div>
-        {subjects.length < MAX_SUBJECTS && (
-          <button type="button" onClick={() => setSubjects(l => [...l, { name: '', chapters: '', confidence: 'medium' }])} className="mt-2 text-sm text-saffron font-medium flex items-center gap-1">
-            <Plus className="w-4 h-4" /> Add subject
+        <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1">
+          {subjects.length < MAX_SUBJECTS && (
+            <button type="button" onClick={() => setSubjects(l => [...l, { name: '', chapters: '', confidence: 'medium' }])} className="text-sm text-saffron font-semibold flex items-center gap-1 hover:underline">
+              <Plus className="w-4 h-4" /> Add subject
+            </button>
+          )}
+          <button type="button" onClick={() => setAttach(a => !a)} className="text-sm text-saffron font-semibold flex items-center gap-1 hover:underline">
+            <Plus className="w-4 h-4" /> Add your PDF{sources.length ? ` · ${sources.length}` : ''}
           </button>
+        </div>
+        {(attach || sources.length > 0) && (
+          <div className="mt-3 rounded-2xl border border-card-border bg-off-white/70 p-3 dark:border-dark-border dark:bg-dark-bg/60">
+            <SourceUpload files={sources} onChange={setSources} disabled={busy} topic={subjects.map(s => `${s.name} ${s.chapters}`).join(' ')} hint="" label="Syllabus or date sheet" />
+          </div>
         )}
       </div>
-
-      <SourceUpload files={sources} onChange={setSources} disabled={busy} topic={subjects.map(s => `${s.name} ${s.chapters}`).join(' ')}
-        hint="Or upload your syllabus / date sheet (PDF, PPTX, DOCX, TXT) — chapters will be taken from it." />
 
       {error && <ErrorNote>{error}</ErrorNote>}
       <div className="flex flex-wrap items-center gap-3">
