@@ -309,6 +309,7 @@
 @keyframes phRing     { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: var(--off); } }
 @keyframes phFloatY   { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 @keyframes phPop      { 0% { transform: scale(0.6); opacity: 0; } 70% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes phGrowX   { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes phSweep    { from { background-position: -200% 0; } to { background-position: 200% 0; } }
 .ph-confetti { position: fixed; top: 0; z-index: 60; width: 9px; height: 14px; border-radius: 2px; pointer-events: none; animation: phConfetti var(--dur,3s) cubic-bezier(.2,.6,.4,1) var(--delay,0s) forwards; }
 .ph-flame  { display: inline-block; animation: phFlame 0.9s ease-in-out infinite; transform-origin: 50% 90%; }

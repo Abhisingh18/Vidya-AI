@@ -14,6 +14,29 @@ const WAIT_COPY: Record<GeneratedDocType, string> = {
   lesson: 'Planning your class period…',
 };
 
+const STEPS: Record<GeneratedDocType, string[]> = {
+  slides: ['Reading your topic', 'Designing the slides', 'Adding pictures and diagrams'],
+  quiz: ['Reading your topic', 'Writing the questions', 'Building the answer key'],
+  lesson: ['Reading your topic', 'Planning each stage', 'Adding activities and homework'],
+};
+
+/** A row of pill buttons to pick one number (slide count, questions, period length). */
+function Chips({ label, value, options, unit, onChange }: { label: string; value: number; options: number[]; unit: string; onChange: (n: number) => void }) {
+  return (
+    <div>
+      <p className={labelCls}>{label}</p>
+      <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-2">
+        {options.map(n => (
+          <button key={n} type="button" role="radio" aria-checked={value === n} onClick={() => onChange(n)}
+            className={`h-11 min-w-[4.5rem] rounded-xl border-2 px-4 text-sm font-semibold transition-all hover:-translate-y-0.5 ${value === n ? 'ph-pop border-saffron bg-saffron text-white shadow-saffron' : 'border-card-border text-navy hover:border-saffron/50 dark:border-dark-border dark:text-dark-text'}`}>
+            {n} <span className={`text-xs font-medium ${value === n ? 'text-white/80' : 'text-muted'}`}>{unit}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function GenerateForm({ type, defaultTopic = '' }: { type: GeneratedDocType; defaultTopic?: string }) {
   const router = useRouter();
   const [topic, setTopic] = useState(defaultTopic);
@@ -48,21 +71,21 @@ export default function GenerateForm({ type, defaultTopic = '' }: { type: Genera
   };
 
   return (
-    <form onSubmit={submit} className="mx-auto max-w-2xl space-y-5">
+    <form onSubmit={submit} className="ph-stagger space-y-6">
       <div>
         <label className={labelCls} htmlFor="topic">
           Topic {sources.length > 0 && <span className="normal-case font-normal tracking-normal">(optional with an upload)</span>}
         </label>
-        <ComposerBox footer={<SourceUpload compact files={sources} onChange={setSources} topic={topic} disabled={busy} />}>
+        <div className="ph-glow"><ComposerBox footer={<SourceUpload compact files={sources} onChange={setSources} topic={topic} disabled={busy} />}>
           <input id="topic" className={`${bareFieldCls} h-11`} value={topic} onChange={e => setTopic(e.target.value)}
           placeholder={sources.length
             ? 'Optional: narrow it down, e.g. Chapter 3 or Laws of motion'
             : 'e.g. Photosynthesis, Quadratic equations — optional if you upload a file'}
           required={!sources.length} maxLength={200} />
-        </ComposerBox>
+        </ComposerBox></div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelCls}>Class</label>
           <select className={inputCls} value={grade} onChange={e => setGrade(e.target.value)}>
@@ -75,39 +98,27 @@ export default function GenerateForm({ type, defaultTopic = '' }: { type: Genera
             {LANGUAGES.map(l => <option key={l}>{l}</option>)}
           </select>
         </div>
-        {type === 'slides' && (
-          <div>
-            <label className={labelCls}>Slides</label>
-            <select className={inputCls} value={slideCount} onChange={e => setSlideCount(+e.target.value)}>
-              {[6, 8, 10, 12, 15].map(n => <option key={n} value={n}>{n} slides</option>)}
-            </select>
-          </div>
-        )}
-        {type === 'quiz' && (
-          <>
-            <div>
-              <label className={labelCls}>Questions</label>
-              <select className={inputCls} value={questionCount} onChange={e => setQuestionCount(+e.target.value)}>
-                {[5, 10, 15, 20].map(n => <option key={n} value={n}>{n} questions</option>)}
-              </select>
-            </div>
-            <div>
-              <label className={labelCls}>Difficulty</label>
-              <select className={inputCls} value={difficulty} onChange={e => setDifficulty(e.target.value)}>
-                <option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option>
-              </select>
-            </div>
-          </>
-        )}
-        {type === 'lesson' && (
-          <div>
-            <label className={labelCls}>Period length</label>
-            <select className={inputCls} value={duration} onChange={e => setDuration(+e.target.value)}>
-              {[30, 35, 40, 45, 60, 90].map(n => <option key={n} value={n}>{n} minutes</option>)}
-            </select>
-          </div>
-        )}
       </div>
+
+      {type === 'slides' && <Chips label="How many slides?" value={slideCount} options={[6, 8, 10, 12, 15]} unit="slides" onChange={setSlideCount} />}
+      {type === 'quiz' && (
+        <>
+          <Chips label="How many questions?" value={questionCount} options={[5, 10, 15, 20]} unit="questions" onChange={setQuestionCount} />
+          <div>
+            <p className={labelCls}>How tough?</p>
+            <div role="radiogroup" aria-label="Difficulty" className="grid grid-cols-3 gap-3">
+              {([['easy', '🌱', 'Easy'], ['medium', '⚖️', 'Medium'], ['hard', '🔥', 'Hard']] as const).map(([v, e, l]) => (
+                <button key={v} type="button" role="radio" aria-checked={difficulty === v} onClick={() => setDifficulty(v)}
+                  className={`group rounded-2xl border-2 p-3 text-left transition-all hover:-translate-y-0.5 ${difficulty === v ? 'border-saffron bg-saffron/5 shadow-saffron' : 'border-card-border hover:border-saffron/50 dark:border-dark-border'}`}>
+                  <span className={`block text-2xl transition-transform group-hover:scale-110 ${difficulty === v ? 'ph-pop' : ''}`}>{e}</span>
+                  <span className="font-heading font-bold text-navy dark:text-dark-text">{l}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+      {type === 'lesson' && <Chips label="Period length" value={duration} options={[30, 35, 40, 45, 60, 90]} unit="min" onChange={setDuration} />}
 
       <details className="group rounded-xl border border-card-border dark:border-dark-border" open={!!extra}>
         <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-navy dark:text-dark-text">Add notes for the AI <span className="font-normal text-muted">(optional)</span></summary>
@@ -122,7 +133,19 @@ export default function GenerateForm({ type, defaultTopic = '' }: { type: Genera
       <button type="submit" disabled={busy || !ready} className="btn-saffron mx-auto flex w-full sm:min-w-[16rem] sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed">
         {busy ? <><Loader2 className="w-4 h-4 animate-spin" /> {WAIT_COPY[type]}</> : <><Sparkles className="w-4 h-4" /> Generate {DOC_TYPES[type].label.toLowerCase()}</>}
       </button>
-      {busy && <p className="text-center text-xs text-muted">This usually takes 20–60 seconds.</p>}
+      {busy && (
+        <div aria-live="polite">
+          <div className="ph-sweep h-1.5 overflow-hidden rounded-full bg-saffron/15" />
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
+            {STEPS[type].map((st, i) => (
+              <span key={st} className="inline-flex animate-pulse items-center gap-1.5 rounded-full bg-saffron/10 px-3 py-1 text-xs font-semibold text-saffron" style={{ animationDelay: `${i * 0.4}s` }}>
+                <span className="h-1.5 w-1.5 rounded-full bg-saffron" />{st}
+              </span>
+            ))}
+          </div>
+          <p className="mt-2 text-center text-xs text-muted">This usually takes 20–60 seconds.</p>
+        </div>
+      )}
     </form>
   );
 }
