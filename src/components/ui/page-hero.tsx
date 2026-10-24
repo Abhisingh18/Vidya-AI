@@ -29,8 +29,8 @@ function Count({ to, suffix = '' }: { to: number; suffix?: string }) {
 
 const rand = (i: number) => { const s = Math.sin(i * 91.7 + 17.3) * 43758.5453; return s - Math.floor(s); };
 
-export default function PageHero({ icon, eyebrow, title, subtitle, stats, action, glyphs = DEFAULT_GLYPHS, children, className = '' }: {
-  icon: ReactNode; eyebrow?: string; title: string; subtitle?: string; stats?: HeroStat[];
+export default function PageHero({ icon, eyebrow, title, titleNode, subtitle, stats, action, glyphs = DEFAULT_GLYPHS, children, className = '' }: {
+  icon: ReactNode; eyebrow?: ReactNode; title: string; titleNode?: ReactNode; subtitle?: string; stats?: HeroStat[];
   action?: ReactNode; glyphs?: string[]; children?: ReactNode; className?: string;
 }) {
   return (
@@ -54,7 +54,7 @@ export default function PageHero({ icon, eyebrow, title, subtitle, stats, action
         <div className="ph-rise ph-pulse flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-saffron to-orange-600 text-white shadow-saffron [&>svg]:h-7 [&>svg]:w-7">{icon}</div>
         <div className="ph-rise min-w-0 flex-1" style={{ animationDelay: '.08s' }}>
           {eyebrow && <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-saffron">{eyebrow}</p>}
-          <h1 className="ph-grad-text font-heading text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h1>
+          {titleNode ?? <h1 className="ph-grad-text font-heading text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h1>}
         </div>
         {action && <div className="ph-rise" style={{ animationDelay: '.16s' }}>{action}</div>}
       </div>

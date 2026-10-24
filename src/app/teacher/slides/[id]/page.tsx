@@ -2,15 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react';
 import {
-  ArrowDown, ArrowRight, ArrowUp, Copy, Download, ExternalLink, ImagePlus, LayoutGrid, Loader2, Play, Plus,
-  RefreshCw, Search, Trash2, X,
+  ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, CloudOff, Copy, Download, ExternalLink, ImagePlus, LayoutGrid, Loader2, Play, Plus,
+  Presentation, RefreshCw, Search, Trash2, X,
 } from 'lucide-react';
 import {
   DIAGRAM_KINDS, emptySlide, SLIDE_LAYOUTS, SLIDE_THEMES,
   type DiagramItem, type DiagramKind, type Slide, type SlideDiagram, type SlideImage, type SlideLayout, type SlideTheme, type SlidesContent,
 } from '@/lib/teacher-docs';
 import { useDoc } from '@/components/teacher/use-doc';
-import EditorBar from '@/components/teacher/editor-bar';
+import Link from 'next/link';
+import PageHero from '@/components/ui/page-hero';
 import SlideView from '@/components/teacher/slide-view';
 import PresentMode from '@/components/teacher/present-mode';
 import { exportPptx } from '@/components/teacher/export-pptx';
@@ -119,22 +120,35 @@ export default function SlidesEditor({ params }: { params: { id: string } }) {
 
   return (
     <TeacherPage>
-      <EditorBar back="/teacher/slides" title={doc.title} onTitle={setTitle} saveState={saveState}
-        meta={`${slides.length} slides · ${doc.grade === 'College' ? 'College' : `Class ${doc.grade}`} · ${doc.language}`}
-        actions={<>
-          <div className="flex items-center gap-1 mr-1" role="radiogroup" aria-label="Theme">
-            {(Object.keys(SLIDE_THEMES) as SlideTheme[]).map(t => (
-              <button key={t} role="radio" aria-checked={theme === t} aria-label={`${t} theme`} title={t}
-                onClick={() => setContent(c => ({ ...c, theme: t }))}
-                className={`w-7 h-7 rounded-full border-2 ${theme === t ? 'border-saffron scale-110' : 'border-card-border dark:border-dark-border'}`}
-                style={{ background: `linear-gradient(135deg, #${SLIDE_THEMES[t].bg} 50%, #${SLIDE_THEMES[t].accent} 50%)` }} />
-            ))}
-          </div>
-          <button onClick={() => setPresenting(true)} className="btn-outline !py-2 !px-4 text-sm"><Play className="w-4 h-4" /> Present</button>
-          <button onClick={download} disabled={exporting} className="btn-saffron !py-2 !px-4 text-sm">
-            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} Download .pptx
-          </button>
-        </>} />
+      <div className="mb-6 overflow-hidden rounded-3xl shadow-card">
+        <PageHero icon={<Presentation />} glyphs={['▶', '1/10', '📊', '✦', '∑', '🖼️', '→', '🎓']} title={doc.title}
+          eyebrow={<Link href="/teacher/slides" className="inline-flex items-center gap-1.5 hover:text-white"><ArrowLeft className="h-3.5 w-3.5" /> Slides</Link>}
+          titleNode={<input value={doc.title} onChange={e => setTitle(e.target.value)} aria-label="Title" maxLength={200}
+            className="w-full truncate border-b-2 border-transparent bg-transparent font-heading text-2xl font-extrabold tracking-tight text-white outline-none focus:border-saffron/60 sm:text-3xl" />}
+          stats={[{ label: 'slides', value: slides.length }]}
+          action={<div className="flex flex-wrap items-center gap-2">
+            <div className="mr-1 flex items-center gap-1.5" role="radiogroup" aria-label="Theme">
+              {(Object.keys(SLIDE_THEMES) as SlideTheme[]).map(t => (
+                <button key={t} role="radio" aria-checked={theme === t} aria-label={`${t} theme`} title={t}
+                  onClick={() => setContent(c => ({ ...c, theme: t }))}
+                  className={`h-7 w-7 rounded-full border-2 transition ${theme === t ? 'scale-110 border-white' : 'border-white/25 hover:border-white/60'}`}
+                  style={{ background: `linear-gradient(135deg, #${SLIDE_THEMES[t].bg} 50%, #${SLIDE_THEMES[t].accent} 50%)` }} />
+              ))}
+            </div>
+            <button onClick={() => setPresenting(true)} className="inline-flex items-center gap-2 rounded-full border border-white/25 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"><Play className="h-4 w-4" /> Present</button>
+            <button onClick={download} disabled={exporting} className="btn-saffron !py-2 !px-4 text-sm">
+              {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Download .pptx
+            </button>
+          </div>}>
+          <p className="flex flex-wrap items-center gap-x-2 text-sm text-white/70">
+            {doc.grade === 'College' ? 'College' : `Class ${doc.grade}`} · {doc.language} ·
+            {saveState === 'saving' && <span className="inline-flex items-center gap-1"><Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving…</span>}
+            {saveState === 'saved' && <span className="inline-flex items-center gap-1"><Check className="h-3.5 w-3.5 text-emerald-400" /> Saved</span>}
+            {saveState === 'unsaved' && <span>Unsaved changes</span>}
+            {saveState === 'error' && <span className="inline-flex items-center gap-1 text-red-300"><CloudOff className="h-3.5 w-3.5" /> Couldn&apos;t save</span>}
+          </p>
+        </PageHero>
+      </div>
 
       <div className="grid lg:grid-cols-[200px_1fr] gap-5">
         {/* Slide strip */}
@@ -142,7 +156,7 @@ export default function SlidesEditor({ params }: { params: { id: string } }) {
           {slides.map((s, i) => (
             <li key={i} className="shrink-0 w-40 lg:w-auto">
               <button onClick={() => setSel(i)} aria-label={`Slide ${i + 1}: ${s.title}`} aria-current={i === at}
-                className={`w-full text-left rounded-xl p-1.5 border-2 transition ${i === at ? 'border-saffron' : 'border-transparent hover:border-card-border dark:hover:border-dark-border'}`}>
+                className={`w-full text-left rounded-xl p-1.5 border-2 transition ${i === at ? 'border-saffron shadow-saffron' : 'border-transparent hover:border-saffron/40'}`}>
                 <div className="pointer-events-none"><SlideView slide={s} theme={theme} /></div>
                 <p className="text-[11px] text-muted mt-1 truncate">{i + 1}. {s.emoji && `${s.emoji} `}{s.title}</p>
               </button>
