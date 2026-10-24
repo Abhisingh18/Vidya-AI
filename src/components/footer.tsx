@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Logo from '@/components/brand/logo';
-import { ExternalLink, Mail, Heart } from 'lucide-react';
+import { Github, Heart, Linkedin, Mail } from 'lucide-react';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -25,7 +25,8 @@ export default function Footer() {
             </p>
             <div className="flex gap-3 mt-5">
               {[
-                { icon: ExternalLink, href: 'https://github.com', label: 'GitHub' },
+                { icon: Github, href: 'https://github.com/Abhisingh18', label: 'GitHub — Abhishek Singh' },
+                { icon: Linkedin, href: 'https://www.linkedin.com/in/abhisheksingh500/', label: 'LinkedIn — Abhishek Singh' },
                 { icon: Mail, href: 'mailto:hello@vidyaai.app', label: 'Email' },
               ].map((s, i) => {
                 const Icon = s.icon;
@@ -82,8 +83,10 @@ export default function Footer() {
           <p className="text-gray-500 text-sm text-center sm:text-left">
             © {new Date().getFullYear()} VidyaAI · All rights reserved
           </p>
-          <p className="text-gray-500 text-sm flex items-center gap-1">
-            Made with <Heart className="w-3.5 h-3.5 text-saffron fill-saffron" /> for Bharat 🇮🇳
+          <p className="text-gray-500 text-sm flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1">
+            Made with <Heart className="w-3.5 h-3.5 text-saffron fill-saffron" /> for Bharat 🇮🇳 · Made by{' '}
+            <a href="https://github.com/Abhisingh18" target="_blank" rel="noopener noreferrer" className="font-semibold text-gray-300 hover:text-saffron transition-colors">Abhishek Singh</a>
+            <a href="https://www.linkedin.com/in/abhisheksingh500/" target="_blank" rel="noopener noreferrer" aria-label="Abhishek Singh on LinkedIn" className="text-gray-400 hover:text-saffron transition-colors"><Linkedin className="w-3.5 h-3.5" /></a>
           </p>
         </div>
       </div>
