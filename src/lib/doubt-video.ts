@@ -28,8 +28,10 @@ export function buildDoubtVideo(d: Doubt): DoubtVideoHandoff {
     d.commonMistake ? `COMMON MISTAKE\n${d.commonMistake}` : '',
   ].filter(Boolean).join('\n\n').slice(0, 12000);
   const first = d.question.split('\n')[0].replace(/\s+/g, ' ').trim();
+  const short = first.length > 90 ? `${first.slice(0, 87)}…` : first;
   return {
-    topic: `Solving: ${first.length > 90 ? `${first.slice(0, 87)}…` : first}`,
+    // "Solve: x² − 5x + 6 = 0" already reads as a task; anything else gets a "Solving:" prefix.
+    topic: /^(solve|find|prove|show|calculate|evaluate|simplify)\b/i.test(short) ? short : `Solving: ${short}`,
     grade: videoGrade(d.grade),
     language: d.language,
     sources: [{ name: 'Your question and its solution', kind: 'text', text }],
