@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useTheme } from './theme-provider';
 import { useSession } from 'next-auth/react';
 import Logo from '@/components/brand/logo';
-import { Menu, X, Sun, Moon, ArrowRight } from 'lucide-react';
+import { Menu, X, Sun, Moon, ArrowRight, PlayCircle } from 'lucide-react';
 import AppSidebar from './app-sidebar';
 import { usesAppSidebar } from './app-shell';
 import { homeForRole, parseRole } from '@/lib/roles';
@@ -54,7 +54,8 @@ export default function Navbar() {
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled ? 'glass shadow-nav dark:shadow-nav-dark' : 'bg-transparent'
+          // The demo page is dark: keep the bar solid there so its links stay readable.
+          isScrolled || pathname === '/demo' ? 'glass shadow-nav dark:shadow-nav-dark' : 'bg-transparent'
         }`}
         role="navigation"
         aria-label="Main navigation"
@@ -86,6 +87,17 @@ export default function Navbar() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-2">
+              <Link
+                href="/demo"
+                className={`hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border-2 transition-all duration-200 ${
+                  pathname === '/demo'
+                    ? 'border-saffron bg-saffron/10 text-saffron'
+                    : 'border-saffron/40 text-saffron hover:border-saffron hover:bg-saffron/10'
+                }`}
+              >
+                <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-saffron opacity-60" /><span className="relative inline-flex h-2 w-2 rounded-full bg-saffron" /></span>
+                Watch demo
+              </Link>
               <button
                 onClick={toggleTheme}
                 className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-dark-border transition-all duration-200 text-navy dark:text-dark-text"
@@ -136,6 +148,9 @@ export default function Navbar() {
             ))}
 
             <div className="mt-4 pt-4 border-t border-card-border dark:border-dark-border space-y-3">
+              <Link href="/demo" className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border-2 border-saffron text-saffron">
+                <PlayCircle className="w-4 h-4" /> Watch demo
+              </Link>
               <Link href={cta.href} className="w-full flex items-center justify-center gap-2 btn-saffron">
                 {cta.label} <ArrowRight className="w-4 h-4" />
               </Link>
