@@ -10,6 +10,7 @@ import {
 } from '@/lib/planner';
 import { STATE_CHIP } from './planner-list';
 import { api, ErrorNote, panelCls, Spinner, TeacherPage } from '@/components/teacher/ui';
+import FeedbackBar from '@/components/feedback-bar';
 
 interface PlanData {
   id: string; title: string; content: PlanContent;
@@ -140,6 +141,7 @@ export default function PlannerView({ id }: { id: string }) {
       )}
 
       {toast && <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 rounded-full bg-navy text-white px-5 py-2.5 shadow-lg flex items-center gap-2 text-sm"><Trophy className="w-4 h-4 text-saffron" /> {toast}</div>}
+      <FeedbackBar feature="plan" refId={plan.id} label="Is this plan helpful?" className="mt-8" />
     </TeacherPage>
   );
 }

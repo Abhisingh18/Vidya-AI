@@ -8,6 +8,7 @@ import { emptyQuestion, type QuestionType, type QuizContent, type QuizQuestion }
 import { useDoc } from '@/components/teacher/use-doc';
 import { QuizPaper } from '@/components/teacher/doc-views';
 import { ErrorNote, inputCls, labelCls, panelCls, Spinner, TeacherPage, textareaCls } from '@/components/teacher/ui';
+import FeedbackBar from '@/components/feedback-bar';
 
 const TYPE_ICON: Record<QuestionType, string> = { mcq: '🔘', truefalse: '⚖️', short: '✍️' };
 const TYPE_LABEL: Record<QuestionType, string> = { mcq: 'Multiple choice', truefalse: 'True / False', short: 'Short answer' };
@@ -141,6 +142,7 @@ export default function QuizEditor({ params }: { params: { id: string } }) {
         </div>
       </div>
 
+      <FeedbackBar feature="quiz" refId={doc.id} label="Is this quiz useful?" className="mt-8" />
       <div className="hidden print:block"><QuizPaper title={doc.title} quiz={quiz} withAnswers={printKey} /></div>
     </TeacherPage>
   );

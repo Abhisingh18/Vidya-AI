@@ -21,6 +21,7 @@ import ScoreRing from '@/components/ui/score-ring';
 import FlashcardCard from './flashcard-card';
 import FlashcardBrowse, { type CardText } from './flashcard-browse';
 import { nextLabel } from './flashcard-deck-list';
+import FeedbackBar from '@/components/feedback-bar';
 
 interface Deck extends DeckContent { id: string; title: string; topic: string; grade: string; language: string }
 interface PatchResult { cards: Flashcard[]; xp: number }
@@ -305,6 +306,8 @@ export default function FlashcardStudy({ id }: { id: string }) {
             </button>
           )}
         </div>
+
+        {mode === 'study' && <FeedbackBar feature="flashcards" refId={deck.id} label="Are these cards helpful?" className="mb-5" />}
 
         {mode === 'browse' && (
           <FlashcardBrowse cards={deck.cards} today={today} onSave={saveCard} onDelete={deleteCard} onReset={resetDeck} />

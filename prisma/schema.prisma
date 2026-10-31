@@ -66,6 +66,7 @@ model User {
 
   accounts   Account[]
   sessions   Session[]
+  feedback   Feedback[]
   videos     Video[]
   watches    Watch[]
   downloads  Download[]
@@ -327,4 +328,26 @@ model XpEvent {
 
   @@index([userId, createdAt])
   @@index([userId, kind, refId])
+}
+
+// 👍/👎 on an AI result (a StudentDoc or TeacherDoc the user owns). Feeds the loop in
+// src/lib/feedback.ts: well-rated answers are reused and shown to the model as examples,
+// poorly rated ones never are. `key` is the normalised input that produced the result.
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String
+  feature   String   // see FEEDBACK_FEATURES in src/lib/feedback.ts
+  refId     String   // id of the rated StudentDoc / TeacherDoc
+  rating    Int      // 1 helpful, -1 not helpful
+  reason    String?  // see FEEDBACK_REASONS
+  note      String?  // optional, at most 300 characters
+  key       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, feature, refId]) // one vote per person per result
+  @@index([feature, key])
+  @@index([feature, refId])
 }

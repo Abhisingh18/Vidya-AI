@@ -16,6 +16,7 @@ import SlideView from '@/components/teacher/slide-view';
 import PresentMode from '@/components/teacher/present-mode';
 import { exportPptx } from '@/components/teacher/export-pptx';
 import { api, ErrorNote, inputCls, labelCls, panelCls, Spinner, TeacherPage, textareaCls } from '@/components/teacher/ui';
+import FeedbackBar from '@/components/feedback-bar';
 
 const LAYOUT_LABEL: Record<SlideLayout, string> = {
   title: 'Title', bullets: 'Bullets', image: 'Picture', diagram: 'Diagram',
@@ -254,6 +255,7 @@ export default function SlidesEditor({ params }: { params: { id: string } }) {
       </div>
 
       {presenting && <PresentMode content={doc.content} start={at} onClose={() => setPresenting(false)} />}
+      <FeedbackBar feature="slides" refId={doc.id} label="Is this deck useful for your class?" className="mt-8" />
     </TeacherPage>
   );
 }

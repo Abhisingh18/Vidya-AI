@@ -12,6 +12,7 @@ import { api, panelCls } from '@/components/teacher/ui';
 import { buildDoubtVideo, stashDoubtVideo } from '@/lib/doubt-video';
 import DoubtFollowup, { type ChatMsg } from './doubt-followup';
 import { nativeName, SubjectPill } from './doubt-history';
+import FeedbackBar from '@/components/feedback-bar';
 
 const SIMPLER_PROMPT = 'Explain this more simply, please.';
 
@@ -96,6 +97,11 @@ export default function DoubtResult({ id, doubt }: { id: string; doubt: Doubt })
             className="inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-muted transition hover:text-saffron"><Clapperboard className="h-4 w-4" /> Video</button>
         </div>
         <p className="hidden text-xs text-muted sm:block">Prefer to watch? Get this exact solution as a narrated video.</p>
+        {doubt.reused && (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-teal/10 px-3 py-1 text-xs font-semibold text-teal" title="Other students asked the same question and rated this answer helpful">
+            ⭐ An answer students rated helpful
+          </span>
+        )}
       </div>
 
       {/* Question */}
@@ -248,6 +254,8 @@ export default function DoubtResult({ id, doubt }: { id: string; doubt: Doubt })
           <DoubtFollowup messages={chat} busy={chatBusy} langCode={lang} onSend={t => send(t)} onNoVoice={() => setNoVoice(true)} />
         </section>
       )}
+      <FeedbackBar feature="doubt" refId={id} label="Did this answer help you?" className="rounded-2xl border border-card-border bg-white p-4 dark:border-dark-border dark:bg-dark-surface" />
+
       <section className="relative overflow-hidden rounded-3xl bg-[#1a1a2e] p-5 text-white sm:p-6">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="gen-aurora absolute -left-10 -top-16 h-56 w-56 rounded-full bg-saffron/35 blur-[80px]" />

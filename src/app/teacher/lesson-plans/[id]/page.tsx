@@ -8,6 +8,7 @@ import type { LessonContent, LessonSection } from '@/lib/teacher-docs';
 import { useDoc } from '@/components/teacher/use-doc';
 import { LessonView } from '@/components/teacher/doc-views';
 import { ErrorNote, inputCls, labelCls, panelCls, Spinner, TeacherPage, textareaCls } from '@/components/teacher/ui';
+import FeedbackBar from '@/components/feedback-bar';
 
 type ListKey = 'objectives' | 'prerequisites' | 'materials' | 'assessment' | 'homework';
 const LISTS: { key: ListKey; label: string; emoji: string }[] = [
@@ -154,6 +155,7 @@ export default function LessonEditor({ params }: { params: { id: string } }) {
         </div>
       </div>
 
+      <FeedbackBar feature="lesson" refId={doc.id} label="Is this lesson plan useful?" className="mt-8" />
       <div className="hidden print:block">
         <LessonView title={doc.title} meta={meta} lesson={{ ...plan, ...Object.fromEntries(LISTS.map(l => [l.key, plan[l.key].filter(Boolean)])) }} />
       </div>

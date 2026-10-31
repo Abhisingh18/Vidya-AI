@@ -11,6 +11,7 @@ import { EMPTY, type MindBranch, type NotesContent } from '@/lib/notes';
 import MindMapView from './mind-map';
 import PageHero from '@/components/ui/page-hero';
 import { api, ErrorNote, inputCls, labelCls, panelCls, Spinner, TeacherPage, textareaCls } from '@/components/teacher/ui';
+import FeedbackBar from '@/components/feedback-bar';
 
 interface NotesDoc { id: string; title: string; topic: string; grade: string; language: string; content: NotesContent }
 type SaveState = 'saved' | 'saving' | 'unsaved' | 'error';
@@ -207,6 +208,7 @@ export default function NotesSheet({ id }: { id: string }) {
           )}
         </article>
       )}
+      {!editing && <FeedbackBar feature="notes" refId={doc.id} label="Are these notes helpful?" className="mt-8 rounded-2xl border border-card-border bg-white p-4 dark:border-dark-border dark:bg-dark-surface" />}
     </TeacherPage>
   );
 }

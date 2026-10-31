@@ -15,6 +15,7 @@ import { api, ErrorNote, panelCls, Spinner, TeacherPage, textareaCls } from '@/c
 import PageHero from '@/components/ui/page-hero';
 import Confetti from '@/components/ui/confetti';
 import ScoreRing from '@/components/ui/score-ring';
+import FeedbackBar from '@/components/feedback-bar';
 
 interface TestData {
   id: string; title: string; grade: string; language: string; config: MockConfig; maxScore: number;
@@ -327,6 +328,7 @@ function MockResult({ test, review, note, onAgain, onRegraded }: {
         </div>
       </div>
 
+      <FeedbackBar feature="mock" refId={test.id} label="Was this test good practice?" className="mb-6 rounded-2xl border border-card-border bg-white p-4 dark:border-dark-border dark:bg-dark-surface" />
       <h2 className="font-heading font-semibold text-navy dark:text-dark-text mb-3">Review every answer</h2>
       <ol className="space-y-3">
         {questions.map((q, i) => {

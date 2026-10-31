@@ -12,6 +12,7 @@ import { useDoc } from '@/components/teacher/use-doc';
 import EditorBar from '@/components/teacher/editor-bar';
 import { ExamAnswerKey, ExamPaper, ExamPrintStyles } from '@/components/teacher/exam-paper';
 import { ErrorNote, inputCls, labelCls, panelCls, Spinner, TeacherPage, textareaCls } from '@/components/teacher/ui';
+import FeedbackBar from '@/components/feedback-bar';
 
 type View = 'edit' | 'paper' | 'key';
 const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard'];
@@ -264,6 +265,7 @@ export default function ExamEditor({ params }: { params: { id: string } }) {
         )}
       </div>
 
+      <FeedbackBar feature="exam" refId={doc.id} label="Is this paper useful?" className="mt-8" />
       <div className="hidden print:block">
         {printing === 'paper' ? <ExamPaper exam={exam} /> : <ExamAnswerKey exam={exam} />}
       </div>

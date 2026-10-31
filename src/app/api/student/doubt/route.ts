@@ -4,8 +4,9 @@ import { requireUser } from '@/lib/session';
 import { awardXp } from '@/lib/xp';
 import { generateJson, LlmUnavailableError, llmErrorMessage } from '@/lib/llm';
 import { generateVisionJson } from '@/lib/vision';
+import { helpfulDoubtExamples, inputKey, reusableDoubt } from '@/lib/feedback';
 import {
-  buildDoubtPrompt, DAILY_DOUBT_LIMIT, MAX_BODY_CHARS, parseDoubtReply, shortTitle,
+  buildDoubtPrompt, DAILY_DOUBT_LIMIT, MAX_BODY_CHARS, parseDoubtReply, readStoredDoubt, shortTitle,
   TEXT_AI_DEADLINE_MS, UNREADABLE_MESSAGE, validateDoubtInput, withDeadline, type Doubt, type DoubtReply, type DoubtSummary,
 } from './solver';
 
@@ -58,7 +59,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `You've solved ${DAILY_DOUBT_LIMIT} doubts in the last 24 hours — great work! Please come back a little later.` }, { status: 429 });
   }
 
-  const { system, prompt } = buildDoubtPrompt({ language, grade, text, hasImage: !!image });
+  // Feedback loop (src/lib/feedback.ts): a typed question that students already rated a good
+  // answer for gets that answer straight away — no AI call; otherwise the best-rated answers
+  // in this language and class are shown to the model as examples.
+  const key = image ? null : inputKey(text, language, grade);
+  if (key) {
+    const prior = await reusableDoubt(key).catch(() => null);
+    const core = prior ? readStoredDoubt(prior.content) : null;
+    if (core) {
+      // Another student's photo note is never copied across; the key ties future votes to this input.
+      const doubt: Doubt = { ...core, studentNote: undefined, language, grade, source: 'text', inputKey: key, reused: true };
+      const doc = await prisma.studentDoc.create({
+        data: { userId, type: 'doubt', title: shortTitle(doubt.question), topic: doubt.topic.slice(0, 200), grade, language, content: JSON.stringify(doubt) },
+        select: { id: true },
+      });
+      const xp = await awardXp(userId, 'doubt_solved', doc.id);
+      return NextResponse.json({ id: doc.id, doubt, xp });
+    }
+  }
+  const examples = await helpfulDoubtExamples(language, grade).catch(() => []);
+
+  const { system, prompt } = buildDoubtPrompt({ language, grade, text, hasImage: !!image, examples });
   let reply: DoubtReply;
   try {
     reply = image
@@ -84,6 +105,7 @@ export async function POST(req: NextRequest) {
     grade,
     source: image ? 'photo' : 'text',
     ...(image && text ? { studentNote: text } : {}),
+    ...(key ? { inputKey: key } : {}),
   };
   // The photo itself is never stored.
   const doc = await prisma.studentDoc.create({
